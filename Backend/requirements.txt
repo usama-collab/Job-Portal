@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+python-dotenv
+python-jose
+passlib[bcrypt]
+python-multipart
+pydantic[email]
+pydantic-settings
+alembic
+sendgrid
+celery[redis]
+authlib
+httpx
+itsdangerous
+argon2_cffi
