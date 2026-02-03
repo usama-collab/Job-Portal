@@ -16,7 +16,9 @@ def create_job(job_create: JobCreate, owner_id: int, db: Session):
     db.refresh(user)
     return user
 
-
+# def get_jobs(db: Session):
+#     jobs = db.query(Job).all()
+#     return jobs
 def get_jobs(db: Session, skip: int, limit: int, q: Optional[str] = None, sort_by: str = 'created_at', order: str = 'desc'):
     cache_key = f'jobs:{skip}:{limit}:{q or None}:{sort_by}:{order}'
 
@@ -64,12 +66,12 @@ def get_jobs(db: Session, skip: int, limit: int, q: Optional[str] = None, sort_b
 
 
 
-def get_job_by_id(job_id: int, owner_id: int, db: Session):
-    return db.query(Job).filter(Job.id == job_id, Job.owner_id == owner_id).first()
+def get_job_by_id(job_id: int, db: Session):
+    return db.query(Job).filter(Job.id == job_id).first()
 
 
 def update_job(updated_job:JobUpdate, job_id:int, owner_id: int ,db: Session):
-    job = get_job_by_id(job_id, owner_id,db)
+    job = get_job_by_id(job_id,db)
     if not job:
         return None
     
@@ -92,9 +94,18 @@ def update_job(updated_job:JobUpdate, job_id:int, owner_id: int ,db: Session):
     
 
 
-def delete_job(job_id:int,owner_id: int,db:Session):
-    job = get_job_by_id(job_id, owner_id, db)
+def delete_job(job_id:int,db:Session):
+    job = get_job_by_id(job_id, db)
     if job:
         db.delete(job)
         db.commit()
     return job
+
+
+def get_jobs_for_employer(owner_id: int, db: Session):
+    return (
+        db.query(Job)
+        .filter(Job.owner_id == owner_id)
+        .order_by(Job.created_at.desc())
+        .all()
+    )

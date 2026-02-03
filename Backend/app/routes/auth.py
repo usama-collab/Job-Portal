@@ -43,7 +43,10 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     if not user or not verify_password:
         raise HTTPException(status_code=400, detail="Invalid Credentials")
     
-    access_token = security.create_access_token({'email': user.email})
+    access_token = security.create_access_token({
+    'email': user.email, 
+    'role': user.role  # Make sure 'role' matches the attribute name in your User model
+})
     refresh_token = security.create_refresh_token({'email': user.email})
     
     ttl = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600

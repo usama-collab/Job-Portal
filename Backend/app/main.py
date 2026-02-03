@@ -15,13 +15,13 @@ app = FastAPI(title="Job Board App")
 #     "http://127.0.0.1:3001",   # Alternate
 # ]
 
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=origins, # Next.js dev server
-#     allow_credentials=True,
-#     allow_methods=["*"],   # Allow all methods
-#     allow_headers=["*"],   # Allow all headers
-# )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # Next.js dev server
+    allow_credentials=True,
+    allow_methods=["*"],   # Allow all methods
+    allow_headers=["*"],   # Allow all headers
+)
 
 app.add_middleware(
     SessionMiddleware,

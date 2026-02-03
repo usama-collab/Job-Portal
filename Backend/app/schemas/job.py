@@ -35,5 +35,5 @@ class JobOut(JobBase):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
-    class config:
-        orm_mode: True
+    class Config:
+        orm_mode = True

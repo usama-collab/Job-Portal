@@ -26,7 +26,7 @@ def register(user_create: UserCreate, db: Session = Depends(get_db)):
     return user
 
 # Get My Profile
-@router.get('/me', response_model=UserOut)
+@router.get('/profile/me', response_model=UserOut)
 def get_my_profile(current_user: User = Depends(get_current_user),db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == current_user.id).first()
 
@@ -77,7 +77,7 @@ def delete(user_id: int, db: Session = Depends(get_db)):
 
 
 # Update Seeker Profile
-@router.put('/me', response_model=UserOut)
+@router.put('/me/update', response_model=UserOut)
 def update_my_profile(payload: ProfileUpdate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     allowed = {'name', 'bio', 'skills', 'experience'}
     data = payload.model_dump(exclude_none=True)

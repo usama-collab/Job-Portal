@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from app.schemas.user import ProfileUpdate, UserCreate,UserUpdate
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.core.security import hash_password
 from fastapi import HTTPException
 
@@ -14,7 +14,8 @@ def create_user(user_create: UserCreate,db: Session):
         name=user_create.name,
         email=user_create.email,
         password_hash=hash_password(user_create.password),
-        role=user_create.role
+        role = user_create.role or UserRole.SEEKER.value
+
         )
     db.add(user)
     db.commit()
