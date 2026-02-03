@@ -20,7 +20,6 @@ import {
   FormMessage,
 } from "../components/ui/form";
 import { jwtDecode } from "jwt-decode";
-import { Alert, AlertDescription } from "../components/ui/alert"; // Cleaned up Alert
 import { useState } from "react";
 import { AlertCircle, Briefcase, Loader2 } from "lucide-react"; // Added Icons
 
@@ -90,12 +89,19 @@ const Login = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                 {error && (
-                <Alert variant="destructive" className="bg-red-50 text-red-800 border-red-100">
-                  <div className="flex items-center gap-2">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription className="font-medium">{error}</AlertDescription>
+                <div className="bg-red-50 border border-red-100 rounded-xl p-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-red-100 p-1 rounded-lg">
+                      <AlertCircle className="h-4 w-4 text-red-600" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-bold text-red-700">Login Failed</p>
+                      <p className="text-xs text-red-700 font-medium leading-relaxed">
+                        {error}
+                      </p>
+                    </div>
                   </div>
-                </Alert>
+                </div>
               )}
               
               <FormField

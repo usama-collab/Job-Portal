@@ -79,7 +79,7 @@ def update_application_status(application_id: int, new_status: ApplicationUpdate
         raise HTTPException(status_code=404, detail="Application Not Found")
     
     job = db.query(Job).filter(Job.id == app.job_id).first()
-    if job.owner_id == current_user.id and getattr(current_user, 'role', None) != "admin":
+    if job.owner_id == current_user.id and getattr(current_user, 'role', None) != "employer":
         raise HTTPException(status_code=403, detail="You are unauthorized to update this application")
     
     allowed_status = {'applied', 'under_review', 'shortlisted', 'hired', 'rejected'}
