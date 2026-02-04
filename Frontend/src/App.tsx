@@ -11,28 +11,29 @@ function App() {
     <>
     <AppRoutes/>
     <Toaster
-      position="top-right"
-      toastOptions={{
-        // Apply to all toasts
-        style: {
-          borderRadius: '16px',
-          padding: '16px',
-          border: 'none',
-        },
-        // Use the 'unstyled' prop for success/error so they don't inherit weird defaults
-        classNames: {
-          toast: 'group !border-none !shadow-2xl',
-          // Success: Jobify Blue with White Text
-          success: '!bg-blue-600 !text-white !flex !items-center !gap-3',
-          // Error: Clean Red with White Text
-          error: '!bg-red-500 !text-white !flex !items-center !gap-3',
-          // Title and Description styling
-          title: '!text-white !font-bold !text-sm',
-          description: '!text-blue-100 !text-xs !font-medium',
-          icon: '!text-white', // Makes the checkmark/x-mark white
-        },
-      }}
-    />
+  position="top-right"
+  toastOptions={{
+    style: {
+      borderRadius: '16px',
+      padding: '16px',
+      border: 'none',
+    },
+    classNames: {
+      // 1. Remove !bg-white and !text-slate-900 from here
+      toast: 'group !border-none !shadow-2xl !flex !items-center !gap-3', 
+      
+      // 2. These will now work correctly without being fighting the base class
+      success: '!bg-blue-600 !text-white',
+      error: '!bg-red-500 !text-white',
+      info: '!bg-slate-900 !text-white',
+      loading: '!bg-slate-900 !text-white',
+      
+      title: '!font-bold !text-sm !text-inherit',
+      description: '!text-xs !font-medium !text-inherit !opacity-90',
+      icon: '!text-inherit',
+    },
+  }}
+/>
     
     </>
   )

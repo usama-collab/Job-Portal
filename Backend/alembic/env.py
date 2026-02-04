@@ -15,6 +15,7 @@ from app.core.db import Base
 from app.models.user import User
 from app.models.job import Job
 from app.models.application import Application
+from app.models.saved_job import SavedJob
 # Add more models here as needed
 
 # Alembic config object

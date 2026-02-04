@@ -6,7 +6,7 @@ import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Search, MapPin, Briefcase, ChevronLeft, ChevronRight, Clock } from 'lucide-react'
 
-const LIMIT = 10
+const LIMIT = 5
 
 const Jobs = () => {
   const [searchParams, setSearchParams] = useSearchParams()

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from app.core.config import settings
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
-from app.routes import user,auth,job,application,google_auth
+from app.routes import user,auth,job,application,google_auth, saved_job
 
 
 
@@ -38,3 +38,4 @@ app.include_router(auth.router)
 app.include_router(job.router)
 app.include_router(application.router)
 app.include_router(google_auth.router)
+app.include_router(saved_job.router)
