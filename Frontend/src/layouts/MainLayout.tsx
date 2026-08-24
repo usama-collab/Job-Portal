@@ -11,19 +11,23 @@ import {
 } from 'lucide-react'
 import { jwtDecode } from "jwt-decode";
 import { useAuthStore } from '../store/authStore';
+import { logoutUser } from '../api/auth';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "../components/ui/popover"
+import { useProfile } from "../hooks/useProfile";
 
 export interface DecodedToken {
-    email: string;
+    sub: string;
     role: string;
     exp: number;
 }
 
 const MainLayout = () => {
+    const { data: profile } = useProfile(); // Fetch profile data
+    const baseURL = import.meta.env.VITE_API_BASE_URL.replace('/api', ''); // Get base server URL
     const navigate = useNavigate()
     const location = useLocation()
     const logoutStore = useAuthStore((state) => state.logout)
@@ -38,21 +42,28 @@ const MainLayout = () => {
         try {
             const decoded = jwtDecode<DecodedToken>(token);
             userRole = decoded.role; 
-            userEmail = decoded.email;
         } catch (error) {
             console.error("Invalid token", error);
         }
     }
+
+    userEmail = profile?.email ?? "";
 
     const handleNavClick = (path: string) => {
         navigate(path);
         setIsPopoverOpen(false);
     };
 
-    const handleLogout = () => {
-        if (logoutStore) logoutStore();
-        setIsPopoverOpen(false);
-        navigate('/jobs');
+    const handleLogout = async () => {
+        try {
+            await logoutUser();
+        } catch {
+            // Local logout still completes when the backend is unavailable.
+        } finally {
+            logoutStore();
+            setIsPopoverOpen(false);
+            navigate('/jobs');
+        }
     };
 
     const canAccessDashboard = userRole === 'admin' || userRole === 'employer';
@@ -124,8 +135,20 @@ const MainLayout = () => {
                                     {/* User Popover */}
                                     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                                         <PopoverTrigger asChild>
-                                            <Button variant="ghost" className="relative h-10 w-10 rounded-full bg-slate-100 p-0 border border-slate-200 hover:bg-slate-200 transition-all">
-                                                <User className="h-5 w-5 text-slate-600" />
+                                            <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 border border-slate-200 overflow-hidden hover:opacity-80 transition-all">
+                                                {profile?.avatar_url ? (
+                                                    <img
+                                                        src={`${baseURL}${profile.avatar_url}`}
+                                                        alt="Profile"
+                                                        className="h-full w-full object-cover"
+                                                        onError={(e) => {
+                                                            // Fallback if image fails to load
+                                                            (e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=' + userEmail;
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <User className="h-5 w-5 text-slate-600" />
+                                                )}
                                             </Button>
                                         </PopoverTrigger>
                                         <PopoverContent className="w-64 mt-2 shadow-xl border-slate-100 rounded-2xl p-2" align="end">

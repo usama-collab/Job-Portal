@@ -1,17 +1,73 @@
-from typing import cast
 from fastapi import APIRouter, File, HTTPException, Depends, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
+import mimetypes
 from app.models.user import User
-from app.utils.functions import get_current_user
+from app.models.user import UserRole
+from app.utils.functions import get_current_user, require_roles
 from app.core.db import get_db
 from app.core.security import create_confirmation_token
 from app.schemas.user import CompanyProfileUpdate, ProfileUpdate, UserCreate,UserOut, UserUpdate
 from sqlalchemy.orm import Session
 from app.crud import user as crud_user
 from app.utils.send_email import send_confirmation_email
-from app.utils.files import save_avatar_file,save_logo_file
+from app.utils.files import (
+    StorageError,
+    StorageObjectNotFound,
+    StorageNotConfigured,
+    delete_object,
+    download_object,
+    is_storage_key,
+    save_avatar_file,
+    save_logo_file,
+)
 
 router = APIRouter(prefix='/users', tags=["Users"])
+
+
+def _set_asset_urls(user: User) -> User:
+    """Expose backend asset endpoints, never private R2 object keys."""
+
+    user.avatar_url = (
+        f"/users/{user.id}/avatar"
+        if is_storage_key(user.avatar_path, "avatars")
+        else None
+    )
+    user.logo_url = (
+        f"/users/{user.id}/logo"
+        if is_storage_key(user.logo_path, "logos")
+        else None
+    )
+    return user
+
+
+async def _serve_public_asset(user_id: int, asset: str, db: Session) -> Response:
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Asset not found")
+
+    if asset == "avatar":
+        object_key = user.avatar_path
+        prefix = "avatars"
+        filename = user.avatar_filename
+    else:
+        object_key = user.logo_path
+        prefix = "logos"
+        filename = user.logo_filename
+
+    if not is_storage_key(object_key, prefix):
+        raise HTTPException(status_code=404, detail="Asset not found")
+
+    try:
+        content, stored_content_type = await download_object(object_key)
+    except StorageObjectNotFound as exc:
+        raise HTTPException(status_code=404, detail="Asset not found") from exc
+    except StorageNotConfigured as exc:
+        raise HTTPException(status_code=503, detail="File storage is not configured") from exc
+    except StorageError as exc:
+        raise HTTPException(status_code=502, detail="File storage is unavailable") from exc
+
+    media_type = stored_content_type or mimetypes.guess_type(filename or "")[0]
+    return Response(content=content, media_type=media_type or "application/octet-stream")
 
 
 # Register User
@@ -32,44 +88,71 @@ def get_my_profile(current_user: User = Depends(get_current_user),db: Session = 
 
     profile = user
 
-    if getattr(profile, "avatar_path", None):
-        profile.avatar_url = '/' + cast(str,profile.avatar_path).replace("\\", "/")
-    else:
-        profile.avatar_url = None
+    return _set_asset_urls(profile)
 
-    
-    if getattr(profile, "logo_path", None):
-        profile.logo_url = '/' + cast(str,profile.logo_path).replace("\\", "/")
 
-    else:
-        profile.logo_url = None
+@router.get('/{user_id}/avatar', response_class=Response)
+async def get_avatar(user_id: int, db: Session = Depends(get_db)):
+    return await _serve_public_asset(user_id, "avatar", db)
 
-    return profile
+
+@router.get('/{user_id}/logo', response_class=Response)
+async def get_logo(user_id: int, db: Session = Depends(get_db)):
+    return await _serve_public_asset(user_id, "logo", db)
 
 
 # Get all Users
 @router.get('/',response_model=list[UserOut])
-def read_all(db: Session = Depends(get_db)):
+def read_all(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.ADMIN.value)),
+):
     return crud_user.get_users(db)
 
 
 # Get Single User
 @router.get('/{user_id}', response_model=UserOut)
-def read_single(user_id:int, db: Session = Depends(get_db)):
-    return crud_user.get_user_by_id(user_id, db)
+def read_single(
+    user_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if current_user.id != user_id and current_user.role != UserRole.ADMIN.value:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user = crud_user.get_user_by_id(user_id, db)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return _set_asset_urls(user)
 
 
 # Updated User
 @router.put('/update/{user_id}', response_model=UserOut)
-def update(user_id:int ,user_update:UserUpdate, db: Session = Depends(get_db)):
+def update(
+    user_id: int,
+    user_update: UserUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if current_user.id != user_id and current_user.role != UserRole.ADMIN.value:
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+
     user = crud_user.update_user(user_id, user_update, db)
     if not user:
-        HTTPException(status_code=200, detail="Job with that id not found")
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
 
 
 # Delete User
 @router.delete('/{user_id}')
-def delete(user_id: int, db: Session = Depends(get_db)):
+def delete(
+    user_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if current_user.id != user_id and current_user.role != UserRole.ADMIN.value:
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+
     user = crud_user.delete_user(user_id, db)
     if not user:
         raise HTTPException(status_code=404, detail="User with this id not exists")
@@ -87,24 +170,32 @@ def update_my_profile(payload: ProfileUpdate, current_user: User = Depends(get_c
     updated = crud_user.update_profile(current_user.id, data, db)
 
     # attach urls
-    updated.avatar_url = "/" + cast(str,updated.avatar_path).replace("\\", "/") if updated.avatar_path else None
-    updated.logo_url = "/" + cast(str,updated.logo_path).replace("\\", "/") if updated.logo_path else None
-
-    return updated
+    return _set_asset_urls(updated)
 
 
 # Upload / update avatar
 @router.post("/me/avatar", response_model=UserOut)
 async def upload_avatar(avatar: UploadFile = File(...), current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    old_path = current_user.avatar_path
+    saved_path = None
+    try:
+        saved_path, original_name = await save_avatar_file(avatar)
+        updated = crud_user.update_avatar(current_user.id, saved_path, original_name, db)
+    except Exception:
+        if saved_path:
+            try:
+                await delete_object(saved_path)
+            except StorageError:
+                pass
+        raise
 
-    saved_path, original_name = await save_avatar_file(avatar)
+    if is_storage_key(old_path, "avatars") and old_path != saved_path:
+        try:
+            await delete_object(old_path)
+        except StorageError:
+            pass
 
-    updated = crud_user.update_avatar(current_user.id, saved_path, original_name, db)
-
-    updated.avatar_url = "/" + cast(str,updated.avatar_path).replace("\\", "/") if updated.avatar_path else None
-    updated.logo_url = "/" + cast(str,updated.logo_path).replace("\\", "/") if updated.logo_path else None
-
-    return updated
+    return _set_asset_urls(updated)
 
 # Update company profile
 @router.post('/me/company', response_model=UserOut)
@@ -120,10 +211,7 @@ def update_company_profile(payload: CompanyProfileUpdate, current_user: User = D
 
     updated = crud_user.update_company_profile(current_user.id, data, db)
 
-    updated.avatar_url = "/" + cast(str,updated.avatar_path).replace("\\", "/") if updated.avatar_path else None
-    updated.logo_url = "/" + cast(str,updated.avatar_path).replace("\\", "/") if updated.logo_path else None
-
-    return updated
+    return _set_asset_urls(updated)
 
 # Upload / update company logo (employer only)
 @router.post("/me/company/logo", response_model=UserOut)
@@ -131,10 +219,23 @@ async def upload_company_logo(logo: UploadFile = File(...), current_user: User =
     if getattr(current_user, "role", "seeker") != "employer" and getattr(current_user, "role", None) != "admin":
         raise HTTPException(status_code=403, detail="Only employers can upload company logo")
 
-    saved_path, original_name = await save_logo_file(logo)
-    updated = crud_user.update_logo(db, current_user.id, saved_path, original_name)
-    
-    updated.avatar_url = "/" + cast(str,updated.avatar_path).replace("\\", "/") if updated.avatar_path else None
-    updated.logo_url = "/" + cast(str,updated.avatar_path).replace("\\", "/") if updated.logo_path else None
+    old_path = current_user.logo_path
+    saved_path = None
+    try:
+        saved_path, original_name = await save_logo_file(logo)
+        updated = crud_user.update_logo(current_user.id, saved_path, original_name, db)
+    except Exception:
+        if saved_path:
+            try:
+                await delete_object(saved_path)
+            except StorageError:
+                pass
+        raise
 
-    return updated
+    if is_storage_key(old_path, "logos") and old_path != saved_path:
+        try:
+            await delete_object(old_path)
+        except StorageError:
+            pass
+
+    return _set_asset_urls(updated)

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 from datetime import datetime
 
@@ -29,11 +29,9 @@ class JobUpdate(BaseModel):
     is_active: Optional[bool] = None
 
 class JobOut(JobBase):
+    model_config = ConfigDict(from_attributes=True)
 
     id: int
     owner_id: int
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-
-    class Config:
-        orm_mode = True

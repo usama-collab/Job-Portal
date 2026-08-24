@@ -23,3 +23,14 @@ myenv/
 
 # Database
 *.db
+
+# Local uploaded files (production uploads belong in private object storage)
+Backend/app/media/
+Backend/media/
+Backend/uploads/
+/media/
+/uploads/
+
+# Python tooling
+.pytest_cache/
+.mypy_cache/

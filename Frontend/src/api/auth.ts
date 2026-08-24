@@ -1,4 +1,5 @@
 import api from "./axios";
+import { REFRESH_TOKEN_STORAGE_KEY } from "../store/authStore";
 
 
 export interface LoginPayload{
@@ -14,6 +15,7 @@ export interface RegisterPayload{
 
 export interface LoginResponse{
     access_token: string
+    refresh_token: string
 }
 
 export const loginUser = async (data: LoginPayload): Promise<LoginResponse> => {
@@ -26,6 +28,17 @@ export const loginUser = async (data: LoginPayload): Promise<LoginResponse> => {
         }
     });
     return response.data
+}
+
+export const logoutUser = async (): Promise<void> => {
+    const refreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
+    if (!refreshToken) return;
+
+    await api.post(
+        "/auth/logout",
+        { refresh_token: refreshToken },
+        { skipAuthRefresh: true },
+    );
 }
 
 export const registerUser = async (data: RegisterPayload) => {

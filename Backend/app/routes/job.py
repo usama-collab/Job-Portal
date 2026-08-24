@@ -1,9 +1,9 @@
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException,Depends, Query
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.core.db import get_db
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.schemas.job import JobCreate, JobOut, JobUpdate
 from app.utils.functions import get_current_user
 from app.crud import job as crud_job
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/jobs", tags=["Jobs"])
 # Create Job
 @router.post('/create', response_model=JobOut)
 def create(job: JobCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    if getattr(current_user, "role", "seeker") not in ("employer"):
+    if current_user.role != UserRole.EMPLOYER.value:
         raise HTTPException(status_code=403, detail="Only employers can create jobs")
     return crud_job.create_job(job, current_user.id,db)
 
@@ -59,14 +59,37 @@ def get_all_jobs(
 # Update Job
 @router.put('/update/{job_id}', response_model=JobOut)
 def update(updated_job: JobUpdate, job_id:int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    return crud_job.update_job(updated_job, job_id,current_user.id,db)
+    if current_user.role not in {UserRole.EMPLOYER.value, UserRole.ADMIN.value}:
+        raise HTTPException(status_code=403, detail="Only employers can update jobs")
+
+    updated = crud_job.update_job(
+        updated_job,
+        job_id,
+        current_user.id,
+        db,
+        is_admin=current_user.role == UserRole.ADMIN.value,
+    )
+    if not updated:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return updated
 
 # Delete a job
 @router.delete('/{job_id}')
-def delete_job(job_id:int, db: Session = Depends(get_db)):
-    job = crud_job.delete_job(job_id,db)
+def delete_job(
+    job_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if current_user.role not in {UserRole.EMPLOYER.value, UserRole.ADMIN.value}:
+        raise HTTPException(status_code=403, detail="Only employers can delete jobs")
+
+    job = crud_job.delete_job(
+        job_id,
+        db,
+        current_user.id,
+        is_admin=current_user.role == UserRole.ADMIN.value,
+    )
     if not job:
-        raise HTTPException(status_code=400, detail="Job with that id not found")
+        raise HTTPException(status_code=404, detail="Job not found")
     
     return JSONResponse(status_code=200,content="Job deleted successfully")
-

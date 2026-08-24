@@ -22,9 +22,10 @@ import {
 import { jwtDecode } from "jwt-decode";
 import { useState } from "react";
 import { AlertCircle, Briefcase, Loader2 } from "lucide-react"; // Added Icons
+import { useQueryClient } from "@tanstack/react-query";
 
 interface DecodedToken {
-  email: string;
+  sub: string;
   role: string;
   exp: number;
 }
@@ -35,6 +36,7 @@ interface LoginForm {
 }
 
 const Login = () => {
+  const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null)  
   const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
@@ -50,7 +52,10 @@ const Login = () => {
     setError(null);
     try {
       const res = await loginUser(data);
-      login(res.access_token);
+      login(res.access_token, res.refresh_token);
+
+      // FORCE REFRESH: This tells TanStack Query to fetch the profile immediately
+      await queryClient.invalidateQueries({ queryKey: ["profile-me"] }); //
 
       const decoded = jwtDecode<DecodedToken>(res.access_token);
       const userRole = decoded.role;
@@ -61,7 +66,6 @@ const Login = () => {
         navigate("/jobs");
       }
     } catch (err: any) {
-      console.error(err);
       setError('Invalid email or password. Please try again.');
     }
   };

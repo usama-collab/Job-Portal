@@ -5,7 +5,19 @@ export const getMyProfile = async () => {
     return response.data;
 };
 
-// We'll also need the update profile function later
+// Add this function:
+export const uploadAvatar = async (file: File) => {
+    const formData = new FormData();
+    formData.append("avatar", file); // "avatar" must match the parameter name in your FastAPI route
+
+    const response = await api.post("/users/me/avatar", formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+    return response.data;
+};
+
 export const updateProfile = async (payload: any) => {
     const response = await api.put('/users/me/update', payload);
     return response.data;

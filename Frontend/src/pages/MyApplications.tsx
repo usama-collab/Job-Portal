@@ -51,7 +51,7 @@ const MyApplications = () => {
   const { data: savedJobs, isLoading: isSavedLoading } = useQuery({
     queryKey: ["saved-jobs"],
     queryFn: getMySavedJobs,
-    enabled: activeTab === 'saved', 
+    // enabled: activeTab === 'saved',
   });
 
   // 3. Remove Saved Job Mutation
@@ -66,7 +66,7 @@ const MyApplications = () => {
     onError: () => toast.error("Failed to remove job")
   });
 
-  const isLoading = isAppliedLoading || (activeTab === 'saved' && isSavedLoading);
+  const isLoading = activeTab === 'applied' ? isAppliedLoading : isSavedLoading;
 
   if (isLoading) return (
     <div className="flex flex-col justify-center items-center min-h-[60vh] gap-4">
@@ -105,11 +105,11 @@ const MyApplications = () => {
                   {appliedJobs.length}
                 </span>
               )}
-              {tab.id === 'saved' && savedJobs && (
-                <span className="ml-1 px-1.5 py-0.5 text-[10px] bg-amber-100 text-amber-700 rounded-md">
-                  {savedJobs.length}
-                </span>
-              )}
+              {tab.id === 'saved' && (
+              <span className="ml-1 px-1.5 py-0.5 text-[10px] bg-amber-100 text-amber-700 rounded-md">
+                {isSavedLoading ? "..." : (savedJobs?.length || 0)}
+              </span>
+            )}
 
               {isActive && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-t-full shadow-[0_-4px_10px_rgba(37,99,235,0.3)]" />

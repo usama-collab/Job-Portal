@@ -1,6 +1,7 @@
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, ConfigDict, HttpUrl
 from pydantic import EmailStr
 from typing import Any, List, Optional
+from app.models.user import UserRole
 
 
 class UserBase(BaseModel):
@@ -9,7 +10,7 @@ class UserBase(BaseModel):
     email: EmailStr
     
 class UserCreate(UserBase):
-    role: Optional[str] = None
+    role: Optional[UserRole] = None
     password: str
 
 class UserUpdate(BaseModel):
@@ -30,6 +31,8 @@ class CompanyProfileUpdate(BaseModel):
     company_description: Optional[str] = None
 
 class UserOut(UserBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     email_verified: bool
     bio: Optional[str] = None
@@ -41,7 +44,3 @@ class UserOut(UserBase):
     company_website: Optional[str] = None
     company_description: Optional[str] = None
     logo_url: Optional[str] = None
-    
-
-    class config:
-        orm_mode = True    

@@ -22,6 +22,7 @@ import {
   Quote
 } from "lucide-react";
 import { toast } from "sonner";
+import api from "../api/axios";
 
 const STATUS_OPTIONS = [
   "applied",
@@ -65,28 +66,31 @@ const JobApplicants = () => {
     enabled: !!jobId,
   });
 
-  const getResumeUrl = (resumePath: string) => {
-    const apiBaseUrl = String(import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
-    const normalizedPath = String(resumePath).replace(/^\/+/, "");
-    return apiBaseUrl ? `${apiBaseUrl}/${normalizedPath}` : normalizedPath;
-  };
-
-  const handleOpenResume = (resumePath: string | null | undefined) => {
+  const handleOpenResume = async (resumePath: string | null | undefined) => {
     if (!resumePath) {
       toast.error("No resume uploaded for this applicant.");
       return;
     }
 
-    const resumeUrl = getResumeUrl(resumePath);
-    const newTab = window.open(resumeUrl, "_blank", "noopener,noreferrer");
-    if (!newTab) {
-      const link = document.createElement("a");
-      link.href = resumeUrl;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    const newTab = window.open("about:blank", "_blank", "noopener,noreferrer");
+    try {
+      const response = await api.get(resumePath, { responseType: "blob" });
+      const objectUrl = URL.createObjectURL(response.data);
+      if (newTab) {
+        newTab.location.href = objectUrl;
+      } else {
+        const link = document.createElement("a");
+        link.href = objectUrl;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+    } catch {
+      newTab?.close();
+      toast.error("Unable to open this resume.");
     }
   };
 
@@ -99,12 +103,9 @@ const JobApplicants = () => {
       return;
     }
 
-    const resumeUrl = getResumeUrl(resumePath);
-
     try {
-      const res = await fetch(resumeUrl);
-      if (!res.ok) throw new Error(`Download failed: ${res.status}`);
-      const blob = await res.blob();
+      const response = await api.get(resumePath, { responseType: "blob" });
+      const blob = response.data;
 
       const objectUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -116,8 +117,7 @@ const JobApplicants = () => {
       URL.revokeObjectURL(objectUrl);
       toast.info("Downloading Resume...");
     } catch {
-      toast.info("Opening resume (use the browser download button).");
-      handleOpenResume(resumePath);
+      toast.error("Unable to download this resume.");
     }
   };
 

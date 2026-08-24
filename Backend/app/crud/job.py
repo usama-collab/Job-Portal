@@ -70,10 +70,19 @@ def get_job_by_id(job_id: int, db: Session):
     return db.query(Job).filter(Job.id == job_id).first()
 
 
-def update_job(updated_job:JobUpdate, job_id:int, owner_id: int ,db: Session):
+def update_job(
+    updated_job: JobUpdate,
+    job_id: int,
+    owner_id: int,
+    db: Session,
+    is_admin: bool = False,
+):
     job = get_job_by_id(job_id,db)
     if not job:
         return None
+
+    if not is_admin and job.owner_id != owner_id:
+        raise HTTPException(status_code=403, detail="You are not authorized to update this job")
     
     data = updated_job.model_dump(exclude_none=True)
     for key,value in data.items():
@@ -94,11 +103,21 @@ def update_job(updated_job:JobUpdate, job_id:int, owner_id: int ,db: Session):
     
 
 
-def delete_job(job_id:int,db:Session):
+def delete_job(
+    job_id: int,
+    db: Session,
+    owner_id: Optional[int] = None,
+    is_admin: bool = False,
+):
     job = get_job_by_id(job_id, db)
-    if job:
-        db.delete(job)
-        db.commit()
+    if not job:
+        return None
+
+    if not is_admin and (owner_id is None or job.owner_id != owner_id):
+        raise HTTPException(status_code=403, detail="You are not authorized to delete this job")
+
+    db.delete(job)
+    db.commit()
     return job
 
 

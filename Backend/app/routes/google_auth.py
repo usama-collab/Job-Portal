@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.requests import Request
 from authlib.integrations.starlette_client import OAuth
 from sqlalchemy.orm import Session
-from app.core.security import create_access_token
+from app.core import redis_client, security
 from app.models.user import User
 from app.core.db import get_db
 from app.core.config import settings
@@ -54,11 +54,33 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
             db.add(user)
             db.commit()
             db.refresh(user)
+        else:
+            if not user.is_active:
+                raise HTTPException(status_code=403, detail="User account is not available")
+            if not user.email_verified:
+                user.email_verified = True
+                db.commit()
+                db.refresh(user)
             
-        jwt_token = create_access_token({'email': user.email})
-        print("Session:", request.session)
+        access_token = security.create_access_token({
+            'sub': str(user.id),
+            'role': user.role,
+        })
+        refresh_token = security.create_refresh_token({'sub': str(user.id)})
+        ttl = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600
+        redis_client.redis_client.setex(
+            redis_client.refresh_token_key(refresh_token),
+            ttl,
+            str(user.id),
+        )
 
-        return {'access_token': jwt_token, 'token_type': 'bearer'}
+        return {
+            'access_token': access_token,
+            'refresh_token': refresh_token,
+            'token_type': 'bearer',
+        }
     
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Google Authenication Failed with {str(e)}")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=500, detail="Google authentication failed")

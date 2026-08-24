@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import api from "../api/axios";
 import { toast } from "sonner";
 import { Camera, Loader2 } from "lucide-react";
 
@@ -18,7 +18,7 @@ const AvatarUpload = ({ currentAvatar }: AvatarUploadProps) => {
       formData.append("avatar", file);
       
       const token = localStorage.getItem("token");
-      return axios.post("http://localhost:8000/users/me/avatar", formData, {
+      return api.post("/users/me/avatar", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,

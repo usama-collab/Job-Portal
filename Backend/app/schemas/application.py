@@ -1,5 +1,5 @@
 # schemas/application.py
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import Optional
 
@@ -8,6 +8,8 @@ class ApplicationCreate(BaseModel):
     # resume will be uploaded via UploadFile in endpoint, so not in the body
 
 class ApplicationOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     job_id: int
     user_id: int
@@ -16,9 +18,6 @@ class ApplicationOut(BaseModel):
     cover_letter: Optional[str] = None
     status: str
     created_at: datetime
-
-    class Config:
-        orm_mode = True
 
 class ApplicationUpdateStatus(BaseModel):
     status: str  # validate in endpoint (allowed statuses)

@@ -5,7 +5,7 @@ from app.core.config import settings
 
 @celery_app.task
 def send_app_status_email(to_email: str,status: str):
-    # link = f'http://localhost:8000/auth/confirm?token={token}'
+    # Confirmation links should use settings.BACKEND_PUBLIC_URL if needed.
     html_content = f"""
     <html>
     <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">

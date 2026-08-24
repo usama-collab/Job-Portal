@@ -10,6 +10,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 
 # Import your Base where all models inherit
 from app.core.db import Base
+from app.core.config import settings
 
 # Import all models here so Alembic can detect them
 from app.models.user import User
@@ -20,6 +21,10 @@ from app.models.saved_job import SavedJob
 
 # Alembic config object
 config = context.config
+
+# Always use the runtime DATABASE_URL instead of the local value in alembic.ini.
+# Percent signs in URLs must be escaped for ConfigParser interpolation.
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL.replace("%", "%%"))
 
 # Setup logging from alembic.ini
 if config.config_file_name is not None:

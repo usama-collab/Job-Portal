@@ -10,11 +10,19 @@ def create_user(user_create: UserCreate,db: Session):
     existing = db.query(User).filter(User.email == user_create.email).first()
     if existing:
         raise HTTPException(status_code=400, detail='Email already exists')
+
+    requested_role = user_create.role or UserRole.SEEKER
+    role = requested_role.value if isinstance(requested_role, UserRole) else requested_role
+    if role == UserRole.ADMIN.value:
+        raise HTTPException(status_code=403, detail='Admin accounts must be provisioned separately')
+    if role not in {UserRole.SEEKER.value, UserRole.EMPLOYER.value}:
+        raise HTTPException(status_code=422, detail='Invalid registration role')
+
     user = User(
         name=user_create.name,
         email=user_create.email,
         password_hash=hash_password(user_create.password),
-        role = user_create.role or UserRole.SEEKER.value
+        role=role,
 
         )
     db.add(user)
@@ -35,8 +43,13 @@ def update_user(user_id: int, user_update:UserUpdate, db:Session):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         return None
-    user.name = user_update.name
-    user.password_hash = hash_password(user_update.password)
+
+    data = user_update.model_dump(exclude_none=True)
+    if 'name' in data:
+        user.name = data['name']
+    if 'password' in data:
+        user.password_hash = hash_password(data['password'])
+
     db.commit()
     db.refresh(user)
     return user
