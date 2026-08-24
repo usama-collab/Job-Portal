@@ -1,7 +1,6 @@
 from app.tasks.celery_worker import celery_app
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
 from app.core.config import settings
+from app.utils.smtp import send_html_email
 
 @celery_app.task
 def send_confirmation_email(to_email: str, token: str):
@@ -22,17 +21,8 @@ def send_confirmation_email(to_email: str, token: str):
     </html>
     """
 
-    message = Mail(
-        from_email=settings.MAIL_FROM,
-        to_emails=to_email,
-        subject='Confirm Your Email',
-        html_content=html_content
-
-    )
-
     try:
-        sendgrid = SendGridAPIClient(settings.SENDGRID_API_KEY)
-        response = sendgrid.send(message)
-        print(f'Email sent to {to_email}, Status: {response.status_code}')
+        send_html_email(to_email, 'Confirm Your Email', html_content)
+        print(f'Email sent to {to_email}')
     except Exception as e:
-        print(f'SendGrid error: {e}')
+        print(f'SMTP error: {e}')

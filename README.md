@@ -39,3 +39,15 @@ TanStack Query (React Query): Advanced server-state management for caching and "
 Tailwind CSS & Shadcn/UI: Modern, responsive design system.
 
 Lucide React: Beautiful, consistent iconography.
+
+## Email configuration
+
+The backend sends confirmation, application, and application-status emails through Brevo SMTP. Configure these environment variables in local development and production:
+
+- `SMTP_HOST`: Brevo SMTP host, normally `smtp-relay.brevo.com`
+- `SMTP_PORT`: SMTP submission port, normally `587`
+- `SMTP_USERNAME`: Brevo SMTP username
+- `SMTP_PASSWORD`: Brevo SMTP key/password
+- `MAIL_FROM`: verified sender address
+
+Keep SMTP credentials in the hosting provider's secret environment settings and do not commit them.

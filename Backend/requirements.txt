@@ -9,7 +9,6 @@ python-multipart==0.0.20
 pydantic[email]==2.11.7
 pydantic-settings==2.10.1
 alembic==1.16.5
-sendgrid==6.12.4
 celery[redis]==5.5.3
 authlib==1.6.3
 httpx==0.28.1

@@ -3,7 +3,7 @@
 ## Project
 
 - Frontend: React + Vite under `Frontend/`.
-- Backend: FastAPI under `Backend/`, with SQLAlchemy/PostgreSQL, Alembic, Redis/Celery, SendGrid, Cloudflare R2, and Google OAuth support.
+- Backend: FastAPI under `Backend/`, with SQLAlchemy/PostgreSQL, Alembic, Redis/Celery, Brevo SMTP, Cloudflare R2, and Google OAuth support.
 - Deployment target: public free-tier portfolio deployment.
 - No deployment, commit, push, or remote history replacement has been performed.
 
@@ -62,7 +62,7 @@
 - Added Cloudflare Pages SPA fallback configuration.
 - Added production database pooling settings including `pool_pre_ping=True` and disabled echo by default.
 - Verified Alembic can read the cloud database URL from `DATABASE_URL`.
-- Documented R2, SendGrid, Redis/Celery, PostgreSQL, and frontend configuration requirements.
+- Documented R2, Brevo SMTP, Redis/Celery, PostgreSQL, and frontend configuration requirements.
 - Updated `.gitignore` to prevent uploaded media from being tracked.
 
 ### Phase 4B — Git privacy cleanup
@@ -80,7 +80,7 @@
 3. Only after explicit approval, replace the remote history with the reviewed rewritten history using the repository's approved force-push procedure.
 4. Configure production secrets and variables in the hosting providers; do not commit them.
 5. Provision the production PostgreSQL database and run `alembic upgrade head` against it.
-6. Configure Render, Cloudflare Pages, R2, SendGrid, Redis, and OAuth redirect/callback settings.
+6. Configure Render, Cloudflare Pages, R2, Brevo SMTP, Redis, and OAuth redirect/callback settings.
 7. Decide whether Celery is required for the deployed feature set; if retained, provision a separate worker process and Redis service.
 8. Perform live integration tests for database migrations, authentication, refresh rotation, email, R2 uploads/downloads, OAuth, and cross-domain frontend/backend behavior.
 9. Determine how legacy local upload records will be migrated or retired; do not claim migration until files are actually copied to R2.
