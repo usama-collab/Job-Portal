@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { useAuthStore } from "../store/authStore";
 import { useNavigate, Link } from "react-router-dom"; // Added Link
-import { loginUser } from "../api/auth";
+import { loginUser, type LoginResponse } from "../api/auth";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import {
@@ -19,17 +19,12 @@ import {
   FormLabel,
   FormMessage,
 } from "../components/ui/form";
-import { jwtDecode } from "jwt-decode";
+import axios from "axios";
 import { useState } from "react";
 import { AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AuthBrandPanel, MobileAuthLogo } from "../components/auth-brand-panel";
-
-interface DecodedToken {
-  sub: string;
-  role: string;
-  exp: number;
-}
+import { getAuthenticatedLandingPath } from "../lib/auth-session";
 
 interface LoginForm {
   email: string;
@@ -51,23 +46,34 @@ const Login = () => {
 
   const onSubmit = async (data: LoginForm) => {
     setError(null);
+
+    let response: LoginResponse;
     try {
-      const res = await loginUser(data);
-      login(res.access_token, res.refresh_token);
-
-      // FORCE REFRESH: This tells TanStack Query to fetch the profile immediately
-      await queryClient.invalidateQueries({ queryKey: ["profile-me"] }); //
-
-      const decoded = jwtDecode<DecodedToken>(res.access_token);
-      const userRole = decoded.role;
-
-      if (userRole === "admin" || userRole === "employer") {
-        navigate("/employer/dashboard");
+      response = await loginUser(data);
+    } catch (requestError) {
+      if (axios.isAxiosError(requestError) && requestError.response?.status === 401) {
+        setError("Invalid email or password. Please try again.");
+      } else if (axios.isAxiosError(requestError) && !requestError.response) {
+        setError("Unable to reach the server. Please check your connection and try again.");
       } else {
-        navigate("/jobs");
+        setError("We couldn't sign you in right now. Please try again shortly.");
       }
+      return;
+    }
+
+    const destination = getAuthenticatedLandingPath(response.access_token);
+    if (!destination || !response.refresh_token) {
+      setError("The server returned an invalid session. Please try again.");
+      return;
+    }
+
+    try {
+      // Remove data from any previous account before the authenticated layout mounts.
+      queryClient.removeQueries({ queryKey: ["profile-me"] });
+      login(response.access_token, response.refresh_token);
+      navigate(destination, { replace: true });
     } catch {
-      setError('Invalid email or password. Please try again.');
+      setError("Your session could not be saved. Please enable browser storage and try again.");
     }
   };
 

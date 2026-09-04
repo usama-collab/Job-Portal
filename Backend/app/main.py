@@ -7,13 +7,32 @@ from app.routes import user,auth,job,application,google_auth, saved_job
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+from urllib.parse import urlsplit
 
 
 app = FastAPI(title="Job Board App")
 
+
+def get_cors_origins() -> list[str]:
+    configured_origin = settings.FRONTEND_ORIGIN.rstrip("/")
+    origins = {configured_origin}
+
+    # Browsers treat localhost and 127.0.0.1 as different origins. Permit both
+    # loopback forms in development while keeping production CORS explicit.
+    if settings.APP_ENV.lower() in {"development", "dev", "local"}:
+        parsed_origin = urlsplit(configured_origin)
+        if parsed_origin.scheme in {"http", "https"}:
+            port = f":{parsed_origin.port}" if parsed_origin.port else ""
+            origins.update({
+                f"{parsed_origin.scheme}://localhost{port}",
+                f"{parsed_origin.scheme}://127.0.0.1{port}",
+            })
+
+    return sorted(origins)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_ORIGIN],
+    allow_origins=get_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],   # Allow all methods
     allow_headers=["*"],   # Allow all headers

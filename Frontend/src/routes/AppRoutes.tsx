@@ -6,6 +6,7 @@ import Login from '../pages/Login'
 import Register from '../pages/Register'
 import MainLayout from '../layouts/MainLayout'
 import ProtectedRoute from './ProtectedRoute'
+import GuestRoute from './GuestRoute'
 import MyApplications from '../pages/MyApplications'
 import JobApplicants from '../pages/JobApplicants'
 import EmployerDashboard from '../pages/EmployerDashboard'
@@ -35,9 +36,11 @@ const AppRoutes = () => {
                 <Route path="/employer/jobs/:jobId/edit" element={<EditJob />}/> 
             </Route>
         </Route>
-        {/* Auth Pages without navbar (Optional) */}
-        <Route path='/login' element={<Login/>}/>
-        <Route path='/register' element={<Register/>}/>
+        {/* Guest-only auth pages without the main navbar */}
+        <Route element={<GuestRoute/>}>
+            <Route path='/login' element={<Login/>}/>
+            <Route path='/register' element={<Register/>}/>
+        </Route>
     </Routes>
   )
 }

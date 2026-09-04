@@ -32,7 +32,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 }) )
 
 if (typeof window !== "undefined") {
-    window.addEventListener(AUTH_TOKEN_REFRESHED_EVENT, () => {
+    const syncAuthentication = () => {
         const token = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
         const refreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
         useAuthStore.setState({
@@ -40,9 +40,33 @@ if (typeof window !== "undefined") {
             refreshToken,
             isAuthenticated: !!token,
         });
-    });
+    };
 
-    window.addEventListener(AUTH_LOGOUT_EVENT, () => {
+    const handleLogout = () => {
         useAuthStore.getState().logout();
-    });
+    };
+
+    const handleStorage = (event: StorageEvent) => {
+        if (
+            event.key !== ACCESS_TOKEN_STORAGE_KEY &&
+            event.key !== REFRESH_TOKEN_STORAGE_KEY &&
+            event.key !== null
+        ) {
+            return;
+        }
+
+        syncAuthentication();
+    };
+
+    window.addEventListener(AUTH_TOKEN_REFRESHED_EVENT, syncAuthentication);
+    window.addEventListener(AUTH_LOGOUT_EVENT, handleLogout);
+    window.addEventListener("storage", handleStorage);
+
+    if (import.meta.hot) {
+        import.meta.hot.dispose(() => {
+            window.removeEventListener(AUTH_TOKEN_REFRESHED_EVENT, syncAuthentication);
+            window.removeEventListener(AUTH_LOGOUT_EVENT, handleLogout);
+            window.removeEventListener("storage", handleStorage);
+        });
+    }
 }

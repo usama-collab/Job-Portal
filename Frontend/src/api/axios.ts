@@ -34,7 +34,7 @@ const clearAuthentication = () => {
     }
 };
 
-const refreshAccessToken = (): Promise<string | null> => {
+export const refreshAccessToken = (): Promise<string | null> => {
     if (refreshPromise) return refreshPromise;
 
     const refreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
