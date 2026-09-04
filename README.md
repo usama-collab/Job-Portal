@@ -1,4 +1,4 @@
-# Jobify - Job-Board-App-React-FastAPI
+# Jobify-Job-Board-App-React-FastAPI
 This is a high-quality project to have on your GitHub. Since it features a modern tech stack (FastAPI, React, PostgreSQL, and TanStack Query), your description should highlight the "Full-Stack" nature and the complex features like JWT authentication and the dual-state (Applied/Saved) job tracking.
 
 Jobify: Modern Full-Stack Job Board Platform
