@@ -1,4 +1,4 @@
-from fastapi import APIRouter, File, HTTPException, Depends, UploadFile
+from fastapi import APIRouter, BackgroundTasks, File, HTTPException, Depends, UploadFile
 from fastapi.responses import JSONResponse, Response
 import mimetypes
 from app.models.user import User
@@ -72,12 +72,16 @@ async def _serve_public_asset(user_id: int, asset: str, db: Session) -> Response
 
 # Register User
 @router.post('/register', response_model=UserOut )
-def register(user_create: UserCreate, db: Session = Depends(get_db)):
+def register(
+    user_create: UserCreate,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
     user = crud_user.create_user(user_create, db)
 
     token = create_confirmation_token({'email': user.email})
 
-    send_confirmation_email.delay(user.email,token)
+    background_tasks.add_task(send_confirmation_email, user.email, token)
 
     return user
 

@@ -42,12 +42,9 @@ Lucide React: Beautiful, consistent iconography.
 
 ## Email configuration
 
-The backend sends confirmation, application, and application-status emails through Brevo SMTP. Configure these environment variables in local development and production:
+The backend submits confirmation, application, and application-status emails to the Brevo Transactional Email API over HTTPS using FastAPI background tasks. Configure these environment variables in local development and production:
 
-- `SMTP_HOST`: Brevo SMTP host, normally `smtp-relay.brevo.com`
-- `SMTP_PORT`: SMTP submission port, normally `587`
-- `SMTP_USERNAME`: Brevo SMTP username
-- `SMTP_PASSWORD`: Brevo SMTP key/password
+- `BREVO_API_KEY`: Brevo API key with transactional-email access
 - `MAIL_FROM`: verified sender address
 
-Keep SMTP credentials in the hosting provider's secret environment settings and do not commit them.
+Keep the API key in the hosting provider's secret environment settings and do not commit it.

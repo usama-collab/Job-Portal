@@ -1,8 +1,11 @@
-from app.tasks.celery_worker import celery_app
-from app.core.config import settings
-from app.utils.smtp import send_html_email
+import logging
 
-@celery_app.task
+from app.core.config import settings
+from app.utils.brevo import EmailDeliveryError, send_html_email
+
+
+logger = logging.getLogger(__name__)
+
 def send_confirmation_email(to_email: str, token: str):
     link = f'{settings.BACKEND_PUBLIC_URL.rstrip("/")}/auth/confirm?token={token}'
     html_content = f"""
@@ -23,6 +26,5 @@ def send_confirmation_email(to_email: str, token: str):
 
     try:
         send_html_email(to_email, 'Confirm Your Email', html_content)
-        print(f'Email sent to {to_email}')
-    except Exception as e:
-        print(f'SMTP error: {e}')
+    except EmailDeliveryError:
+        logger.exception("Confirmation email delivery failed")

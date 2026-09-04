@@ -1,7 +1,10 @@
-from app.tasks.celery_worker import celery_app
-from app.utils.smtp import send_html_email
+import logging
 
-@celery_app.task
+from app.utils.brevo import EmailDeliveryError, send_html_email
+
+
+logger = logging.getLogger(__name__)
+
 def send_app_email(to_email: str, job_title: str):
     # Confirmation links should use settings.BACKEND_PUBLIC_URL if needed.
     html_content = f"""
@@ -17,6 +20,5 @@ def send_app_email(to_email: str, job_title: str):
 
     try:
         send_html_email(to_email, 'Applied for Job', html_content)
-        print(f'Email sent to {to_email}')
-    except Exception as e:
-        print(f'SMTP error: {e}')
+    except EmailDeliveryError:
+        logger.exception("Application email delivery failed")

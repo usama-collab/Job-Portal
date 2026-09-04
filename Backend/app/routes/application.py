@@ -1,6 +1,6 @@
 from typing import Optional
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends
+from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile, File, Form, Depends
 from fastapi.responses import Response
 from pathlib import Path
 import mimetypes
@@ -49,6 +49,7 @@ def _download_filename(filename: Optional[str]) -> str:
 @router.post('/jobs/{job_id}/apply', response_model=ApplicationOut)
 async def apply_to_job(
     job_id: int,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
     cover_letter: Optional[str] = Form(None),
     resume: Optional[UploadFile] = File(None),
@@ -84,7 +85,7 @@ async def apply_to_job(
     # fetching the job i am applying only to get the name of the job to show in email
     job = db.query(Job).filter(Job.id == job_id).first()
 
-    send_app_email.delay(current_user.email, job.title)
+    background_tasks.add_task(send_app_email, current_user.email, job.title)
 
     return _application_response(app)
 
@@ -160,7 +161,13 @@ async def download_application_resume(
 
 # Update the status of Applications (Done by admin/employer)
 @router.put('/{application_id}/status', response_model=ApplicationOut)
-def update_application_status(application_id: int, new_status: ApplicationUpdateStatus, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def update_application_status(
+    application_id: int,
+    new_status: ApplicationUpdateStatus,
+    background_tasks: BackgroundTasks,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
 
     app = crud_app.get_application_by_id(application_id, db)
     if not app:
@@ -184,6 +191,6 @@ def update_application_status(application_id: int, new_status: ApplicationUpdate
 
     app_user = db.query(User).filter(User.id == app.user_id).first()
 
-    send_app_status_email.delay(app_user.email, new_status.status)
+    background_tasks.add_task(send_app_status_email, app_user.email, new_status.status)
 
     return _application_response(updated_status)
