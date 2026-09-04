@@ -30,14 +30,15 @@ Last inspected: 2026-09-05
 - The health check executes `SELECT 1`; it verifies database connectivity only and does not verify application tables or Alembic revision state.
 - The frontend uses build-time `VITE_API_BASE_URL`; the backend uses environment-based database, public URL, CORS, Redis, R2, Brevo API, Google OAuth, JWT, and session configuration.
 
-## Email delivery fix implemented locally
+## Email delivery
 
 - On 2026-09-05, email delivery was migrated from Celery/Brevo SMTP to FastAPI `BackgroundTasks` and Brevo's HTTPS transactional-email endpoint.
 - Registration confirmation, application confirmation, and application-status messages retain their existing subjects and HTML content.
 - Celery code and dependency were removed. `redis==6.4.0` is now an explicit dependency because Redis remains required for authentication and job caching.
 - `BREVO_API_KEY` replaces the SMTP host/port/username/password settings. `MAIL_FROM` remains the verified sender setting. The API key is optional at application startup but email delivery logs a generic configuration failure if it is absent.
 - `Backend/.env.example`, `render.yaml`, and the root README document the new settings without containing a secret value. The four obsolete SMTP entries were removed from the ignored local `Backend/app/.env`; no API key was invented or copied from the unrelated SMTP credential.
-- The change has not yet been deployed. Before deployment, set a real Brevo transactional API key as the secret `BREVO_API_KEY` in the Render backend environment and retain a verified `MAIL_FROM` value.
+- The Brevo HTTPS implementation has been deployed, and production confirmation-email delivery has been verified. Render must retain a real transactional `BREVO_API_KEY` secret and a verified `MAIL_FROM` value.
+- On 2026-09-05, successful first-time confirmation was changed to return an HTTP 303 redirect to `FRONTEND_ORIGIN/login`. Invalid/expired-token handling and the existing already-verified response remain unchanged. Verify this behavior after Render redeploys the commit.
 - Previous diagnosis found two confirmation tasks stranded in the old Upstash Celery queue with no worker. The new implementation intentionally does not consume that obsolete queue; those short-lived confirmation tokens will expire.
 
 ## Security and production changes already implemented
@@ -55,7 +56,7 @@ Last inspected: 2026-09-05
 
 - Registration from the production frontend had returned HTTP 500, with Render reporting `psycopg2.errors.UndefinedTable: relation "users" does not exist`.
 - Root cause was an unmigrated Neon schema. The existing migrations were applied successfully on 2026-09-05, and the expected tables now exist.
-- Production registration still needs an end-to-end retest after deploying the HTTPS email change.
+- Production registration and Brevo confirmation delivery now succeed. Confirmation redirect behavior needs verification after the latest Render redeploy.
 
 ## Alembic migration state
 
@@ -78,15 +79,15 @@ Last inspected: 2026-09-05
 
 ## Remaining production tasks
 
-1. Create a Brevo transactional API key, store it only as `BREVO_API_KEY` in the Render backend environment, and confirm `MAIL_FROM` is a verified sender.
-2. Deploy the backend email changes and retest new-user registration, confirmation delivery/link handling, verified-user login, application confirmation, and status-update delivery.
+1. After the latest Render redeploy, verify a fresh confirmation link redirects to the frontend `/login` page and the verified user can sign in.
+2. Retest application-confirmation and application-status email delivery.
 3. Test Upstash-backed job caching/token rotation and R2 upload/download/delete behavior in production.
 4. Complete and test the frontend Google OAuth redirect/callback integration, and confirm the Google console permits the exact production callback URI.
 5. Consider making migrations an explicit controlled release step rather than silently running them on every web startup.
 
 ## Recommended immediate next action
 
-- Set `BREVO_API_KEY` in Render without exposing it, deploy the current backend changes, and register a new seeker or employer with a fresh email address. Confirm the user row is created, the background task receives a successful Brevo API response, and the confirmation link verifies the account.
+- Allow Render to deploy the confirmation redirect commit, then register a new seeker or employer with a fresh email address and verify the complete confirmation-to-login flow.
 - Existing accounts whose confirmations were stranded in the former Celery queue cannot simply re-register with the same email and may need a future resend-confirmation flow or controlled cleanup.
 
 ## Warnings and handoff constraints

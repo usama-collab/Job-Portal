@@ -3,7 +3,7 @@ from app.utils.functions import get_current_user
 from app.core.db import get_db
 from sqlalchemy.orm import Session
 from app.crud import user as crud_user
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from app.core import redis_client, security
 from app.models.user import User
@@ -34,7 +34,8 @@ def confirm_email(token: str, db: Session = Depends(get_db)):
         return HTMLResponse(content="<h1>Email Already Verified!</h1>")
     
     crud_user.verify_user_email(user, db)
-    return HTMLResponse(content="<h1>Email Verified Successfully!</h1>")
+    login_url = f'{settings.FRONTEND_ORIGIN.rstrip("/")}/login'
+    return RedirectResponse(url=login_url, status_code=303)
 
 
 # Login
