@@ -1,7 +1,6 @@
 from pydantic import BaseModel, ConfigDict, HttpUrl
 from pydantic import EmailStr
 from typing import Any, List, Optional
-from app.models.user import UserRole
 
 
 class UserBase(BaseModel):
@@ -10,7 +9,6 @@ class UserBase(BaseModel):
     email: EmailStr
     
 class UserCreate(UserBase):
-    role: Optional[UserRole] = None
     password: str
 
 class UserUpdate(BaseModel):

@@ -21,8 +21,9 @@ import {
 } from "../components/ui/form";
 import { jwtDecode } from "jwt-decode";
 import { useState } from "react";
-import { AlertCircle, Briefcase, Loader2 } from "lucide-react"; // Added Icons
+import { AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { AuthBrandPanel, MobileAuthLogo } from "../components/auth-brand-panel";
 
 interface DecodedToken {
   sub: string;
@@ -65,31 +66,30 @@ const Login = () => {
       } else {
         navigate("/jobs");
       }
-    } catch (err: any) {
+    } catch {
       setError('Invalid email or password. Please try again.');
     }
   };
 
   return (
-    // Matching the homepage gradient
-    <div className="min-h-screen flex flex-col items-center justify-start py-10 px-4 bg-linear-to-b from-blue-50/50 to-white">
-      
-      {/* Brand Logo Header */}
-      <div className="mb-8 flex flex-col items-center gap-2">
-        <div className="bg-blue-600 p-2.5 rounded-xl shadow-lg shadow-blue-200">
-          <Briefcase className="text-white w-6 h-6" />
-        </div>
-        <h2 className="text-2xl font-black tracking-tight text-slate-900">Jobify</h2>
-      </div>
+    <main className="grid min-h-screen bg-white lg:grid-cols-[minmax(0,1.05fr)_minmax(440px,0.95fr)]">
+      <section className="flex min-h-screen items-center px-5 py-10 sm:px-10 lg:px-16 xl:px-24">
+        <div className="mx-auto w-full max-w-md lg:mx-0">
+          <MobileAuthLogo />
 
-      <Card className="w-full max-w-md shadow-xl border-slate-100 rounded-2xl bg-white/80 backdrop-blur-sm">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Welcome back</CardTitle>
-          <CardDescription className="text-center text-slate-500">
-            Enter your credentials to manage your career
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          <Link to="/" className="mb-10 hidden w-fit items-center gap-2 text-sm font-semibold text-slate-500 transition-colors hover:text-blue-600 lg:flex">
+            <ArrowLeft className="h-4 w-4" />
+            Back to homepage
+          </Link>
+
+          <Card className="w-full gap-0 border-0 bg-transparent p-0 shadow-none">
+            <CardHeader className="space-y-2 px-0 pb-8">
+              <CardTitle className="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">Welcome back</CardTitle>
+              <CardDescription className="text-base text-slate-500">
+                Enter your credentials to manage your career
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-0">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                 {error && (
@@ -115,10 +115,10 @@ const Login = () => {
                   <FormItem>
                     <FormLabel className="text-slate-700 font-semibold">Email</FormLabel>
                     <FormControl>
-                      <Input 
+                      <Input
                         placeholder="name@example.com" 
                         type="email" 
-                        className="h-11 rounded-lg border-slate-200 focus:ring-blue-500"
+                        className="h-12 rounded-xl border-slate-200 bg-slate-50/70 px-4 focus:bg-white focus:ring-blue-500"
                         {...field} 
                       />
                     </FormControl>
@@ -139,10 +139,10 @@ const Login = () => {
                         </Link>
                     </div>
                     <FormControl>
-                      <Input 
+                      <Input
                         placeholder="••••••••" 
                         type="password" 
-                        className="h-11 rounded-lg border-slate-200 focus:ring-blue-500"
+                        className="h-12 rounded-xl border-slate-200 bg-slate-50/70 px-4 focus:bg-white focus:ring-blue-500"
                         {...field} 
                       />
                     </FormControl>
@@ -153,7 +153,7 @@ const Login = () => {
 
               <Button 
                 type="submit" 
-                className="w-full h-11 text-base font-bold bg-blue-600 hover:bg-blue-700 transition-all shadow-md shadow-blue-100 mt-2" 
+                className="mt-2 h-12 w-full rounded-xl bg-blue-600 text-base font-bold shadow-lg shadow-blue-200 transition-all hover:bg-blue-700"
                 disabled={form.formState.isSubmitting}
               >
                 {form.formState.isSubmitting ? (
@@ -172,14 +172,13 @@ const Login = () => {
               </p>
             </form>
           </Form>
-        </CardContent>
-      </Card>
-      
-      {/* Footer link back to home */}
-      <Link to="/" className="mt-8 text-sm text-slate-600 hover:text-slate-400 transition-colors">
-        ← Back to homepage
-      </Link>
-    </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      <AuthBrandPanel description="Sign in to continue exploring roles, tracking applications, and connecting with teams doing meaningful work." />
+    </main>
   );
 };
 

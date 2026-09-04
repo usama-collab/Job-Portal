@@ -11,18 +11,11 @@ def create_user(user_create: UserCreate,db: Session):
     if existing:
         raise HTTPException(status_code=400, detail='Email already exists')
 
-    requested_role = user_create.role or UserRole.SEEKER
-    role = requested_role.value if isinstance(requested_role, UserRole) else requested_role
-    if role == UserRole.ADMIN.value:
-        raise HTTPException(status_code=403, detail='Admin accounts must be provisioned separately')
-    if role not in {UserRole.SEEKER.value, UserRole.EMPLOYER.value}:
-        raise HTTPException(status_code=422, detail='Invalid registration role')
-
     user = User(
         name=user_create.name,
         email=user_create.email,
         password_hash=hash_password(user_create.password),
-        role=role,
+        role=UserRole.SEEKER.value,
 
         )
     db.add(user)

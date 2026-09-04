@@ -18,21 +18,15 @@ import {
   FormLabel,
   FormMessage,
 } from "../components/ui/form"
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "../components/ui/select"
-import { Briefcase, Loader2, UserPlus } from 'lucide-react'
+import { ArrowLeft, Loader2 } from 'lucide-react'
 import { useState } from 'react'
+import { AuthBrandPanel, MobileAuthLogo } from '../components/auth-brand-panel'
 
 interface RegisterForm {
     email: string
     name: string
     password: string
-    role: string
+    confirmPassword: string
 }
 
 const Register = () => {
@@ -44,41 +38,45 @@ const Register = () => {
             name: "",
             email: "",
             password: "",
-            role: "seeker" // Default role
+            confirmPassword: ""
         }
     })
 
     const onSubmit = async (data: RegisterForm) => {
         setError(null)
         try {
-            await registerUser(data)
+            await registerUser({
+                name: data.name,
+                email: data.email,
+                password: data.password,
+            })
             navigate('/login')
-        } catch (error) {
+        } catch {
             setError("Registration failed. Please try a different email.")
         }
     }
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-start py-16 px-4 bg-linear-to-b from-blue-50/50 to-white">
-            
-            {/* Brand Header */}
-            <div className="mb-8 flex flex-col items-center gap-2">
-                <div className="bg-blue-600 p-2.5 rounded-xl shadow-lg shadow-blue-200">
-                    <Briefcase className="text-white w-6 h-6" />
-                </div>
-                <h2 className="text-2xl font-black tracking-tight text-slate-900">Jobify</h2>
-            </div>
+        <main className="grid min-h-screen bg-white lg:grid-cols-[minmax(0,1.05fr)_minmax(440px,0.95fr)]">
+            <section className="flex min-h-screen items-center px-5 py-8 sm:px-10 lg:px-16 xl:px-24">
+                <div className="mx-auto w-full max-w-md lg:mx-0">
+                    <MobileAuthLogo />
 
-            <Card className="w-full max-w-md shadow-xl border-slate-100 rounded-2xl bg-white/80 backdrop-blur-sm">
-                <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
-                        <UserPlus className="w-5 h-5 text-blue-600" /> Create account
+                    <Link to="/" className="mb-7 hidden w-fit items-center gap-2 text-sm font-semibold text-slate-500 transition-colors hover:text-blue-600 lg:flex">
+                        <ArrowLeft className="h-4 w-4" />
+                        Back to homepage
+                    </Link>
+
+                    <Card className="w-full gap-0 border-0 bg-transparent p-0 shadow-none">
+                        <CardHeader className="space-y-2 px-0 pb-6">
+                    <CardTitle className="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
+                        Create account
                     </CardTitle>
-                    <CardDescription className="text-center text-slate-500">
+                    <CardDescription className="text-base text-slate-500">
                         Join Jobify to start your career journey
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-0">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                             
@@ -95,7 +93,7 @@ const Register = () => {
                                     <FormItem>
                                         <FormLabel className="text-slate-700 font-semibold">Full Name</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="John Doe" className="h-11 rounded-lg" {...field} />
+                                            <Input placeholder="John Doe" className="h-11 rounded-xl border-slate-200 bg-slate-50/70 px-4 focus:bg-white" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -109,30 +107,8 @@ const Register = () => {
                                     <FormItem>
                                         <FormLabel className="text-slate-700 font-semibold">Email</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="name@example.com" type="email" className="h-11 rounded-lg" {...field} />
+                                            <Input placeholder="name@example.com" type="email" className="h-11 rounded-xl border-slate-200 bg-slate-50/70 px-4 focus:bg-white" {...field} />
                                         </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="role"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-slate-700 font-semibold">I am a...</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <FormControl>
-                                                <SelectTrigger className="h-11 rounded-lg">
-                                                    <SelectValue placeholder="Select your role" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                <SelectItem value="seeker">Job Seeker</SelectItem>
-                                                <SelectItem value="employer">Employer / Recruiter</SelectItem>
-                                            </SelectContent>
-                                        </Select>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -145,16 +121,47 @@ const Register = () => {
                                     <FormItem>
                                         <FormLabel className="text-slate-700 font-semibold">Password</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="••••••••" type="password" className="h-11 rounded-lg" {...field} />
+                                            <Input
+                                                placeholder="••••••••"
+                                                type="password"
+                                                autoComplete="new-password"
+                                                className="h-11 rounded-xl border-slate-200 bg-slate-50/70 px-4 focus:bg-white"
+                                                {...field}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
+                                rules={{ required: "Password is required" }}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="confirmPassword"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-slate-700 font-semibold">Confirm Password</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="••••••••"
+                                                type="password"
+                                                autoComplete="new-password"
+                                                className="h-11 rounded-xl border-slate-200 bg-slate-50/70 px-4 focus:bg-white"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                                rules={{
+                                    required: "Please confirm your password",
+                                    validate: (value) => value === form.getValues("password") || "Passwords do not match"
+                                }}
                             />
 
                             <Button 
                                 type="submit" 
-                                className="w-full h-11 text-base font-bold bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-100 mt-2 transition-all"
+                                className="mt-2 h-12 w-full rounded-xl bg-blue-600 text-base font-bold shadow-lg shadow-blue-200 transition-all hover:bg-blue-700"
                                 disabled={form.formState.isSubmitting}
                             >
                                 {form.formState.isSubmitting ? (
@@ -174,12 +181,12 @@ const Register = () => {
                         </form>
                     </Form>
                 </CardContent>
-            </Card>
+                    </Card>
+                </div>
+            </section>
 
-            <Link to="/" className="mt-8 text-sm text-slate-400 hover:text-slate-600 transition-colors">
-                ← Back to homepage
-            </Link>
-        </div>
+            <AuthBrandPanel description="Create your profile, find the right opportunity, and take the next step in your career with confidence." />
+        </main>
     )
 }
 
