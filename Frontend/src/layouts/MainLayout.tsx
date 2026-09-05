@@ -6,7 +6,6 @@ import {
   LogOut, 
   LayoutDashboard, 
   UserCircle, 
-  Briefcase, 
   Bookmark // Added Bookmark icon
 } from 'lucide-react'
 import { jwtDecode } from "jwt-decode";
@@ -18,6 +17,7 @@ import {
   PopoverTrigger,
 } from "../components/ui/popover"
 import { useProfile } from "../hooks/useProfile";
+import { BrandLogo } from "../components/brand-logo";
 
 export interface DecodedToken {
     sub: string;
@@ -79,21 +79,7 @@ const MainLayout = () => {
                 <div className='container mx-auto flex h-16 items-center justify-between px-6'>
                     
                     {/* Logo Section */}
-                    <Link to="/" className='flex items-center gap-3 group transition-transform active:scale-95'>
-                        <div className='relative flex items-center justify-center'>
-                            <div className='absolute inset-0 bg-blue-400 blur-md opacity-20 group-hover:opacity-40 transition-opacity' />
-                            <div className='relative bg-linear-to-br from-blue-500 to-blue-700 p-2 rounded-xl shadow-lg shadow-blue-200'>
-                                <Briefcase className='text-white w-6 h-6' />
-                                <div className='absolute top-1 right-1 w-1.5 h-1.5 bg-blue-300 rounded-full animate-pulse' />
-                            </div>
-                        </div>
-                        <div className='flex flex-col leading-none'>
-                            <span className='text-2xl font-[1000] tracking-tighter text-slate-900 flex items-baseline'>
-                                Jobify
-                                <span className='text-blue-600 ml-0.5 text-3xl'>.</span>
-                            </span>
-                        </div>
-                    </Link>
+                    <BrandLogo markClassName="h-10 w-10" />
 
                     <div className='flex items-center gap-8'>
                         <div className='hidden md:flex items-center gap-6 mr-4 border-r pr-8 h-6 border-slate-200'>

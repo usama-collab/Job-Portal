@@ -1,5 +1,5 @@
 import { Briefcase, CheckCircle2 } from "lucide-react"
-import { Link } from "react-router-dom"
+import { BrandLogo } from "./brand-logo"
 
 interface AuthBrandPanelProps {
   description: string
@@ -12,14 +12,7 @@ export function AuthBrandPanel({ description }: AuthBrandPanelProps) {
       <div className="pointer-events-none absolute -bottom-36 -left-24 h-96 w-96 rounded-full border border-white/10 bg-white/5" />
       <div className="pointer-events-none absolute right-16 top-1/3 h-24 w-24 rounded-3xl border border-white/10 bg-white/5 rotate-12" />
 
-      <Link to="/" className="relative flex w-fit items-center gap-3">
-        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-blue-600 shadow-xl shadow-blue-950/20">
-          <Briefcase className="h-6 w-6" />
-        </span>
-        <span className="text-2xl font-black tracking-tight">
-          Jobify<span className="text-blue-200">.</span>
-        </span>
-      </Link>
+      <BrandLogo className="relative" light />
 
       <div className="relative max-w-lg">
         <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-[2rem] border border-white/20 bg-white/10 shadow-2xl shadow-blue-950/20 backdrop-blur-sm">
@@ -56,13 +49,6 @@ export function AuthBrandPanel({ description }: AuthBrandPanelProps) {
 
 export function MobileAuthLogo() {
   return (
-    <Link to="/" className="mb-10 flex w-fit items-center gap-3 lg:hidden">
-      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-200">
-        <Briefcase className="h-5 w-5" />
-      </span>
-      <span className="text-xl font-black tracking-tight text-slate-900">
-        Jobify<span className="text-blue-600">.</span>
-      </span>
-    </Link>
+    <BrandLogo className="mb-10 lg:hidden" markClassName="h-10 w-10" wordmarkClassName="text-xl" />
   )
 }
