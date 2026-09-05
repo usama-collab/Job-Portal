@@ -3,33 +3,49 @@ import { getAllJobs, type Job } from '../api/jobs'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useState } from 'react'
 import { Button } from '../components/ui/button'
-import { Input } from '../components/ui/input'
-import { Search, MapPin, Briefcase, ChevronLeft, ChevronRight, Clock } from 'lucide-react'
+import { JobSearchFields } from '../components/job-search-fields'
+import { MapPin, Briefcase, ChevronLeft, ChevronRight, Clock } from 'lucide-react'
 
 const LIMIT = 5
 
 const Jobs = () => {
+  const [params] = useSearchParams()
+  return <JobResults key={JSON.stringify([params.get('q'), params.get('location')])} />
+}
+
+const JobResults = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const q = searchParams.get("q") || ''
+  const location = searchParams.get('location') || ''
   const page = Number(searchParams.get("page") || 1)
   const skip = (page - 1) * LIMIT
 
   const [search, setSearch] = useState(q)
+  const [locationSearch, setLocationSearch] = useState(location)
   const navigate = useNavigate()
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['jobs', q, page],
-    queryFn: () => getAllJobs(q, skip, LIMIT),
+    queryKey: ['jobs', q, location, page],
+    queryFn: () => getAllJobs(q, skip, LIMIT, location),
     placeholderData: (previousData) => previousData,
   })
 
   const onSearch = (e?: React.FormEvent) => {
     e?.preventDefault()
-    setSearchParams(search ? { q: search, page: '1' } : { page: '1' })
+    const params = new URLSearchParams()
+    if (search.trim()) params.set('q', search.trim())
+    if (locationSearch.trim()) params.set('location', locationSearch.trim())
+    params.set('page', '1')
+    setSearchParams(params)
   }
 
-  const nextPage = () => setSearchParams({ q, page: String(page + 1) })
-  const prevPage = () => setSearchParams({ q, page: String(page - 1) })
+  const changePage = (next: number) => {
+    const params = new URLSearchParams(searchParams)
+    params.set('page', String(next))
+    setSearchParams(params)
+  }
+  const nextPage = () => changePage(page + 1)
+  const prevPage = () => changePage(page - 1)
 
   if (isError) return (
     <div className="max-w-6xl mx-auto p-10 text-center">
@@ -42,22 +58,14 @@ const Jobs = () => {
       {/* Header / Search Section */}
       <div className="bg-white border-b sticky top-16 z-40 py-8 shadow-sm">
         <div className="max-w-6xl mx-auto px-6">
-          <form onSubmit={onSearch} className="flex flex-col md:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-5 w-5" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Job title, keywords, or company"
-                className="pl-10 h-12 text-base border-slate-200 focus:ring-blue-500 rounded-xl"
-              />
-            </div>
+          <form onSubmit={onSearch} className="flex flex-col md:flex-row gap-3 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
+            <JobSearchFields search={search} location={locationSearch} onSearchChange={setSearch} onLocationChange={setLocationSearch} />
             <Button type="submit" className="h-12 px-8 bg-blue-600 hover:bg-blue-700 text-base font-bold rounded-xl shadow-md shadow-blue-100">
               Find Jobs
             </Button>
           </form>
           <p className="text-xs text-slate-500 mt-3 px-1">
-            {data ? `Showing ${data.length} jobs for "${q || 'All'}"` : 'Searching...'}
+            {data ? `Showing ${data.length} jobs for "${q || 'All'}"${location ? ` in "${location}"` : ''}` : 'Searching...'}
           </p>
         </div>
       </div>
@@ -74,7 +82,7 @@ const Jobs = () => {
             <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-300">
               <Briefcase className="mx-auto h-12 w-12 text-slate-300 mb-4" />
               <h3 className="text-lg font-bold text-slate-900">No jobs found</h3>
-              <p className="text-slate-500">Try adjusting your search keywords.</p>
+              <p className="text-slate-500">Try adjusting your keywords or location.</p>
             </div>
           ) : (
             data?.map((job: Job) => (

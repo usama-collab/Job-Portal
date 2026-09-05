@@ -134,7 +134,7 @@ const CreateJob = () => {
                                     </Label>
                                     <Input
                                         name="location"
-                                        placeholder="e.g. New York, Remote"
+                                        placeholder="e.g. New York, NY 10001 or Remote"
                                         value={form.location}
                                         onChange={handleChange}
                                         className="h-11 rounded-xl"

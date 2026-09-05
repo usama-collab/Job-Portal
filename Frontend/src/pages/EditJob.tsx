@@ -171,7 +171,7 @@ const EditJob = () => {
                   </Label>
                   <Input
                     {...register("location")}
-                    placeholder="Remote, NY, etc."
+                    placeholder="e.g. New York, NY 10001 or Remote"
                     className="h-11 rounded-xl"
                   />
                 </div>

@@ -20,8 +20,9 @@ def create_job(job_create: JobCreate, company_id: int, creator_id: int, db: Sess
 # def get_jobs(db: Session):
 #     jobs = db.query(Job).all()
 #     return jobs
-def get_jobs(db: Session, skip: int, limit: int, q: Optional[str] = None, sort_by: str = 'created_at', order: str = 'desc'):
-    cache_key = f'jobs:{skip}:{limit}:{q or None}:{sort_by}:{order}'
+def get_jobs(db: Session, skip: int, limit: int, q: Optional[str] = None, sort_by: str = 'created_at', order: str = 'desc', location: Optional[str] = None):
+    location = (location or '').strip()
+    cache_key = 'jobs:' + json.dumps([skip, limit, q or None, sort_by, order, location])
 
     cached_jobs = redis_client.get(cache_key)
     if cached_jobs:
@@ -39,6 +40,9 @@ def get_jobs(db: Session, skip: int, limit: int, q: Optional[str] = None, sort_b
             (Job.company_record.has(Company.name.ilike(like)))
         )
     
+    if location:
+        query = query.filter(Job.location.icontains(location, autoescape=True))
+
     if sort_by == "company":
         query = query.join(Job.company_record)
 

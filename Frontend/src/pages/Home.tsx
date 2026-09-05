@@ -32,12 +32,18 @@ const testimonials = [
   { quote: "Clean, quick, and refreshingly simple. I always knew where each application stood.", name: "Sarah Ali", role: "Frontend engineer", initials: "SA", color: "bg-emerald-100 text-emerald-700" },
 ]
 
+import { JobSearchFields } from '../components/job-search-fields'
+
 const Home = () => {
   const navigate = useNavigate()
   const [search, setSearch] = useState("")
+  const [location, setLocation] = useState('')
   const findJobs = (event: FormEvent) => {
     event.preventDefault()
-    navigate(search.trim() ? `/jobs?q=${encodeURIComponent(search.trim())}` : "/jobs")
+    const params = new URLSearchParams()
+    if (search.trim()) params.set('q', search.trim())
+    if (location.trim()) params.set('location', location.trim())
+    navigate(params.size ? `/jobs?${params}` : '/jobs')
   }
   const browse = (term: string) => navigate(`/jobs?q=${encodeURIComponent(term)}`)
 
@@ -56,10 +62,7 @@ const Home = () => {
             </h1>
             <p className="mt-7 max-w-xl text-lg leading-8 text-slate-600 sm:text-xl">Discover meaningful opportunities from trusted teams, build your profile, and take the next step in your career—all in one place.</p>
             <form onSubmit={findJobs} className="mt-9 flex max-w-2xl flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_20px_60px_-18px_rgba(15,23,42,0.2)] sm:flex-row">
-              <label className="flex min-w-0 flex-1 items-center gap-3 px-3" aria-label="Search jobs">
-                <Search className="h-5 w-5 shrink-0 text-slate-400" />
-                <input value={search} onChange={(e) => setSearch(e.target.value)} className="h-12 w-full bg-transparent text-sm font-medium outline-none placeholder:text-slate-400" placeholder="Job title, skill, or company" />
-              </label>
+              <JobSearchFields search={search} location={location} onSearchChange={setSearch} onLocationChange={setLocation} />
               <Button type="submit" className="h-12 rounded-xl bg-blue-600 px-7 font-bold text-white shadow-lg shadow-blue-200 hover:-translate-y-0.5 hover:bg-blue-700">Search jobs <ArrowRight /></Button>
             </form>
             <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm font-semibold text-slate-500"><span className="text-slate-400">Popular:</span>{["Remote", "Product design", "Engineering"].map(term => <button key={term} onClick={() => browse(term)} className="hover:text-blue-600">{term}</button>)}</div>

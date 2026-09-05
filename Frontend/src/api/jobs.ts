@@ -35,10 +35,11 @@ export interface CreateJobPayload{
 }
 
 
-export const getAllJobs = async (q?: string, skip = 0, limit = 10): Promise<Job[]> => {
+export const getAllJobs = async (q?: string, skip = 0, limit = 10, location?: string): Promise<Job[]> => {
     const response = await api.get('/jobs/',{
         params: {
             q,
+            location,
             skip,
             limit
         }

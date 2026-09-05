@@ -49,8 +49,9 @@ def get_all_jobs(
     q: Optional[str] = None,
     sort_by: Optional[str] = None,
     order: Optional[str] = None,
+    location: Optional[str] = None,
     ):
-    return crud_job.get_jobs(db,skip, limit, q, sort_by, order)
+    return crud_job.get_jobs(db,skip, limit, q, sort_by, order, location=location)
 
 
 
