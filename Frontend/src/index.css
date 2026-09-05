@@ -92,6 +92,11 @@ html { scroll-behavior: smooth; }
   50% { box-shadow: 0 0 0 6px rgb(52 211 153 / 0); }
 }
 
+@keyframes jobs-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .home-rise { animation: home-rise .7s cubic-bezier(.2,.8,.2,1) both; }
 .home-float { animation: home-float 4s ease-in-out infinite; }
 .home-delay-1 { animation-delay: .12s; }
@@ -106,6 +111,8 @@ html { scroll-behavior: smooth; }
 .auth-status-dot { animation: auth-status-pulse 2s ease-out infinite; }
 .auth-float-card { animation: auth-card-float 4.5s ease-in-out infinite; }
 .auth-float-delay { animation-delay: -2.25s; }
+.jobs-rise { animation: jobs-rise .65s cubic-bezier(.2,.8,.2,1) both; }
+.jobs-card-rise { animation: jobs-rise .55s cubic-bezier(.2,.8,.2,1) both; }
 
 .auth-form-scroll {
   scrollbar-width: none;
@@ -135,7 +142,7 @@ html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .home-rise, .home-float, .auth-panel-rise, .auth-orb, .auth-job-card,
-  .auth-match-bar, .auth-status-dot, .auth-float-card { animation: none; }
+  .auth-match-bar, .auth-status-dot, .auth-float-card, .jobs-rise, .jobs-card-rise { animation: none; }
 }
 
 @theme inline {
