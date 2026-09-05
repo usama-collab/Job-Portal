@@ -1,6 +1,6 @@
 from typing import Optional
 from sqlalchemy import String, asc, cast, desc
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from app.core.redis_client import redis_client
 from app.schemas.job import JobCreate,JobUpdate
 from app.models.company import Company
@@ -127,6 +127,7 @@ def delete_job(
 def get_jobs_for_company(company_id: int, db: Session):
     return (
         db.query(Job)
+        .options(selectinload(Job.applications))
         .filter(Job.company_id == company_id)
         .order_by(Job.created_at.desc())
         .all()

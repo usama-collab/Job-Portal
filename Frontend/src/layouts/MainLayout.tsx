@@ -88,7 +88,7 @@ const MainLayout = () => {
                                     {/* 1. New Save/Applications Icon Button */}
                                     <Button 
                                         variant="ghost" 
-                                        className={`h-10 w-10 rounded-full p-0 transition-all ${
+                                        className={`group h-10 w-10 rounded-full p-0 transition-all focus-visible:text-blue-600 ${
                                             location.pathname === '/applications' 
                                             ? "bg-blue-50 text-blue-600 border border-blue-100" 
                                             : "text-slate-600 hover:bg-slate-100"
@@ -96,7 +96,7 @@ const MainLayout = () => {
                                         onClick={() => navigate('/applications')}
                                         title="My Applications"
                                     >
-                                        <Bookmark className="h-5 w-5" />
+                                        <Bookmark className={`h-5 w-5 transition-[fill] group-focus-visible:fill-current ${location.pathname === '/applications' ? 'fill-current' : ''}`} />
                                     </Button>
 
                                     {/* User Popover */}

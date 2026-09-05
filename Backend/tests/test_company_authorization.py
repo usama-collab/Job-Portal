@@ -8,13 +8,14 @@ from sqlalchemy.pool import StaticPool
 from app.core.db import Base
 from app.crud.company import create_company
 from app.crud.application import create_application
+from app.crud.job import get_jobs_for_company
 from app.models.application import Application
 from app.models.company import Company, CompanyMembership
 from app.models.job import Job
 from app.models.saved_job import SavedJob
 from app.models.user import User
 from app.schemas.company import CompanyCreate
-from app.schemas.job import JobCreate
+from app.schemas.job import EmployerJobOut, JobCreate
 from app.schemas.user import UserCreate
 from app.utils.functions import can_manage_company
 from app.core.security import create_access_token, verify_access_token
@@ -122,6 +123,10 @@ class CompanyAuthorizationTests(unittest.TestCase):
 
         application = create_application(job.id, owner.id, None, None, None, self.db)
         self.assertEqual(owner.id, application.user_id)
+
+        listing = get_jobs_for_company(company.id, self.db)[0]
+        response = EmployerJobOut.model_validate(listing)
+        self.assertEqual(1, response.applications_count)
 
 
 if __name__ == "__main__":

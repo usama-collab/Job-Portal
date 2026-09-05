@@ -29,6 +29,10 @@ class Job(Base):
     def company(self):
         return self.company_record.name
 
+    @property
+    def applications_count(self):
+        return len(self.applications)
+
 
     def as_dict(self):
         return {

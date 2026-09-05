@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.core.db import get_db
 from app.models.user import User
-from app.schemas.job import JobCreate, JobOut, JobUpdate
+from app.schemas.job import EmployerJobOut, JobCreate, JobOut, JobUpdate
 from app.utils.functions import can_manage_company, get_current_user, require_company_owner
 from app.models.company import CompanyMembership
 from app.crud import job as crud_job
@@ -23,7 +23,7 @@ def create(
     return crud_job.create_job(job, membership.company_id, current_user.id, db)
 
 # Get Jobs for employer
-@router.get("/me", response_model=List[JobOut])
+@router.get("/me", response_model=List[EmployerJobOut])
 def get_my_jobs(
     membership: CompanyMembership = Depends(require_company_owner),
     db: Session = Depends(get_db)

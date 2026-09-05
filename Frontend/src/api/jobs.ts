@@ -21,7 +21,12 @@ export interface EmployerJob {
   title: string
   location?: string
   created_at: string
-  applications_count?: number
+  description: string
+  salary_min?: number
+  salary_max?: number
+  employment_type?: string
+  is_active: boolean
+  applications_count: number
 }
 
 export interface CreateJobPayload{

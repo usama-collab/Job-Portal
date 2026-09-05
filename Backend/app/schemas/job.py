@@ -37,3 +37,6 @@ class JobOut(JobBase):
     created_by_user_id: Optional[int] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+
+class EmployerJobOut(JobOut):
+    applications_count: int = 0
