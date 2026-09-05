@@ -2,7 +2,6 @@ import { jwtDecode } from "jwt-decode"
 
 interface AccessTokenClaims {
   exp?: number
-  role?: string
   sub?: string
 }
 
@@ -16,8 +15,7 @@ export function getValidAccessTokenClaims(token: string | null): AccessTokenClai
     if (
       typeof claims.exp !== "number" ||
       claims.exp <= nowInSeconds ||
-      typeof claims.sub !== "string" ||
-      typeof claims.role !== "string"
+      typeof claims.sub !== "string"
     ) {
       return null
     }
@@ -32,7 +30,5 @@ export function getAuthenticatedLandingPath(token: string): string | null {
   const claims = getValidAccessTokenClaims(token)
   if (!claims) return null
 
-  return claims.role === "admin" || claims.role === "employer"
-    ? "/employer/dashboard"
-    : "/jobs"
+  return "/jobs"
 }

@@ -19,7 +19,9 @@ Recruitment Suite: Create, update, and manage job postings through a dedicated e
 
 Applicant Management: Review candidates, view resumes directly in-browser, and update application statuses with instant feedback.
 
-Role-Based Access: Secure environment with distinct permissions for Seekers and Employers.
+Company-Based Access: Every account can use job-seeker features, while company ownership unlocks recruiting tools with backend-enforced authorization.
+
+Employer Onboarding: Users create a separate company profile before posting jobs; company data and permissions are not stored as a self-selected account role.
 
 🛠️ Tech Stack
 Backend (The Engine)

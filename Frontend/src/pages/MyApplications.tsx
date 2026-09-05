@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { getMyApplications, type Application } from "../api/application";
 import { getMySavedJobs, toggleSaveJob } from "../api/savedJobs";
+import type { LucideIcon } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { toast } from "sonner";
 import { 
@@ -162,7 +163,7 @@ const MyApplications = () => {
         {/* SAVED JOBS */}
         {activeTab === 'saved' && (
           savedJobs && savedJobs.length > 0 ? (
-            savedJobs.map((item: any) => (
+            savedJobs.map((item) => (
               <div
                 key={item.id}
                 className="group bg-white border border-slate-200 rounded-[2rem] p-6 hover:shadow-xl hover:shadow-amber-500/5 hover:border-amber-200 transition-all duration-300"
@@ -219,7 +220,14 @@ const MyApplications = () => {
 };
 
 // Reusable Empty State Component
-const EmptyState = ({ icon: Icon, message, btnText, onBtnClick }: any) => (
+interface EmptyStateProps {
+  icon: LucideIcon;
+  message: string;
+  btnText: string;
+  onBtnClick: () => void;
+}
+
+const EmptyState = ({ icon: Icon, message, btnText, onBtnClick }: EmptyStateProps) => (
   <div className="py-20 text-center animate-in fade-in zoom-in-95 duration-500">
     <div className="bg-slate-100 w-24 h-24 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 text-slate-300">
         <Icon size={40} />

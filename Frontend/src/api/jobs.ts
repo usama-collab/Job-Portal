@@ -10,8 +10,9 @@ export interface Job{
     salary_max?: string
     employment_type?: string
     company?: string
+    company_id: number
     created_at: string
-    owner_id: string
+    created_by_user_id?: number
     is_active: boolean
 }
 
@@ -30,7 +31,6 @@ export interface CreateJobPayload{
     salary_min?: number
     salary_max?: number
     employment_type?: string
-    company?: string
     is_active: boolean
 }
 
@@ -72,4 +72,3 @@ export  const deleteJob = async (jobId: string) => {
     return response.data
 
 }
-

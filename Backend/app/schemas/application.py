@@ -1,7 +1,7 @@
 # schemas/application.py
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
-from typing import Optional
+from typing import Literal, Optional
 
 class ApplicationCreate(BaseModel):
     cover_letter: Optional[str] = None
@@ -18,6 +18,8 @@ class ApplicationOut(BaseModel):
     cover_letter: Optional[str] = None
     status: str
     created_at: datetime
+    user_email: Optional[str] = None
 
 class ApplicationUpdateStatus(BaseModel):
-    status: str  # validate in endpoint (allowed statuses)
+    model_config = ConfigDict(extra="forbid")
+    status: Literal["applied", "under_review", "shortlisted", "hired", "rejected"]

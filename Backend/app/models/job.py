@@ -13,17 +13,21 @@ class Job(Base):
     salary_min = Column(Integer, nullable=True)
     salary_max = Column(Integer, nullable=True)
     employment_type = Column(String(50), nullable=True)  # e.g. "full-time", "part-time", "remote"
-    company = Column(String(200), nullable=True)
     is_active = Column(Boolean, default=True)
 
-    owner_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"), nullable=False, index=True)
+    company_id = Column(Integer, ForeignKey('companies.id', ondelete="CASCADE"), nullable=False, index=True)
+    created_by_user_id = Column(Integer, ForeignKey('users.id', ondelete="SET NULL"), nullable=True, index=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    owner = relationship("User", back_populates="jobs")
+    company_record = relationship("Company", back_populates="jobs")
+    created_by = relationship("User", back_populates="created_jobs")
     applications = relationship('Application', back_populates='job', cascade="all, delete-orphan")
 
+    @property
+    def company(self):
+        return self.company_record.name
 
 
     def as_dict(self):
@@ -35,9 +39,10 @@ class Job(Base):
             "salary_min": self.salary_min,
             "salary_max": self.salary_max,
             "employment_type": self.employment_type,
-            "company": self.company,
+            "company": self.company_record.name,
+            "company_id": self.company_id,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
             "is_active": self.is_active,
-            "owner_id": self.owner_id,
+            "created_by_user_id": self.created_by_user_id,
         }

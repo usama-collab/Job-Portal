@@ -3,9 +3,10 @@ from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.core.db import get_db
-from app.models.user import User, UserRole
+from app.models.user import User
 from app.schemas.job import JobCreate, JobOut, JobUpdate
-from app.utils.functions import get_current_user
+from app.utils.functions import can_manage_company, get_current_user, require_company_owner
+from app.models.company import CompanyMembership
 from app.crud import job as crud_job
 
 
@@ -13,24 +14,21 @@ router = APIRouter(prefix="/jobs", tags=["Jobs"])
 
 # Create Job
 @router.post('/create', response_model=JobOut)
-def create(job: JobCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    if current_user.role != UserRole.EMPLOYER.value:
-        raise HTTPException(status_code=403, detail="Only employers can create jobs")
-    return crud_job.create_job(job, current_user.id,db)
+def create(
+    job: JobCreate,
+    membership: CompanyMembership = Depends(require_company_owner),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return crud_job.create_job(job, membership.company_id, current_user.id, db)
 
 # Get Jobs for employer
 @router.get("/me", response_model=List[JobOut])
 def get_my_jobs(
-    current_user: User = Depends(get_current_user),
+    membership: CompanyMembership = Depends(require_company_owner),
     db: Session = Depends(get_db)
 ):
-    if getattr(current_user, "role", None) != "employer":
-        raise HTTPException(
-            status_code=403,
-            detail="Only employers can view their jobs"
-        )
-
-    jobs = crud_job.get_jobs_for_employer(current_user.id, db)
+    jobs = crud_job.get_jobs_for_company(membership.company_id, db)
     return jobs
 
 # Get single Job by id
@@ -59,16 +57,12 @@ def get_all_jobs(
 # Update Job
 @router.put('/update/{job_id}', response_model=JobOut)
 def update(updated_job: JobUpdate, job_id:int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    if current_user.role not in {UserRole.EMPLOYER.value, UserRole.ADMIN.value}:
-        raise HTTPException(status_code=403, detail="Only employers can update jobs")
-
-    updated = crud_job.update_job(
-        updated_job,
-        job_id,
-        current_user.id,
-        db,
-        is_admin=current_user.role == UserRole.ADMIN.value,
-    )
+    existing = crud_job.get_job_by_id(job_id, db)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Job not found")
+    if not can_manage_company(current_user, existing.company_id, db):
+        raise HTTPException(status_code=403, detail="You are not authorized to update this job")
+    updated = crud_job.update_job(updated_job, job_id, db)
     if not updated:
         raise HTTPException(status_code=404, detail="Job not found")
     return updated
@@ -80,15 +74,12 @@ def delete_job(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    if current_user.role not in {UserRole.EMPLOYER.value, UserRole.ADMIN.value}:
-        raise HTTPException(status_code=403, detail="Only employers can delete jobs")
-
-    job = crud_job.delete_job(
-        job_id,
-        db,
-        current_user.id,
-        is_admin=current_user.role == UserRole.ADMIN.value,
-    )
+    existing = crud_job.get_job_by_id(job_id, db)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Job not found")
+    if not can_manage_company(current_user, existing.company_id, db):
+        raise HTTPException(status_code=403, detail="You are not authorized to delete this job")
+    job = crud_job.delete_job(job_id, db)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     

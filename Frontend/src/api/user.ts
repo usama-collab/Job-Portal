@@ -18,17 +18,19 @@ export const uploadAvatar = async (file: File) => {
     return response.data;
 };
 
-export const updateProfile = async (payload: any) => {
+export interface ProfileUpdatePayload {
+    name?: string;
+    bio?: string;
+    skills?: string[];
+    experience?: unknown[];
+}
+
+export const updateProfile = async (payload: ProfileUpdatePayload) => {
     const response = await api.put('/users/me/update', payload);
     return response.data;
 };
 
-export const updateMyProfile = async (payload: {
-    name?: string;
-    bio?: string;
-    skills?: string;
-    experience?: string;
-}) => {
+export const updateMyProfile = async (payload: ProfileUpdatePayload) => {
     const response = await api.put('/users/me/update', payload);
     return response.data;
 };

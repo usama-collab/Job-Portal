@@ -1,20 +1,21 @@
 from typing import Optional
-from fastapi import HTTPException
 from sqlalchemy import String, asc, cast, desc
 from sqlalchemy.orm import Session
 from app.core.redis_client import redis_client
 from app.schemas.job import JobCreate,JobUpdate
+from app.models.company import Company
 from app.models.job import Job
 import json
 
 
-def create_job(job_create: JobCreate, owner_id: int, db: Session):
+def create_job(job_create: JobCreate, company_id: int, creator_id: int, db: Session):
     payload = job_create.model_dump()
-    user = Job(**payload, owner_id=owner_id)
-    db.add(user)
+    job = Job(**payload, company_id=company_id, created_by_user_id=creator_id)
+    db.add(job)
     db.commit()
-    db.refresh(user)
-    return user
+    db.refresh(job)
+    invalidate_jobs_cache()
+    return job
 
 # def get_jobs(db: Session):
 #     jobs = db.query(Job).all()
@@ -35,13 +36,16 @@ def get_jobs(db: Session, skip: int, limit: int, q: Optional[str] = None, sort_b
             (Job.title.ilike(like)) |
             (Job.description.ilike(like)) |
             (cast(Job.created_at, String).ilike(like)) |
-            (Job.company.ilike(like))
+            (Job.company_record.has(Company.name.ilike(like)))
         )
     
+    if sort_by == "company":
+        query = query.join(Job.company_record)
+
     sortable_field = {
         "title": Job.title,
         "created_at": Job.created_at,
-        "company": Job.company
+        "company": Company.name
     }
     sort_field = sortable_field.get(sort_by, Job.created_at)
 
@@ -70,20 +74,22 @@ def get_job_by_id(job_id: int, db: Session):
     return db.query(Job).filter(Job.id == job_id).first()
 
 
+def invalidate_jobs_cache():
+    with redis_client.pipeline() as pipe:
+        for key in redis_client.scan_iter("jobs:*"):
+            pipe.delete(key)
+        pipe.execute()
+
+
 def update_job(
     updated_job: JobUpdate,
     job_id: int,
-    owner_id: int,
     db: Session,
-    is_admin: bool = False,
 ):
     job = get_job_by_id(job_id,db)
     if not job:
         return None
 
-    if not is_admin and job.owner_id != owner_id:
-        raise HTTPException(status_code=403, detail="You are not authorized to update this job")
-    
     data = updated_job.model_dump(exclude_none=True)
     for key,value in data.items():
         setattr(job,key,value)
@@ -92,10 +98,7 @@ def update_job(
     db.commit()
     db.refresh(job)
 
-    with redis_client.pipeline() as pipe:
-        for key in redis_client.scan_iter("jobs:*"):
-            pipe.delete(key)
-        pipe.execute()
+    invalidate_jobs_cache()
         
     return job
 
@@ -106,25 +109,21 @@ def update_job(
 def delete_job(
     job_id: int,
     db: Session,
-    owner_id: Optional[int] = None,
-    is_admin: bool = False,
 ):
     job = get_job_by_id(job_id, db)
     if not job:
         return None
 
-    if not is_admin and (owner_id is None or job.owner_id != owner_id):
-        raise HTTPException(status_code=403, detail="You are not authorized to delete this job")
-
     db.delete(job)
     db.commit()
+    invalidate_jobs_cache()
     return job
 
 
-def get_jobs_for_employer(owner_id: int, db: Session):
+def get_jobs_for_company(company_id: int, db: Session):
     return (
         db.query(Job)
-        .filter(Job.owner_id == owner_id)
+        .filter(Job.company_id == company_id)
         .order_by(Job.created_at.desc())
         .all()
     )

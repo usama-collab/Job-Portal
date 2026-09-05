@@ -4,8 +4,6 @@ import { getJobById } from "../api/jobs";
 import { Button } from "../components/ui/button";
 import { getMyApplications } from "../api/application";
 import { toggleSaveJob, getMySavedJobs } from "../api/savedJobs";
-import { jwtDecode } from "jwt-decode";
-import type { DecodedToken } from "../layouts/MainLayout";
 import { 
   Bookmark, 
   BookmarkCheck, 
@@ -25,18 +23,8 @@ const JobDetail = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // 1. Token & Role Extraction
+  // 1. Authentication state
   const token = localStorage.getItem('token');
-  let userRole: string | null = null;
-  
-  if (token) {
-    try {
-      const decoded = jwtDecode<DecodedToken>(token);
-      userRole = decoded.role;
-    } catch (e) {
-      console.error("Invalid token found", e);
-    }
-  }
 
   // 2. Fetch Job Details
   const { data: job, isLoading, isError } = useQuery({
@@ -49,14 +37,14 @@ const JobDetail = () => {
   const { data: myApplications } = useQuery({
     queryKey: ['my-applications'],
     queryFn: getMyApplications,
-    enabled: !!token && userRole === 'seeker', 
+    enabled: !!token,
   });
 
   // 4. Fetch Saved Jobs (to check "Already Saved")
   const { data: savedJobs } = useQuery({
     queryKey: ['saved-jobs'],
     queryFn: getMySavedJobs,
-    enabled: !!token && userRole === 'seeker',
+    enabled: !!token,
   });
 
   // 5. Derive Statuses
@@ -65,7 +53,7 @@ const JobDetail = () => {
   );
 
   const isSaved = savedJobs?.some(
-    (item: any) => item.job_id === job?.id || item.job_id === Number(id)
+    (item) => item.job_id === job?.id || item.job_id === Number(id)
   );
 
   // 6. Mutations
@@ -186,7 +174,7 @@ const JobDetail = () => {
                     >
                       Login to Apply
                     </Button>
-                  ) : userRole === 'seeker' ? (
+                  ) : (
                     <Button
                       className={`w-full h-14 rounded-2xl text-lg font-black transition-all shadow-xl ${
                         hasApplied 
@@ -200,14 +188,10 @@ const JobDetail = () => {
                         <span className="flex items-center gap-2"><CheckCircle2 size={20} /> Applied</span>
                       ) : "Quick Apply"}
                     </Button>
-                  ) : (
-                    <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl text-amber-800 text-xs font-bold leading-relaxed">
-                      You are logged in as an <span className="underline">{userRole}</span>. Switching to a seeker account is required to apply.
-                    </div>
                   )}
 
                   {/* Functional Save Button */}
-                  {userRole === 'seeker' && (
+                  {token && (
                     <Button 
                       variant={isSaved ? "default" : "outline"} 
                       className={`w-full h-14 rounded-2xl text-lg font-black transition-all duration-300 ${

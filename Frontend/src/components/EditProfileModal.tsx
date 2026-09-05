@@ -15,36 +15,44 @@ import { Textarea } from "../components/ui/textarea";
 interface EditProfileProps {
   isOpen: boolean;
   onClose: () => void;
-  initialData: any;
+  initialData: {
+    name?: string;
+    bio?: string;
+    skills?: string[];
+    experience?: unknown[];
+  };
+}
+
+interface EditProfileForm {
+  name: string;
+  bio: string;
+  skills: string;
+  experience: string;
 }
 
 const EditProfileModal = ({ isOpen, onClose, initialData }: EditProfileProps) => {
   const queryClient = useQueryClient();
-  const { register, handleSubmit } = useForm({
+  const { register, handleSubmit } = useForm<EditProfileForm>({
   values: {
     name: initialData?.name || "",
     bio: initialData?.bio || "",
     // Array -> "Skill 1, Skill 2"
     skills: Array.isArray(initialData?.skills) ? initialData.skills.join(", ") : "",
     // Array -> "Full Experience Text"
-    experience: Array.isArray(initialData?.experience) ? initialData.experience.join("\n") : "",
+    experience: Array.isArray(initialData?.experience) ? initialData.experience.map(String).join("\n") : "",
   },
 });
 
   const { mutate, isPending } = useMutation({
-  mutationFn: (data: any) => {
+  mutationFn: (data: EditProfileForm) => {
     // Transform the flat form strings into arrays for the API
     const payload = {
       name: data.name,
       bio: data.bio,
       // Convert "React, FastAPI" -> ["React", "FastAPI"]
-      skills: typeof data.skills === 'string' 
-        ? data.skills.split(',').map((s: string) => s.trim()).filter(Boolean) 
-        : data.skills,
+      skills: data.skills.split(',').map((s) => s.trim()).filter(Boolean),
       // Convert the experience text block into a single-item array to satisfy List[Any]
-      experience: typeof data.experience === 'string' 
-        ? [data.experience] 
-        : data.experience,
+      experience: data.experience ? [data.experience] : [],
     };
     
     return updateMyProfile(payload);

@@ -56,10 +56,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             headers={'WWW-Authenticate': 'Bearer'},
         )
     
-    access_token = security.create_access_token({
-        'sub': str(user.id),
-        'role': user.role,
-    })
+    access_token = security.create_access_token({'sub': str(user.id)})
     refresh_token = security.create_refresh_token({'sub': str(user.id)})
     
     ttl = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600
@@ -90,10 +87,7 @@ def refresh_token(payload: RefreshRequest, db: Session = Depends(get_db)):
     if not current_user or not current_user.is_active or not current_user.email_verified:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
-    new_access = security.create_access_token({
-        'sub': str(current_user.id),
-        'role': current_user.role,
-    })
+    new_access = security.create_access_token({'sub': str(current_user.id)})
     new_refresh = security.create_refresh_token({'sub': str(current_user.id)})
 
     ttl = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600

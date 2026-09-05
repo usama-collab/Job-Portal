@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { getMyJobs, deleteJob, type EmployerJob } from "../api/jobs";
+import { getMyCompany } from "../api/company";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import {
@@ -38,6 +39,10 @@ const EmployerDashboard = () => {
     queryKey: ["employer-jobs"],
     queryFn: getMyJobs,
   });
+  const { data: company } = useQuery({
+    queryKey: ["my-company"],
+    queryFn: getMyCompany,
+  });
 
   // 2. Delete Mutation
   const deleteMutation = useMutation({
@@ -47,8 +52,7 @@ const EmployerDashboard = () => {
       setDeleteModalOpen(false);
       setSelectedJob(null);
     },
-    onError: (err: any) => {
-      console.error(err);
+    onError: () => {
       alert("Failed to delete the job. Please try again.");
     }
   });
@@ -95,7 +99,7 @@ const EmployerDashboard = () => {
         <div className="max-w-6xl mx-auto px-6 py-10">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
-              <h1 className="text-3xl font-black tracking-tight text-slate-900">Employer Dashboard</h1>
+              <h1 className="text-3xl font-black tracking-tight text-slate-900">{company?.name || "Employer Dashboard"}</h1>
               <p className="text-slate-500 mt-1 font-medium">Manage your active listings and review applicants.</p>
             </div>
             <Button

@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.core.db import get_db
 from app.models.user import User
@@ -15,8 +15,6 @@ def toggle_save(
     db: Session = Depends(get_db), 
     current_user: User = Depends(get_current_user)
 ):
-    if current_user.role != "seeker":
-        raise HTTPException(status_code=403, detail="Only seekers can save jobs")
     return crud_saved.toggle_save_job(db, current_user.id, job_id)
 
 @router.get("/", response_model=List[SavedJobOut])

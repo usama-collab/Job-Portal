@@ -9,11 +9,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../co
 import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
 import { toast } from "sonner";
+import { getApiErrorDetail } from "../lib/api-error";
 import { 
   Briefcase, 
   MapPin, 
   DollarSign, 
-  Building2, 
   ArrowLeft, 
   Loader2, 
   Save,
@@ -27,7 +27,6 @@ interface JobForm {
   salary_min?: number;
   salary_max?: number;
   employment_type?: string;
-  company?: string;
   is_active: boolean;
 }
 
@@ -52,7 +51,6 @@ const EditJob = () => {
       salary_min: job.salary_min ? Number(job.salary_min) : undefined,
       salary_max: job.salary_max ? Number(job.salary_max) : undefined,
       employment_type: job.employment_type || "",
-      company: job.company || "",
       is_active: job.is_active ?? true, 
     } : undefined
   });
@@ -74,9 +72,9 @@ const EditJob = () => {
       });
       navigate("/employer/dashboard");
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error("Update Failed", {
-        description: err?.response?.data?.detail || "Could not save changes.",
+        description: getApiErrorDetail(err, "Could not save changes."),
       });
     }
   });
@@ -165,18 +163,8 @@ const EditJob = () => {
                 </div>
               </div>
 
-              {/* Company & Location */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label className="font-bold text-slate-700 flex items-center gap-2">
-                    <Building2 size={16} className="text-slate-400" /> Company
-                  </Label>
-                  <Input
-                    {...register("company")}
-                    placeholder="Company Name"
-                    className="h-11 rounded-xl"
-                  />
-                </div>
+              {/* Location */}
+              <div className="grid grid-cols-1 gap-6">
                 <div className="space-y-2">
                   <Label className="font-bold text-slate-700 flex items-center gap-2">
                     <MapPin size={16} className="text-slate-400" /> Location

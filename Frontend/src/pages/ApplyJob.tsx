@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../co
 import { Textarea } from "../components/ui/textarea"; // Assuming you have this shadcn component
 import { ArrowLeft, FileText, UploadCloud, CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { getApiErrorDetail } from "../lib/api-error";
 
 const ApplyJob = () => {
   const { id } = useParams();
@@ -30,9 +31,9 @@ const ApplyJob = () => {
       });
       navigate("/jobs");
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error("Failed To Apply", {
-        description: err?.response?.data?.detail || "Could not save changes.",
+        description: getApiErrorDetail(err, "Could not save changes."),
       });
     }
   });

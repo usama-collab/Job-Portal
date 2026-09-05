@@ -14,6 +14,8 @@ import CreateJob from '../pages/CreateJob'
 import EditJob from '../pages/EditJob'
 import ApplyJob from '../pages/ApplyJob'
 import Profile from '../pages/Profile'
+import CompanyRoute from './CompanyRoute'
+import EmployerOnboarding from '../pages/EmployerOnboarding'
 
 
 const AppRoutes = () => {
@@ -24,16 +26,18 @@ const AppRoutes = () => {
             <Route path='/' element={<Home/>}/>
             <Route path='/jobs' element={<Jobs/>}/>
             <Route path='/jobs/:id' element={<JobDetail/>}/>
-            <Route path='/jobs/:id/apply' element={<ApplyJob/>}/>
-            <Route path="/applications" element={<MyApplications />} />
-            <Route path="/profile" element={<Profile />} />
-
             {/* Protected Route */}
             <Route element={<ProtectedRoute/>}>
-                <Route path="/employer/jobs/:jobId/applicants" element={<JobApplicants />} />
-                <Route path='/employer/dashboard' element={<EmployerDashboard/>}/>
-                <Route path='/employer/jobs/create' element={<CreateJob/>}/>
-                <Route path="/employer/jobs/:jobId/edit" element={<EditJob />}/> 
+                <Route path='/jobs/:id/apply' element={<ApplyJob/>}/>
+                <Route path="/applications" element={<MyApplications />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/employer/onboarding" element={<EmployerOnboarding />} />
+                <Route element={<CompanyRoute />}>
+                    <Route path="/employer/jobs/:jobId/applicants" element={<JobApplicants />} />
+                    <Route path='/employer/dashboard' element={<EmployerDashboard/>}/>
+                    <Route path='/employer/jobs/create' element={<CreateJob/>}/>
+                    <Route path="/employer/jobs/:jobId/edit" element={<EditJob />}/>
+                </Route>
             </Route>
         </Route>
         {/* Guest-only auth pages without the main navbar */}

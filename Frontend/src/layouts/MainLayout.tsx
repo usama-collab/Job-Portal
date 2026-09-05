@@ -8,7 +8,6 @@ import {
   UserCircle, 
   Bookmark // Added Bookmark icon
 } from 'lucide-react'
-import { jwtDecode } from "jwt-decode";
 import { useAuthStore } from '../store/authStore';
 import { logoutUser } from '../api/auth';
 import {
@@ -18,12 +17,6 @@ import {
 } from "../components/ui/popover"
 import { useProfile } from "../hooks/useProfile";
 import { BrandLogo } from "../components/brand-logo";
-
-export interface DecodedToken {
-    sub: string;
-    role: string;
-    exp: number;
-}
 
 const MainLayout = () => {
     const { data: profile } = useProfile(); // Fetch profile data
@@ -35,19 +28,7 @@ const MainLayout = () => {
     
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     
-    let userRole = null;
-    let userEmail = "";
-
-    if (token) {
-        try {
-            const decoded = jwtDecode<DecodedToken>(token);
-            userRole = decoded.role; 
-        } catch (error) {
-            console.error("Invalid token", error);
-        }
-    }
-
-    userEmail = profile?.email ?? "";
+    const userEmail = profile?.email ?? "";
 
     const handleNavClick = (path: string) => {
         navigate(path);
@@ -66,7 +47,7 @@ const MainLayout = () => {
         }
     };
 
-    const canAccessDashboard = userRole === 'admin' || userRole === 'employer';
+    const canAccessDashboard = Boolean(profile?.company_membership);
 
     const linkStyle = (path: string) => 
         `text-sm font-semibold transition-colors hover:text-blue-600 ${
@@ -85,9 +66,9 @@ const MainLayout = () => {
                         <div className='hidden md:flex items-center gap-6 mr-4 border-r pr-8 h-6 border-slate-200'>
                             <Link to="/" className={linkStyle("/")}>Home</Link>
                             <Link to="/jobs" className={linkStyle("/jobs")}>Find Jobs</Link>
-                            {token && canAccessDashboard && (
-                                <Link to="/employer/dashboard" className={linkStyle("/employer/dashboard")}>
-                                    Recruiting
+                            {token && (
+                                <Link to={canAccessDashboard ? "/employer/dashboard" : "/employer/onboarding"} className={linkStyle("/employer/dashboard")}>
+                                    {canAccessDashboard ? "Recruiting" : "Start hiring"}
                                 </Link>
                             )}
                         </div>
@@ -145,7 +126,7 @@ const MainLayout = () => {
                                                         {userEmail}
                                                     </p>
                                                     <span className='text-[10px] bg-blue-600 text-white w-fit px-2 py-0.5 rounded-md font-black uppercase'>
-                                                        {userRole}
+                                                        {profile?.is_admin ? "Administrator" : profile?.company_membership ? "Company owner" : "Job seeker"}
                                                     </span>
                                                 </div>
                                                 

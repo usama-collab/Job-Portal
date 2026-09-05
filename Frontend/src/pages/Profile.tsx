@@ -124,7 +124,7 @@ const Profile = () => {
             </div>
             <div className="flex items-center gap-1.5 capitalize">
               <Briefcase size={18} className="text-blue-500" />
-              {profile.role}
+              {profile.company_membership ? `Owner at ${profile.company_membership.company_name}` : "Job seeker"}
             </div>
             <div className="flex items-center gap-1.5">
               <Calendar size={18} className="text-blue-500" />

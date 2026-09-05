@@ -17,9 +17,9 @@ from app.utils.files import (
 )
 from app.utils.send_app_email import send_app_email
 from app.core.db import get_db
-from app.models.user import User, UserRole
+from app.models.user import User
 from app.schemas.application import ApplicationOut, ApplicationUpdateStatus
-from app.utils.functions import get_current_user
+from app.utils.functions import can_manage_company, get_current_user
 from app.crud import application as crud_app
 from app.crud import job as crud_job
 
@@ -37,6 +37,7 @@ def _application_response(application) -> dict:
         if is_storage_key(application.resume_path, "resumes")
         else None
     )
+    response["user_email"] = application.user.email if application.user else None
     return response
 
 
@@ -55,9 +56,6 @@ async def apply_to_job(
     resume: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db)
     ):
-    if current_user.role != UserRole.SEEKER.value:
-        raise HTTPException(status_code=403, detail="Only job seekers can apply for this job")
-    
     resume_path = None
     resume_filename = None
     if resume:
@@ -98,9 +96,7 @@ def get_applications_for_job(job_id: int, current_user: User = Depends(get_curre
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     
-    if current_user.role == UserRole.ADMIN.value:
-        pass
-    elif current_user.role != UserRole.EMPLOYER.value or job.owner_id != current_user.id:
+    if not can_manage_company(current_user, job.company_id, db):
         raise HTTPException(status_code=403, detail="You are unauthorized to view applications for this job!")
     
     apps = crud_app.get_applications_for_job(job_id, db)
@@ -132,12 +128,8 @@ async def download_application_resume(
         raise HTTPException(status_code=404, detail="Resume not found")
 
     is_applicant = application.user_id == current_user.id
-    is_job_owner = (
-        current_user.role == UserRole.EMPLOYER.value
-        and job.owner_id == current_user.id
-    )
-    is_admin = current_user.role == UserRole.ADMIN.value
-    if not (is_applicant or is_job_owner or is_admin):
+    is_company_manager = can_manage_company(current_user, job.company_id, db)
+    if not (is_applicant or is_company_manager):
         raise HTTPException(status_code=404, detail="Resume not found")
 
     try:
@@ -177,15 +169,8 @@ def update_application_status(
     if not job:
         raise HTTPException(status_code=404, detail="Application Not Found")
 
-    if current_user.role not in {UserRole.EMPLOYER.value, UserRole.ADMIN.value}:
+    if not can_manage_company(current_user, job.company_id, db):
         raise HTTPException(status_code=403, detail="You are unauthorized to update this application")
-
-    if current_user.role == UserRole.EMPLOYER.value and job.owner_id != current_user.id:
-        raise HTTPException(status_code=403, detail="You are unauthorized to update this application")
-    
-    allowed_status = {'applied', 'under_review', 'shortlisted', 'hired', 'rejected'}
-    if new_status.status not in allowed_status:
-        raise HTTPException(status_code=400, detail=f'invalid status, Allowed status: {allowed_status}')
     
     updated_status = crud_app.update_application_status(application_id, new_status.status, db)
 

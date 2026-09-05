@@ -9,10 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../co
 import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
 import { toast } from "sonner"; // Beautiful toast notifications
+import { getApiErrorDetail } from "../lib/api-error";
 import { 
   MapPin, 
   DollarSign, 
-  Building2, 
   ArrowLeft, 
   Loader2, 
   Sparkles 
@@ -29,7 +29,6 @@ const CreateJob = () => {
         salary_min: '',
         salary_max: '',
         employment_type: '',
-        company: '',
         is_active: true
     });
 
@@ -42,8 +41,8 @@ const CreateJob = () => {
             });
             navigate('/employer/dashboard');
         },
-        onError: (err: any) => {
-            const errorMsg = err?.response?.data?.detail || "Failed to create job";
+        onError: (err: unknown) => {
+            const errorMsg = getApiErrorDetail(err, "Failed to create job");
             toast.error("Error", { description: errorMsg });
         }
     });
@@ -128,20 +127,7 @@ const CreateJob = () => {
                             </div>
 
                             {/* Details Section */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <Label className="font-bold text-slate-700 flex items-center gap-2">
-                                        <Building2 size={16} className="text-slate-400" /> Company Name
-                                    </Label>
-                                    <Input
-                                        name="company"
-                                        placeholder="Your Company"
-                                        value={form.company}
-                                        onChange={handleChange}
-                                        className="h-11 rounded-xl"
-                                        disabled={isPending}
-                                    />
-                                </div>
+                            <div className="grid grid-cols-1 gap-6">
                                 <div className="space-y-2">
                                     <Label className="font-bold text-slate-700 flex items-center gap-2">
                                         <MapPin size={16} className="text-slate-400" /> Location

@@ -3,7 +3,7 @@ from app.core.config import settings
 from app.core.db import get_db
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
-from app.routes import user,auth,job,application,google_auth, saved_job
+from app.routes import user,auth,job,application,google_auth, saved_job, company
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -67,3 +67,4 @@ app.include_router(job.router)
 app.include_router(application.router)
 app.include_router(google_auth.router)
 app.include_router(saved_job.router)
+app.include_router(company.router)

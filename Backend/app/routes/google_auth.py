@@ -62,10 +62,7 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
                 db.commit()
                 db.refresh(user)
             
-        access_token = security.create_access_token({
-            'sub': str(user.id),
-            'role': user.role,
-        })
+        access_token = security.create_access_token({'sub': str(user.id)})
         refresh_token = security.create_refresh_token({'sub': str(user.id)})
         ttl = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600
         redis_client.redis_client.setex(
