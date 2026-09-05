@@ -2,10 +2,12 @@
 import './App.css'
 import AppRoutes from './routes/AppRoutes'
 import { Toaster } from 'sonner'
+import ScrollToTop from './routes/ScrollToTop'
 
 function App() {
   return (
     <>
+      <ScrollToTop />
       <AppRoutes />
       <Toaster
         position="top-right"
