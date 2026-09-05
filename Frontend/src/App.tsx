@@ -3,38 +3,38 @@ import './App.css'
 import AppRoutes from './routes/AppRoutes'
 import { Toaster } from 'sonner'
 
-
-
 function App() {
-
   return (
     <>
-    <AppRoutes/>
-    <Toaster
-  position="top-right"
-  toastOptions={{
-    style: {
-      borderRadius: '16px',
-      padding: '16px',
-      border: 'none',
-    },
-    classNames: {
-      // 1. Remove !bg-white and !text-slate-900 from here
-      toast: 'group !border-none !shadow-2xl !flex !items-center !gap-3', 
-      
-      // 2. These will now work correctly without being fighting the base class
-      success: '!bg-blue-600 !text-white',
-      error: '!bg-red-500 !text-white',
-      info: '!bg-slate-900 !text-white',
-      loading: '!bg-slate-900 !text-white',
-      
-      title: '!font-bold !text-sm !text-inherit',
-      description: '!text-xs !font-medium !text-inherit !opacity-90',
-      icon: '!text-inherit',
-    },
-  }}
-/>
-    
+      <AppRoutes />
+      <Toaster
+        position="top-right"
+        theme="light"
+        closeButton
+        offset={20}
+        mobileOffset={16}
+        toastOptions={{
+          duration: 4000,
+          style: {
+            borderRadius: '16px',
+            padding: '16px',
+          },
+          classNames: {
+            toast: 'group !flex !items-center !gap-3 !border !border-slate-200 !bg-white !text-slate-600 !shadow-[0_18px_50px_-18px_rgba(15,23,42,0.28)]',
+            success: '!border-l-4 !border-l-emerald-500 !text-emerald-600',
+            error: '!border-l-4 !border-l-red-500 !text-red-500',
+            info: '!border-l-4 !border-l-blue-500 !text-blue-600',
+            warning: '!border-l-4 !border-l-amber-500 !text-amber-600',
+            loading: '!border-l-4 !border-l-blue-500 !text-blue-600',
+            title: '!text-sm !font-bold !text-slate-900',
+            description: '!text-xs !font-medium !leading-5 !text-slate-500',
+            icon: '!text-inherit',
+            closeButton: '!border-slate-200 !bg-white !text-slate-500 !shadow-sm hover:!bg-slate-50 hover:!text-slate-900',
+            actionButton: '!rounded-lg !bg-blue-600 !px-3 !font-bold !text-white hover:!bg-blue-700',
+            cancelButton: '!rounded-lg !bg-slate-100 !px-3 !font-bold !text-slate-700 hover:!bg-slate-200',
+          },
+        }}
+      />
     </>
   )
 }

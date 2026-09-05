@@ -57,7 +57,7 @@ const MainLayout = () => {
     return (
         <div className='min-h-screen flex flex-col bg-slate-50/30'>
             <nav className='sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md'>
-                <div className='container mx-auto flex h-16 items-center justify-between px-6'>
+                <div className='mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6'>
                     
                     {/* Logo Section */}
                     <BrandLogo markClassName="h-10 w-10" />
