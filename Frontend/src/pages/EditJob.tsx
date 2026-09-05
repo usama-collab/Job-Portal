@@ -1,10 +1,11 @@
-import { useForm,useWatch } from "react-hook-form";
+import { Controller, useForm,useWatch } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getJobById, updateJob } from "../api/jobs";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { Textarea } from "../components/ui/textarea";
+import { JobDescriptionEditor } from "../components/job-description-editor";
+import { descriptionText } from "../lib/job-description";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
@@ -154,11 +155,16 @@ const EditJob = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="font-bold text-slate-700">Description</Label>
-                  <Textarea
-                    {...register("description", { required: true })}
-                    placeholder="Describe the role..."
-                    className="min-h-50 rounded-xl focus:ring-blue-500 p-4 leading-relaxed"
+                  <Label htmlFor="job-description" className="font-bold text-slate-700">Description</Label>
+                  <Controller
+                    name="description"
+                    control={control}
+                    rules={{ validate: (value) => !!descriptionText(value || "").trim() || "Please enter a job description." }}
+                    render={({ field, fieldState }) => <>
+                      <JobDescriptionEditor value={field.value || ""} onChange={field.onChange}
+                        onBlur={field.onBlur} disabled={isPending} invalid={!!fieldState.error} />
+                      {fieldState.error && <p role="alert" className="text-sm text-red-600">{fieldState.error.message}</p>}
+                    </>}
                   />
                 </div>
               </div>

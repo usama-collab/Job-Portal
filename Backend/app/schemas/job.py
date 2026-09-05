@@ -1,4 +1,5 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
+from app.utils.job_description import sanitize_description
 from typing import Optional
 from datetime import datetime
 
@@ -15,7 +16,10 @@ class JobBase(BaseModel):
     is_active: Optional[bool] = True
 
 class JobCreate(JobBase):
-    pass
+    @field_validator("description")
+    @classmethod
+    def clean_description(cls, value: str) -> str:
+        return sanitize_description(value)
 
 class JobUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -27,6 +31,11 @@ class JobUpdate(BaseModel):
     salary_max: Optional[int] = None
     employment_type: Optional[str] = None
     is_active: Optional[bool] = None
+
+    @field_validator("description")
+    @classmethod
+    def clean_description(cls, value: Optional[str]) -> Optional[str]:
+        return sanitize_description(value) if value is not None else None
 
 class JobOut(JobBase):
     model_config = ConfigDict(from_attributes=True)

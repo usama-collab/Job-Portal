@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { createJob } from "../api/jobs";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { Textarea } from "../components/ui/textarea";
+import { JobDescriptionEditor } from "../components/job-description-editor";
+import { descriptionText } from "../lib/job-description";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Label } from "../components/ui/label";
 import { Switch } from "../components/ui/switch";
@@ -58,7 +59,7 @@ const CreateJob = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!form.title || !form.description) {
+        if (!form.title || !descriptionText(form.description).trim()) {
             toast.warning("Missing Fields", { description: "Please fill in all required fields (*)." });
             return;
         }
@@ -114,13 +115,10 @@ const CreateJob = () => {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="font-bold text-slate-700">Description *</Label>
-                                    <Textarea
-                                        name="description"
-                                        placeholder="Tell us about the role, responsibilities, and requirements..."
+                                    <Label htmlFor="job-description" className="font-bold text-slate-700">Description *</Label>
+                                    <JobDescriptionEditor
                                         value={form.description}
-                                        onChange={handleChange}
-                                        className="min-h-50 rounded-xl focus:ring-blue-500 p-4 leading-relaxed"
+                                        onChange={(description) => setForm((prev) => ({ ...prev, description }))}
                                         disabled={isPending}
                                     />
                                 </div>

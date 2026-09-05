@@ -1,3 +1,4 @@
+import { descriptionText } from "../lib/job-description";
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useState, type ReactNode } from 'react'
@@ -159,7 +160,7 @@ const JobCard = ({ job, index, onOpen }: { job: Job; index: number; onOpen: () =
           <div className="mt-5 flex flex-wrap gap-2 text-xs font-bold text-slate-600 sm:text-sm">
             <Meta icon={<MapPin />} label={job.location || 'Remote'} /><Meta icon={<Briefcase />} label={titleCase(job.employment_type)} />{salary && <Meta label={salary} />}
           </div>
-          <p className="mt-5 line-clamp-2 text-sm leading-6 text-slate-600 sm:pr-8">{job.description}</p>
+          <p className="mt-5 line-clamp-2 text-sm leading-6 text-slate-600 sm:pr-8">{descriptionText(job.description)}</p>
           <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-5"><span className="flex items-center gap-1.5 text-xs font-semibold text-slate-400"><Clock3 className="h-3.5 w-3.5" />{postedLabel(job.created_at)}</span><span className="flex items-center gap-1.5 text-sm font-extrabold text-blue-600">View role <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transform-none" /></span></div>
         </div>
       </div>

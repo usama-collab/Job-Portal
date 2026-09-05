@@ -1,3 +1,4 @@
+import { descriptionText } from "../lib/job-description";
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
@@ -130,7 +131,7 @@ const JobCard = ({ job, index, onApplicants, onEdit, onDelete }: { job: Employer
       <div className="min-w-0"><div className="mb-3 flex items-center gap-2"><span className={`h-2 w-2 rounded-full ${job.is_active ? 'bg-emerald-500' : 'bg-slate-300'}`} /><span className={`text-[11px] font-black uppercase tracking-wider ${job.is_active ? 'text-emerald-700' : 'text-slate-500'}`}>{job.is_active ? 'Active' : 'Inactive'}</span><span className="text-xs text-slate-300">•</span><span className="text-xs font-bold text-slate-400">#{job.id}</span></div><h3 className="truncate text-xl font-black tracking-[-0.025em] text-slate-900 transition-colors group-hover:text-blue-600">{job.title}</h3></div>
       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600"><BriefcaseBusiness className="h-5 w-5" /></span>
     </div>
-    <p className="mt-4 line-clamp-2 min-h-12 text-sm leading-6 text-slate-500">{job.description}</p>
+    <p className="mt-4 line-clamp-2 min-h-12 text-sm leading-6 text-slate-500">{descriptionText(job.description)}</p>
     <div className="mt-5 grid grid-cols-2 gap-2 text-xs font-bold text-slate-600">
       <Detail icon={<MapPin />} label={job.location || 'Remote'} />
       <Detail icon={<BriefcaseBusiness />} label={employmentLabel(job.employment_type)} />

@@ -1,3 +1,4 @@
+import { descriptionHtml } from "../lib/job-description";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { getJobById } from "../api/jobs";
@@ -156,9 +157,8 @@ const JobDetail = () => {
                 <h3 className="text-xl font-black text-slate-900 mb-4 flex items-center gap-2">
                   Role Overview
                 </h3>
-                <div className="text-slate-600 leading-relaxed font-medium whitespace-pre-line text-lg">
-                  {job.description}
-                </div>
+                <div className="job-rich-text text-slate-600 leading-relaxed font-medium text-lg"
+                  dangerouslySetInnerHTML={{ __html: descriptionHtml(job.description) }} />
               </div>
             </div>
 
