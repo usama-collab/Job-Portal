@@ -20,6 +20,7 @@ import {
 } from "../components/ui/form"
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { AuthBrandPanel, MobileAuthLogo } from '../components/auth-brand-panel'
 
 interface RegisterForm {
@@ -50,6 +51,7 @@ const Register = () => {
                 email: data.email,
                 password: data.password,
             })
+            toast.success('Account created. Please verify your email')
             navigate('/login')
         } catch {
             setError("Registration failed. Please try a different email.")
