@@ -116,7 +116,7 @@ html { scroll-behavior: smooth; }
 
 @media (max-height: 700px) and (min-width: 64rem) {
   .auth-panel-content {
-    justify-content: flex-start;
+    justify-content: center;
     padding-top: 1.5rem;
     padding-bottom: 1rem;
   }
