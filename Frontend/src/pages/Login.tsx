@@ -78,35 +78,36 @@ const Login = () => {
   };
 
   return (
-    <main className="grid min-h-screen bg-white lg:grid-cols-[minmax(0,1.05fr)_minmax(440px,0.95fr)]">
-      <section className="flex min-h-screen items-center px-5 py-10 sm:px-10 lg:px-16 xl:px-24">
-        <div className="mx-auto w-full max-w-md lg:mx-0">
-          <MobileAuthLogo />
+    <main className="grid h-dvh overflow-hidden bg-white lg:grid-cols-2">
+      <section className="relative h-full overflow-y-auto bg-[radial-gradient(circle_at_top_left,#eff6ff_0%,#f8fafc_42%,#ffffff_100%)]">
+        <div className="mx-auto flex min-h-full w-full max-w-lg flex-col justify-center px-5 py-8 sm:px-8">
+          <div className="relative mb-6 flex items-center justify-center">
+            <MobileAuthLogo />
+            <Link to="/" className="absolute right-0 inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 transition-colors hover:text-blue-600 lg:hidden">
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Home
+            </Link>
+          </div>
 
-          <Link to="/" className="mb-10 hidden w-fit items-center gap-2 text-sm font-semibold text-slate-500 transition-colors hover:text-blue-600 lg:flex">
-            <ArrowLeft className="h-4 w-4" />
-            Back to homepage
-          </Link>
-
-          <Card className="w-full gap-0 border-0 bg-transparent p-0 shadow-none">
-            <CardHeader className="space-y-2 px-0 pb-8">
-              <CardTitle className="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">Welcome back</CardTitle>
-              <CardDescription className="text-base text-slate-500">
-                Enter your credentials to manage your career
+          <Card className="w-full gap-0 rounded-[1.75rem] border-slate-200/80 bg-white py-0 shadow-[0_24px_70px_-32px_rgba(15,23,42,0.32)]">
+            <CardHeader className="space-y-1.5 px-7 pb-5 pt-7 text-center sm:px-9 sm:pt-8">
+              <CardTitle className="text-2xl font-black tracking-[-0.035em] text-slate-900">Welcome back</CardTitle>
+              <CardDescription className="text-sm text-slate-500">
+                Sign in to continue your career journey
               </CardDescription>
             </CardHeader>
-            <CardContent className="px-0">
+            <CardContent className="px-7 pb-7 sm:px-9 sm:pb-8">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 {error && (
-                <div className="bg-red-50 border border-red-100 rounded-xl p-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="animate-in rounded-xl border border-red-100 bg-red-50 p-3.5 fade-in slide-in-from-top-2 duration-300">
                   <div className="flex items-start gap-3">
-                    <div className="bg-red-100 p-1 rounded-lg">
+                    <div className="rounded-lg bg-red-100 p-1">
                       <AlertCircle className="h-4 w-4 text-red-600" />
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm font-bold text-red-700">Login Failed</p>
-                      <p className="text-xs text-red-700 font-medium leading-relaxed">
+                      <p className="text-xs font-bold text-red-700">Login failed</p>
+                      <p className="text-xs font-medium leading-relaxed text-red-700">
                         {error}
                       </p>
                     </div>
@@ -119,12 +120,13 @@ const Login = () => {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-slate-700 font-semibold">Email</FormLabel>
+                    <FormLabel className="text-sm font-semibold text-slate-700">Email address</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="name@example.com" 
                         type="email" 
-                        className="h-12 rounded-xl border-slate-200 bg-slate-50/70 px-4 focus:bg-white focus:ring-blue-500"
+                        autoComplete="email"
+                        className="h-11 rounded-xl border-slate-200 bg-slate-50/70 px-4 transition-colors focus:bg-white"
                         {...field} 
                       />
                     </FormControl>
@@ -139,8 +141,8 @@ const Login = () => {
                 render={({ field }) => (
                   <FormItem>
                     <div className="flex items-center justify-between">
-                        <FormLabel className="text-slate-700 font-semibold">Password</FormLabel>
-                        <Link to="/forgot-password" className="text-xs text-blue-600 hover:underline font-medium">
+                        <FormLabel className="text-sm font-semibold text-slate-700">Password</FormLabel>
+                        <Link to="/forgot-password" className="text-xs font-semibold text-blue-600 hover:underline">
                             Forgot password?
                         </Link>
                     </div>
@@ -148,7 +150,8 @@ const Login = () => {
                       <Input
                         placeholder="••••••••" 
                         type="password" 
-                        className="h-12 rounded-xl border-slate-200 bg-slate-50/70 px-4 focus:bg-white focus:ring-blue-500"
+                        autoComplete="current-password"
+                        className="h-11 rounded-xl border-slate-200 bg-slate-50/70 px-4 transition-colors focus:bg-white"
                         {...field} 
                       />
                     </FormControl>
@@ -159,7 +162,7 @@ const Login = () => {
 
               <Button 
                 type="submit" 
-                className="mt-2 h-12 w-full rounded-xl bg-blue-600 text-base font-bold shadow-lg shadow-blue-200 transition-all hover:bg-blue-700"
+                className="mt-1 h-11 w-full rounded-xl bg-blue-600 text-sm font-bold shadow-lg shadow-blue-200/80 transition-all hover:-translate-y-0.5 hover:bg-blue-700"
                 disabled={form.formState.isSubmitting}
               >
                 {form.formState.isSubmitting ? (
@@ -170,9 +173,9 @@ const Login = () => {
                 ) : "Sign in"}
               </Button>
 
-              <p className="text-center text-sm text-slate-500 mt-4">
+              <p className="mt-3 text-center text-xs text-slate-500 sm:text-sm">
                 Don't have an account?{" "}
-                <Link to="/register" className="text-blue-600 font-bold hover:underline">
+                <Link to="/register" className="font-bold text-blue-600 hover:underline">
                     Create one for free
                 </Link>
               </p>

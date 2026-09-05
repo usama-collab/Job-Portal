@@ -62,14 +62,55 @@ html { scroll-behavior: smooth; }
   50% { transform: translateY(-7px); }
 }
 
+@keyframes auth-panel-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes auth-orbit {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(28px, -18px, 0) scale(1.08); }
+}
+
+@keyframes auth-card-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+@keyframes auth-job-glow {
+  0%, 100% { border-color: rgb(96 165 250 / 0.3); background-color: rgb(255 255 255 / 0.09); }
+  50% { border-color: rgb(103 232 249 / 0.48); background-color: rgb(255 255 255 / 0.12); }
+}
+
+@keyframes auth-match-load {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes auth-status-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(52 211 153 / 0.35); }
+  50% { box-shadow: 0 0 0 6px rgb(52 211 153 / 0); }
+}
+
 .home-rise { animation: home-rise .7s cubic-bezier(.2,.8,.2,1) both; }
 .home-float { animation: home-float 4s ease-in-out infinite; }
 .home-delay-1 { animation-delay: .12s; }
 .home-delay-2 { animation-delay: .65s; }
+.auth-panel-rise { animation: auth-panel-rise .7s cubic-bezier(.2,.8,.2,1) both; }
+.auth-panel-delay { animation-delay: .14s; }
+.auth-orb { animation: auth-orbit 9s ease-in-out infinite; }
+.auth-orb-two { animation-delay: -4.5s; animation-direction: reverse; }
+.auth-job-card { animation: auth-job-glow 4s ease-in-out infinite; }
+.auth-job-delay { animation-delay: -2s; }
+.auth-match-bar { animation: auth-match-load 1.2s .55s cubic-bezier(.2,.8,.2,1) both; transform-origin: left; }
+.auth-status-dot { animation: auth-status-pulse 2s ease-out infinite; }
+.auth-float-card { animation: auth-card-float 4.5s ease-in-out infinite; }
+.auth-float-delay { animation-delay: -2.25s; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .home-rise, .home-float { animation: none; }
+  .home-rise, .home-float, .auth-panel-rise, .auth-orb, .auth-job-card,
+  .auth-match-bar, .auth-status-dot, .auth-float-card { animation: none; }
 }
 
 @theme inline {

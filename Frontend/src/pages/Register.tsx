@@ -57,31 +57,32 @@ const Register = () => {
     }
 
     return (
-        <main className="grid min-h-screen bg-white lg:grid-cols-[minmax(0,1.05fr)_minmax(440px,0.95fr)]">
-            <section className="flex min-h-screen items-center px-5 py-8 sm:px-10 lg:px-16 xl:px-24">
-                <div className="mx-auto w-full max-w-md lg:mx-0">
-                    <MobileAuthLogo />
+        <main className="grid h-dvh overflow-hidden bg-white lg:grid-cols-2">
+            <section className="relative h-full overflow-y-auto bg-[radial-gradient(circle_at_top_left,#eff6ff_0%,#f8fafc_42%,#ffffff_100%)]">
+                <div className="mx-auto flex min-h-full w-full max-w-lg flex-col justify-center px-5 py-7 sm:px-8">
+                    <div className="relative mb-5 flex items-center justify-center">
+                        <MobileAuthLogo />
+                        <Link to="/" className="absolute right-0 inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 transition-colors hover:text-blue-600 lg:hidden">
+                            <ArrowLeft className="h-3.5 w-3.5" />
+                            Home
+                        </Link>
+                    </div>
 
-                    <Link to="/" className="mb-7 hidden w-fit items-center gap-2 text-sm font-semibold text-slate-500 transition-colors hover:text-blue-600 lg:flex">
-                        <ArrowLeft className="h-4 w-4" />
-                        Back to homepage
-                    </Link>
-
-                    <Card className="w-full gap-0 border-0 bg-transparent p-0 shadow-none">
-                        <CardHeader className="space-y-2 px-0 pb-6">
-                    <CardTitle className="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
+                    <Card className="w-full gap-0 rounded-[1.75rem] border-slate-200/80 bg-white py-0 shadow-[0_24px_70px_-32px_rgba(15,23,42,0.32)]">
+                        <CardHeader className="space-y-1.5 px-7 pb-4 pt-6 text-center sm:px-9 sm:pt-7">
+                    <CardTitle className="text-2xl font-black tracking-[-0.035em] text-slate-900">
                         Create account
                     </CardTitle>
-                    <CardDescription className="text-base text-slate-500">
-                        Join Jobify to start your career journey
+                    <CardDescription className="text-sm text-slate-500">
+                        Build your profile and find your next role
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="px-0">
+                <CardContent className="px-7 pb-6 sm:px-9 sm:pb-7">
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3.5">
                             
                             {error && (
-                                <p className="text-sm font-medium text-red-500 bg-red-50 p-3 rounded-lg border border-red-100 text-center">
+                                <p className="rounded-xl border border-red-100 bg-red-50 p-3 text-center text-xs font-medium text-red-600">
                                     {error}
                                 </p>
                             )}
@@ -91,9 +92,9 @@ const Register = () => {
                                 name="name"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-slate-700 font-semibold">Full Name</FormLabel>
+                                        <FormLabel className="text-sm font-semibold text-slate-700">Full name</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="John Doe" className="h-11 rounded-xl border-slate-200 bg-slate-50/70 px-4 focus:bg-white" {...field} />
+                                            <Input placeholder="John Doe" autoComplete="name" className="h-10 rounded-xl border-slate-200 bg-slate-50/70 px-4 transition-colors focus:bg-white" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -105,9 +106,9 @@ const Register = () => {
                                 name="email"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-slate-700 font-semibold">Email</FormLabel>
+                                        <FormLabel className="text-sm font-semibold text-slate-700">Email address</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="name@example.com" type="email" className="h-11 rounded-xl border-slate-200 bg-slate-50/70 px-4 focus:bg-white" {...field} />
+                                            <Input placeholder="name@example.com" type="email" autoComplete="email" className="h-10 rounded-xl border-slate-200 bg-slate-50/70 px-4 transition-colors focus:bg-white" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -119,13 +120,13 @@ const Register = () => {
                                 name="password"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-slate-700 font-semibold">Password</FormLabel>
+                                        <FormLabel className="text-sm font-semibold text-slate-700">Password</FormLabel>
                                         <FormControl>
                                             <Input
                                                 placeholder="••••••••"
                                                 type="password"
                                                 autoComplete="new-password"
-                                                className="h-11 rounded-xl border-slate-200 bg-slate-50/70 px-4 focus:bg-white"
+                                                className="h-10 rounded-xl border-slate-200 bg-slate-50/70 px-4 transition-colors focus:bg-white"
                                                 {...field}
                                             />
                                         </FormControl>
@@ -140,13 +141,13 @@ const Register = () => {
                                 name="confirmPassword"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-slate-700 font-semibold">Confirm Password</FormLabel>
+                                        <FormLabel className="text-sm font-semibold text-slate-700">Confirm password</FormLabel>
                                         <FormControl>
                                             <Input
                                                 placeholder="••••••••"
                                                 type="password"
                                                 autoComplete="new-password"
-                                                className="h-11 rounded-xl border-slate-200 bg-slate-50/70 px-4 focus:bg-white"
+                                                className="h-10 rounded-xl border-slate-200 bg-slate-50/70 px-4 transition-colors focus:bg-white"
                                                 {...field}
                                             />
                                         </FormControl>
@@ -161,7 +162,7 @@ const Register = () => {
 
                             <Button 
                                 type="submit" 
-                                className="mt-2 h-12 w-full rounded-xl bg-blue-600 text-base font-bold shadow-lg shadow-blue-200 transition-all hover:bg-blue-700"
+                                className="mt-1 h-11 w-full rounded-xl bg-blue-600 text-sm font-bold shadow-lg shadow-blue-200/80 transition-all hover:-translate-y-0.5 hover:bg-blue-700"
                                 disabled={form.formState.isSubmitting}
                             >
                                 {form.formState.isSubmitting ? (
@@ -172,9 +173,9 @@ const Register = () => {
                                 ) : "Register"}
                             </Button>
 
-                            <p className="text-center text-sm text-slate-500 mt-4">
+                            <p className="mt-3 text-center text-xs text-slate-500 sm:text-sm">
                                 Already have an account?{" "}
-                                <Link to="/login" className="text-blue-600 font-bold hover:underline">
+                                <Link to="/login" className="font-bold text-blue-600 hover:underline">
                                     Sign in
                                 </Link>
                             </p>
