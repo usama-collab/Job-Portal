@@ -58,7 +58,7 @@ const Register = () => {
 
     return (
         <main className="grid h-dvh overflow-hidden bg-white lg:grid-cols-2">
-            <section className="relative h-full overflow-y-auto bg-[radial-gradient(circle_at_top_left,#eff6ff_0%,#f8fafc_42%,#ffffff_100%)]">
+            <section className="auth-form-scroll relative h-full overflow-y-auto bg-[radial-gradient(circle_at_top_left,#eff6ff_0%,#f8fafc_42%,#ffffff_100%)]">
                 <div className="mx-auto flex min-h-full w-full max-w-lg flex-col justify-center px-5 py-7 sm:px-8">
                     <div className="relative mb-5 flex items-center justify-center">
                         <MobileAuthLogo />

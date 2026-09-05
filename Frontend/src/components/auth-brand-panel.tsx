@@ -30,22 +30,22 @@ export function AuthBrandPanel({ description }: AuthBrandPanelProps) {
         Back to home
       </Link>
 
-      <div className="relative z-10 mx-auto flex h-full max-w-xl flex-col justify-center px-10 py-16 xl:px-12">
+      <div className="auth-panel-content relative z-10 mx-auto flex h-full max-w-xl flex-col justify-center px-10 py-16 xl:px-12">
         <div className="auth-panel-rise">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-300/20 bg-blue-400/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-blue-200">
+          <div className="auth-panel-kicker mb-5 inline-flex items-center gap-2 rounded-full border border-blue-300/20 bg-blue-400/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-blue-200">
             <Sparkles className="h-3.5 w-3.5" />
             Smarter career moves
           </div>
-          <h2 className="max-w-lg text-4xl font-black leading-[1.08] tracking-[-0.045em] xl:text-[2.75rem]">
+          <h2 className="auth-panel-title max-w-lg text-4xl font-black leading-[1.08] tracking-[-0.045em] xl:text-[2.75rem]">
             Your next opportunity is already looking for you.
           </h2>
-          <p className="mt-4 max-w-lg text-sm leading-6 text-slate-300 xl:text-[15px]">
+          <p className="auth-panel-description mt-4 max-w-lg text-sm leading-6 text-slate-300 xl:text-[15px]">
             {description}
           </p>
         </div>
 
-        <div className="auth-panel-rise auth-panel-delay relative mt-8 rounded-[1.75rem] border border-white/15 bg-white/[0.08] p-4 shadow-[0_28px_80px_-28px_rgba(37,99,235,0.65)] backdrop-blur-xl xl:p-5">
-          <div className="flex items-center justify-between border-b border-white/10 pb-4">
+        <div className="auth-match-card auth-panel-rise auth-panel-delay relative mt-8 rounded-[1.75rem] border border-white/15 bg-white/[0.08] p-4 shadow-[0_28px_80px_-28px_rgba(37,99,235,0.65)] backdrop-blur-xl xl:p-5">
+          <div className="auth-match-card-header flex items-center justify-between border-b border-white/10 pb-4">
             <div className="flex items-center gap-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500 shadow-lg shadow-blue-950/40">
                 <BriefcaseBusiness className="h-5 w-5" />
@@ -60,8 +60,8 @@ export function AuthBrandPanel({ description }: AuthBrandPanelProps) {
             </span>
           </div>
 
-          <div className="mt-4 space-y-3">
-            <div className="auth-job-card rounded-2xl border border-blue-400/30 bg-white/[0.09] p-4">
+          <div className="auth-job-list mt-4 space-y-3">
+            <div className="auth-primary-job auth-job-card rounded-2xl border border-blue-400/30 bg-white/[0.09] p-4">
               <div className="flex items-start gap-3">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white font-black text-slate-950">N</span>
                 <div className="min-w-0 flex-1">
@@ -82,7 +82,7 @@ export function AuthBrandPanel({ description }: AuthBrandPanelProps) {
               </div>
             </div>
 
-            <div className="auth-job-card auth-job-delay flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.05] p-3.5">
+            <div className="auth-secondary-job auth-job-card auth-job-delay flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.05] p-3.5">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-500 font-black">L</span>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-bold">Frontend Engineer</p>
@@ -103,7 +103,7 @@ export function AuthBrandPanel({ description }: AuthBrandPanelProps) {
           </div>
         </div>
 
-        <div className="mt-10 flex items-center gap-6 text-[11px] font-semibold text-slate-400">
+        <div className="auth-panel-metrics mt-10 flex items-center gap-6 text-[11px] font-semibold text-slate-400">
           <span><strong className="mr-1 text-sm text-white">2.5k+</strong> open roles</span>
           <span className="h-4 w-px bg-white/15" />
           <span><strong className="mr-1 text-sm text-white">94%</strong> verified listings</span>

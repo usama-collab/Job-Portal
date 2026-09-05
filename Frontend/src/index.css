@@ -107,6 +107,31 @@ html { scroll-behavior: smooth; }
 .auth-float-card { animation: auth-card-float 4.5s ease-in-out infinite; }
 .auth-float-delay { animation-delay: -2.25s; }
 
+.auth-form-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.auth-form-scroll::-webkit-scrollbar { display: none; }
+
+@media (max-height: 700px) and (min-width: 64rem) {
+  .auth-panel-content {
+    justify-content: flex-start;
+    padding-top: 1.5rem;
+    padding-bottom: 1rem;
+  }
+
+  .auth-panel-kicker { margin-bottom: .7rem; }
+  .auth-panel-title { max-width: 29rem; font-size: 2rem; line-height: 1.05; }
+  .auth-panel-description { margin-top: .6rem; max-width: 30rem; font-size: .75rem; line-height: 1.2rem; }
+  .auth-match-card { margin-top: 1.2rem; padding: .75rem; border-radius: 1.4rem; }
+  .auth-match-card-header { padding-bottom: .65rem; }
+  .auth-job-list { margin-top: .7rem; }
+  .auth-primary-job { padding: .75rem; }
+  .auth-secondary-job { padding: .65rem; }
+  .auth-panel-metrics { margin-top: 1.65rem; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .home-rise, .home-float, .auth-panel-rise, .auth-orb, .auth-job-card,
