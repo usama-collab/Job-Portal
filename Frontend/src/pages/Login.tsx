@@ -25,6 +25,7 @@ import { AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AuthBrandPanel, MobileAuthLogo } from "../components/auth-brand-panel";
 import { getAuthenticatedLandingPath } from "../lib/auth-session";
+import { toast } from "sonner";
 
 interface LoginForm {
   email: string;
@@ -71,6 +72,7 @@ const Login = () => {
       // Remove data from any previous account before the authenticated layout mounts.
       queryClient.removeQueries({ queryKey: ["profile-me"] });
       login(response.access_token, response.refresh_token);
+      toast.success("Welcome back");
       navigate(destination, { replace: true });
     } catch {
       setError("Your session could not be saved. Please enable browser storage and try again.");
