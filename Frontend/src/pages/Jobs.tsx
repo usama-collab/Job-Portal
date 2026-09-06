@@ -2,7 +2,7 @@ import { descriptionText } from "../lib/job-description";
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useState, type ReactNode } from 'react'
-import { ArrowUpRight, Briefcase, Building2, ChevronLeft, ChevronRight, Clock3, MapPin, SearchX, Sparkles, X } from 'lucide-react'
+import { ArrowUpRight, Briefcase, Building2, ChevronLeft, ChevronRight, Clock3, MapPin, SearchX, X } from 'lucide-react'
 import { getAllJobs, type Job } from '../api/jobs'
 import { Button } from '../components/ui/button'
 import { JobSearchFields } from '../components/job-search-fields'
@@ -76,24 +76,10 @@ const JobResults = () => {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-50 pb-24">
-      <div className="pointer-events-none absolute -left-48 top-80 h-96 w-96 rounded-full bg-blue-200/30 blur-3xl" />
-      <div className="pointer-events-none absolute -right-40 top-[38rem] h-80 w-80 rounded-full bg-indigo-200/25 blur-3xl" />
-
-      <section className="relative overflow-hidden border-b border-blue-100 bg-[linear-gradient(135deg,#eff6ff_0%,#f8fbff_48%,#eef2ff_100%)] px-5 pb-14 pt-14 sm:px-6 sm:pb-16 sm:pt-16">
-        <div className="pointer-events-none absolute -right-24 -top-28 h-80 w-80 rounded-full border-[52px] border-white/50" />
-        <div className="jobs-rise relative mx-auto max-w-6xl">
-          <div className="mb-8 max-w-3xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/80 px-3.5 py-2 text-xs font-extrabold text-blue-700 shadow-sm backdrop-blur">
-              <Sparkles className="h-3.5 w-3.5" /> Opportunities picked for ambition
-            </span>
-            <h1 className="mt-5 text-4xl font-black tracking-[-0.045em] text-slate-950 sm:text-5xl">
-              Find a role that fits <span className="text-blue-600">your next move.</span>
-            </h1>
-            <p className="mt-4 max-w-xl text-base leading-7 text-slate-600 sm:text-lg">Explore opportunities from growing teams and search by role, skill, company, or location.</p>
-          </div>
-
-          <form onSubmit={submitSearch} className="flex flex-col gap-2 rounded-2xl border border-white/80 bg-white/95 p-2.5 shadow-[0_24px_70px_-24px_rgba(30,64,175,0.32)] ring-1 ring-slate-200/70 backdrop-blur transition-shadow duration-300 focus-within:shadow-[0_28px_80px_-22px_rgba(37,99,235,0.38)] md:flex-row">
+    <div className="min-h-screen bg-slate-50 pb-24">
+      <section aria-label="Search jobs" className="border-b border-slate-200/80 bg-white px-5 py-6 sm:px-6 sm:py-8">
+        <div className="jobs-rise mx-auto max-w-5xl">
+          <form onSubmit={submitSearch} className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-2.5 shadow-[0_12px_35px_-20px_rgba(15,23,42,0.35)] transition-all duration-300 focus-within:border-blue-200 focus-within:shadow-[0_16px_40px_-20px_rgba(37,99,235,0.3)] md:flex-row">
             <JobSearchFields search={search} location={locationSearch} onSearchChange={setSearch} onLocationChange={setLocationSearch} />
             <Button type="submit" className="h-12 rounded-xl bg-blue-600 px-8 text-base font-bold text-white shadow-lg shadow-blue-200 transition-all duration-300 hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-xl motion-reduce:transform-none">
               Find Jobs <ArrowUpRight className="h-4 w-4" />
@@ -102,13 +88,12 @@ const JobResults = () => {
         </div>
       </section>
 
-      <main className="relative mx-auto max-w-5xl px-5 pt-10 sm:px-6 sm:pt-12">
+      <main className="mx-auto max-w-5xl px-5 pt-8 sm:px-6 sm:pt-10">
         <header className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">Latest opportunities</p>
-            <h2 className="mt-1.5 text-2xl font-black tracking-[-0.03em] text-slate-900 sm:text-3xl">
+            <h1 className="text-2xl font-black tracking-[-0.03em] text-slate-900 sm:text-3xl">
               {isLoading ? 'Finding the right roles…' : `${data?.length || 0} ${data?.length === 1 ? 'job' : 'jobs'} on this page`}
-            </h2>
+            </h1>
           </div>
           {(q || location) && (
             <div className="flex flex-wrap items-center gap-2">
