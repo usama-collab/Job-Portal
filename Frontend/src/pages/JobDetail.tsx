@@ -80,7 +80,7 @@ const JobDetail = () => {
   if (isLoading) return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
       <Loader2 className="animate-spin text-blue-600 h-10 w-10" />
-      <p className="text-slate-400 font-bold animate-pulse">Loading job specifications...</p>
+      <p className="text-sm sm:text-base text-slate-400 font-bold animate-pulse">Loading job specifications...</p>
     </div>
   );
   
@@ -88,9 +88,9 @@ const JobDetail = () => {
     return (
       <div className="max-w-md mx-auto mt-20 p-8 bg-white border border-slate-200 rounded-[2rem] text-center shadow-xl">
         <AlertCircle size={48} className="mx-auto text-red-500 mb-4" />
-        <h2 className="text-2xl font-black text-slate-900 mb-2">Job Post Expired</h2>
-        <p className="text-slate-500 mb-6 font-medium">This position is no longer accepting applications or has been removed.</p>
-        <Button onClick={() => navigate('/jobs')} className="w-full rounded-xl h-12">Back to Job Board</Button>
+        <h2 className="text-xl sm:text-2xl font-black text-slate-900 mb-2">Job Post Expired</h2>
+        <p className="text-sm sm:text-base text-slate-500 mb-6 font-medium">This position is no longer accepting applications or has been removed.</p>
+        <Button onClick={() => navigate('/jobs')} className="w-full rounded-xl h-12 text-sm sm:text-base">Back to Job Board</Button>
       </div>
     );
   }
@@ -99,7 +99,7 @@ const JobDetail = () => {
     <div className="max-w-5xl mx-auto p-6 py-12 animate-in fade-in duration-700">
       <Button 
         variant="ghost" 
-        className="mb-8 text-slate-500 font-bold gap-2 group p-0 hover:bg-transparent" 
+        className="mb-8 text-sm sm:text-base text-slate-500 font-bold gap-2 group p-0 hover:bg-transparent"
         onClick={() => navigate(-1)}
       >
         <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
@@ -117,14 +117,14 @@ const JobDetail = () => {
                 <span className="bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
                   Featured Role
                 </span>
-                <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">
+                <span className="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-widest">
                   Posted {new Date(job.created_at).toLocaleDateString()}
                 </span>
               </div>
-              <h1 className="text-4xl md:text-5xl font-[1000] tracking-tighter text-slate-900 leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-[1000] tracking-tighter text-slate-900 leading-tight">
                 {job.title}
               </h1>
-              <div className="flex flex-wrap gap-6 text-slate-600">
+              <div className="flex flex-wrap gap-6 text-sm sm:text-base text-slate-600">
                 <div className="flex items-center gap-2 font-bold">
                   <div className="p-2 bg-slate-100 rounded-lg"><Building2 size={16} className="text-blue-600" /></div>
                   {job.company || "Company Confidential"}
@@ -154,29 +154,29 @@ const JobDetail = () => {
           <div className="grid md:grid-cols-3 gap-12 border-t border-slate-100 pt-10">
             <div className="md:col-span-2 space-y-8">
               <div>
-                <h3 className="text-xl font-black text-slate-900 mb-4 flex items-center gap-2">
+                <h3 className="text-lg sm:text-xl font-black text-slate-900 mb-4 flex items-center gap-2">
                   Role Overview
                 </h3>
-                <div className="job-rich-text text-slate-600 leading-relaxed font-medium text-lg"
+                <div className="job-rich-text text-slate-600 leading-relaxed font-medium text-base sm:text-lg"
                   dangerouslySetInnerHTML={{ __html: descriptionHtml(job.description) }} />
               </div>
             </div>
 
             <div className="space-y-6">
               <div className="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 sticky top-24">
-                <h4 className="text-sm font-black uppercase tracking-widest text-slate-400 mb-6">Action Center</h4>
+                <h4 className="text-xs sm:text-sm font-black uppercase tracking-widest text-slate-400 mb-6">Action Center</h4>
                 
                 <div className="flex flex-col gap-3">
                   {!token ? (
                     <Button 
-                      className="w-full h-14 rounded-2xl text-lg font-black bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-200 transition-all" 
+                      className="w-full h-14 rounded-2xl text-base sm:text-lg font-black bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-200 transition-all"
                       onClick={() => navigate('/login')}
                     >
                       Login to Apply
                     </Button>
                   ) : (
                     <Button
-                      className={`w-full h-14 rounded-2xl text-lg font-black transition-all shadow-xl ${
+                      className={`w-full h-14 rounded-2xl text-base sm:text-lg font-black transition-all shadow-xl ${
                         hasApplied 
                         ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-none cursor-default' 
                         : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200'
@@ -194,7 +194,7 @@ const JobDetail = () => {
                   {token && (
                     <Button 
                       variant={isSaved ? "default" : "outline"} 
-                      className={`w-full h-14 rounded-2xl text-lg font-black transition-all duration-300 ${
+                      className={`w-full h-14 rounded-2xl text-base sm:text-lg font-black transition-all duration-300 ${
                         isSaved 
                         ? 'bg-amber-500 hover:bg-amber-600 border-none text-white shadow-lg shadow-amber-100' 
                         : 'border-slate-200 hover:bg-slate-50 text-slate-600'
