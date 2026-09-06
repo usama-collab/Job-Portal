@@ -38,8 +38,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     },
 
     logout: () => {
-        localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY)
-        localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY)
+        try {
+            localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY)
+            localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY)
+        } catch { /* State must still be cleared when browser storage is unavailable. */ }
         set({ token: null, refreshToken: null, isAuthenticated: false })
     }
 }) )

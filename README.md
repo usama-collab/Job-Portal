@@ -53,7 +53,7 @@ Keep the API key in the hosting provider's secret environment settings and do no
 
 ## Google login and signup
 
-Both auth pages offer **Continue with Google**. Google must return a validated OpenID identity with a verified email. An exact email match signs into the existing account, preserves its profile and password, and verifies its email; otherwise a verified account is created. Inactive accounts cannot sign in. Success opens `/jobs` with “Welcome back”. No database migration is required.
+Both auth pages offer **Continue with Google**. Google must return a validated OpenID identity with a verified email. An exact email match signs into the existing account, preserves its profile and password, and verifies its email; otherwise a verified account is created. Inactive accounts cannot sign in. Success opens `/jobs` with “Welcome back”. Google sign-in itself does not require additional provider-specific database columns.
 
 For local development, configure the backend environment (loaded from `Backend/app/.env`) with `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, a strong `SESSION_SECRET`, and a working `REDIS_URL`. Set:
 
@@ -82,3 +82,20 @@ Replace those example hosts with the deployed hosts, and register the resulting 
 The backend redirects with a random code in the fragment, never access or refresh tokens. Redis holds it for 60 seconds. `POST /googleauth/exchange` requires `{ code, verifier }`, checks the SHA-256 browser challenge associated with OAuth state, atomically consumes the code, rechecks the account, and registers the issued refresh token. Redis must permit `GET`, `SETEX`, `DEL`, and `EVAL`. The initiating tab must retain session storage; failure or expiration offers a retry from login.
 
 Automated checks mock Google and Redis. Once credentials are configured, manually check consent success with a new account, repeat login with the same account, login matching an existing password account, cancellation, and a delayed/expired callback. Confirm `/jobs`, the welcome notification, unchanged existing profile data, and that replaying an exchanged code fails. Repository configuration does not verify deployed credentials or consent-screen settings; these checks must also be performed against production separately.
+
+## Password recovery
+
+The standalone `/forgot-password` and `/reset-password` pages implement account-neutral password recovery. `POST /auth/forgot-password` accepts an email and always returns `202` with the same message for eligible and ineligible accounts. Active, verified accounts receive a one-time link through Brevo; the opaque token is carried in the URL fragment so it is not sent in HTTP requests or referrers. `POST /auth/reset-password` accepts the token and new password, consumes the Redis record, and returns the same `400` response for invalid, expired, used, or superseded links.
+
+Redis is required for reset-token storage and the per-email fixed-window request limit. Only SHA-256-derived identifiers appear in Redis keys; raw reset tokens are never persisted. Configure `PASSWORD_RESET_TOKEN_EXPIRE_MINUTES` (default `15`), `PASSWORD_RESET_REQUEST_LIMIT` (default `3`), and `PASSWORD_RESET_RATE_WINDOW_SECONDS` (default `3600`) alongside `REDIS_URL`, `BREVO_API_KEY`, `MAIL_FROM`, and `FRONTEND_ORIGIN`.
+
+Every issued access and refresh JWT contains the user's `auth_version`. A successful password reset or authenticated password update increments this version and immediately invalidates all earlier sessions. Tokens issued before this rollout without a version claim are treated as version `0` only while the user's database version is still `0`.
+
+Before deploying backend code containing this feature, apply the database migration:
+
+```bash
+cd Backend
+alembic upgrade head
+```
+
+The migration adds the non-null `users.auth_version` column with a server default of `0`. Confirm before deployment that no case-colliding duplicate email records exist, since recovery lookup is case-insensitive.

@@ -127,8 +127,9 @@ def exchange_google_code(payload: GoogleExchange, response: Response, db: Sessio
         user = db.query(User).filter(User.id == int(identity)).first()
         if not user or not user.is_active or not user.email_verified:
             raise HTTPException(status_code=403, detail="This account is not available.")
-        access = security.create_access_token({'sub': str(user.id)})
-        refresh = security.create_refresh_token({'sub': str(user.id)})
+        token_data = {'sub': str(user.id), 'ver': user.auth_version}
+        access = security.create_access_token(token_data)
+        refresh = security.create_refresh_token(token_data)
         redis_client.redis_client.setex(redis_client.refresh_token_key(refresh),
                                        settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600, str(user.id))
         return TokenOut(access_token=access, refresh_token=refresh)

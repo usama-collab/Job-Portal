@@ -10,7 +10,12 @@ class EmailDeliveryError(RuntimeError):
     """Raised when an email cannot be submitted to Brevo."""
 
 
-def send_html_email(to_email: str, subject: str, html_content: str) -> None:
+def send_html_email(
+    to_email: str,
+    subject: str,
+    html_content: str,
+    text_content: str = "This email requires an HTML-capable email client.",
+) -> None:
     if not settings.BREVO_API_KEY or not settings.MAIL_FROM:
         raise EmailDeliveryError("Brevo email delivery is not configured")
 
@@ -19,7 +24,7 @@ def send_html_email(to_email: str, subject: str, html_content: str) -> None:
         "to": [{"email": to_email}],
         "subject": subject,
         "htmlContent": html_content,
-        "textContent": "This email requires an HTML-capable email client.",
+        "textContent": text_content,
     }
     headers = {
         "accept": "application/json",

@@ -17,12 +17,16 @@ import ApplyJob from '../pages/ApplyJob'
 import Profile from '../pages/Profile'
 import CompanyRoute from './CompanyRoute'
 import EmployerOnboarding from '../pages/EmployerOnboarding'
+import ForgotPassword from '../pages/ForgotPassword'
+import ResetPassword from '../pages/ResetPassword'
 
 
 const AppRoutes = () => {
   return (
     <Routes>
         <Route path="/auth/google/callback" element={<GoogleCallback />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         {/* Public Layout */}
         <Route element={<MainLayout/>}>
             <Route path='/' element={<Home/>}/>

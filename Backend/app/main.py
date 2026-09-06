@@ -45,6 +45,14 @@ app.add_middleware(
     same_site="lax",
 )
 
+
+@app.middleware("http")
+async def prevent_password_recovery_caching(request, call_next):
+    response = await call_next(request)
+    if request.url.path in {"/auth/forgot-password", "/auth/reset-password"}:
+        response.headers["Cache-Control"] = "no-store"
+    return response
+
 @app.get('/')
 def get_home():
     return {"message": 'Job Board API with FastAPI + PostgresQL'}

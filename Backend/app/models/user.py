@@ -11,6 +11,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, nullable=False, index=True )
     password_hash = Column(String, nullable=False)
+    auth_version = Column(Integer, default=0, server_default="0", nullable=False)
     is_admin = Column(Boolean, default=False, server_default="false", nullable=False)
     email_verified = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)

@@ -18,6 +18,10 @@ export interface LoginResponse{
     refresh_token: string
 }
 
+export interface MessageResponse {
+    message: string
+}
+
 export const loginUser = async (data: LoginPayload): Promise<LoginResponse> => {
     const formData = new URLSearchParams()
     formData.append("username", data.email)
@@ -43,5 +47,23 @@ export const logoutUser = async (): Promise<void> => {
 
 export const registerUser = async (data: RegisterPayload) => {
     const response = await api.post("/users/register", data)
+    return response.data
+}
+
+export const requestPasswordReset = async (email: string): Promise<MessageResponse> => {
+    const response = await api.post(
+        "/auth/forgot-password",
+        { email },
+        { skipAuthRefresh: true },
+    )
+    return response.data
+}
+
+export const resetPassword = async (token: string, newPassword: string): Promise<MessageResponse> => {
+    const response = await api.post(
+        "/auth/reset-password",
+        { token, new_password: newPassword },
+        { skipAuthRefresh: true },
+    )
     return response.data
 }

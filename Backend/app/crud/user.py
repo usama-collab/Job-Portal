@@ -40,6 +40,7 @@ def update_user(user_id: int, user_update:UserUpdate, db:Session):
         user.name = data['name']
     if 'password' in data:
         user.password_hash = hash_password(data['password'])
+        user.auth_version += 1
 
     db.commit()
     db.refresh(user)

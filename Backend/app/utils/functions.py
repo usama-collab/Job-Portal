@@ -40,6 +40,14 @@ def get_current_user(token: str = Depends(oauth2_schemes), db: Session = Depends
     if not user.is_active or not user.email_verified:
         raise HTTPException(status_code=403, detail='User account is not available')
 
+    token_version = payload.get('ver', 0)
+    if type(token_version) is not int or token_version != user.auth_version:
+        raise HTTPException(
+            status_code=401,
+            detail='Invalid authentication credentials',
+            headers={'WWW-Authenticate': 'Bearer'},
+        )
+
     return user
 
 

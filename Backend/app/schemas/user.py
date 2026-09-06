@@ -17,6 +17,17 @@ class UserUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: Optional[str] = None
     password: Optional[str] = None
+
+
+class ForgotPasswordRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    token: str
+    new_password: str
     
 # Update schema for seeker profile
 class ProfileUpdate(BaseModel):
