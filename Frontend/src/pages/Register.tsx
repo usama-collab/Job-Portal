@@ -1,3 +1,4 @@
+import { GoogleLoginButton } from "../components/google-login-button";
 import { useForm } from 'react-hook-form'
 import { useNavigate, Link } from 'react-router-dom'
 import { registerUser } from '../api/auth'
@@ -80,7 +81,8 @@ const Register = () => {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="px-7 pb-6 sm:px-9 sm:pb-7">
-                    <Form {...form}>
+                    <GoogleLoginButton />
+          <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3.5">
                             
                             {error && (

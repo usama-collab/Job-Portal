@@ -82,7 +82,7 @@ api.interceptors.response.use(
             return Promise.reject(error);
         }
 
-        const isAuthEndpoint = ["/auth/login", "/auth/refresh", "/auth/logout"]
+        const isAuthEndpoint = ["/auth/login", "/auth/refresh", "/auth/logout", "/googleauth/exchange"]
             .some((path) => config.url?.includes(path));
 
         if (config.skipAuthRefresh || isAuthEndpoint) {

@@ -50,3 +50,35 @@ The backend submits confirmation, application, and application-status emails to 
 - `MAIL_FROM`: verified sender address
 
 Keep the API key in the hosting provider's secret environment settings and do not commit it.
+
+## Google login and signup
+
+Both auth pages offer **Continue with Google**. Google must return a validated OpenID identity with a verified email. An exact email match signs into the existing account, preserves its profile and password, and verifies its email; otherwise a verified account is created. Inactive accounts cannot sign in. Success opens `/jobs` with “Welcome back”. No database migration is required.
+
+For local development, configure the backend environment (loaded from `Backend/app/.env`) with `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, a strong `SESSION_SECRET`, and a working `REDIS_URL`. Set:
+
+```dotenv
+GOOGLE_REDIRECT_URI=http://localhost:8000/googleauth/google/callback
+FRONTEND_ORIGIN=http://localhost:5173
+APP_ENV=development
+SESSION_COOKIE_SECURE=false
+```
+
+Set `VITE_API_BASE_URL=http://localhost:8000` in the frontend environment. In Google Cloud's OAuth web client, register this exact authorized redirect URI: `http://localhost:8000/googleauth/google/callback`. Configure the consent screen and test users if the app is in testing. Start from `http://localhost:5173`; do not mix `localhost` and `127.0.0.1`, because browser session storage and OAuth cookies depend on the host.
+
+For a production deployment using `https://api.example.com` and `https://jobs.example.com`, use:
+
+```dotenv
+GOOGLE_REDIRECT_URI=https://api.example.com/googleauth/google/callback
+FRONTEND_ORIGIN=https://jobs.example.com
+APP_ENV=production
+SESSION_COOKIE_SECURE=true
+# Frontend build environment:
+VITE_API_BASE_URL=https://api.example.com
+```
+
+Replace those example hosts with the deployed hosts, and register the resulting backend callback URL exactly in Google's authorized redirect URIs. The frontend `/auth/google/callback` is an internal landing page, not Google's registered callback. Configure the frontend host to serve the SPA for this route. Use HTTPS on both hosts and a stable secret shared across backend instances; production enables secure session cookies with SameSite=Lax. Rebuild the frontend when changing its API URL.
+
+The backend redirects with a random code in the fragment, never access or refresh tokens. Redis holds it for 60 seconds. `POST /googleauth/exchange` requires `{ code, verifier }`, checks the SHA-256 browser challenge associated with OAuth state, atomically consumes the code, rechecks the account, and registers the issued refresh token. Redis must permit `GET`, `SETEX`, `DEL`, and `EVAL`. The initiating tab must retain session storage; failure or expiration offers a retry from login.
+
+Automated checks mock Google and Redis. Once credentials are configured, manually check consent success with a new account, repeat login with the same account, login matching an existing password account, cancellation, and a delayed/expired callback. Confirm `/jobs`, the welcome notification, unchanged existing profile data, and that replaying an exchanged code fails. Repository configuration does not verify deployed credentials or consent-screen settings; these checks must also be performed against production separately.

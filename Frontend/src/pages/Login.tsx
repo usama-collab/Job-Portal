@@ -1,3 +1,4 @@
+import { GoogleLoginButton } from "../components/google-login-button";
 import { useForm } from "react-hook-form";
 import { useAuthStore } from "../store/authStore";
 import { useNavigate, Link } from "react-router-dom"; // Added Link
@@ -99,6 +100,7 @@ const Login = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="px-7 pb-7 sm:px-9 sm:pb-8">
+          <GoogleLoginButton />
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 {error && (

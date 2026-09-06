@@ -5,6 +5,10 @@ export const REFRESH_TOKEN_STORAGE_KEY = "refresh_token";
 export const AUTH_TOKEN_REFRESHED_EVENT = "auth:token-refreshed";
 export const AUTH_LOGOUT_EVENT = "auth:logout";
 
+function readStoredToken(key: string): string | null {
+    try { return localStorage.getItem(key); } catch { return null; }
+}
+
 interface AuthState {
     token: string | null,
     refreshToken: string | null,
@@ -14,13 +18,22 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-    token: localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY),
-    refreshToken: localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY),
-    isAuthenticated: !!localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY),
+    token: readStoredToken(ACCESS_TOKEN_STORAGE_KEY),
+    refreshToken: readStoredToken(REFRESH_TOKEN_STORAGE_KEY),
+    isAuthenticated: !!readStoredToken(ACCESS_TOKEN_STORAGE_KEY),
 
     login: (token, refreshToken) => {
-        localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, token);
-        localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, refreshToken);
+        try {
+            localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, token);
+            localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, refreshToken);
+        } catch (error) {
+            set({ token: null, refreshToken: null, isAuthenticated: false });
+            try {
+                localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+                localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
+            } catch { /* Storage may be completely unavailable. */ }
+            throw error;
+        }
         set({ token, refreshToken, isAuthenticated: true })
     },
 
@@ -33,8 +46,8 @@ export const useAuthStore = create<AuthState>((set) => ({
 
 if (typeof window !== "undefined") {
     const syncAuthentication = () => {
-        const token = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
-        const refreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
+        const token = readStoredToken(ACCESS_TOKEN_STORAGE_KEY);
+        const refreshToken = readStoredToken(REFRESH_TOKEN_STORAGE_KEY);
         useAuthStore.setState({
             token,
             refreshToken,

@@ -1,3 +1,4 @@
+import GoogleCallback from "../pages/GoogleCallback"
 import { Route, Routes } from 'react-router-dom'
 import Home from '../pages/Home'
 import Jobs from '../pages/Jobs'
@@ -21,6 +22,7 @@ import EmployerOnboarding from '../pages/EmployerOnboarding'
 const AppRoutes = () => {
   return (
     <Routes>
+        <Route path="/auth/google/callback" element={<GoogleCallback />} />
         {/* Public Layout */}
         <Route element={<MainLayout/>}>
             <Route path='/' element={<Home/>}/>
