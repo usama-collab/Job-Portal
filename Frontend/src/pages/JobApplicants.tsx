@@ -156,7 +156,7 @@ const JobApplicants = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
+    <div className="mx-auto w-full max-w-5xl px-4 py-8 animate-in fade-in duration-700 sm:py-12">
       <div className="mb-10">
         <Button 
           variant="ghost" 
@@ -187,25 +187,25 @@ const JobApplicants = () => {
             key={app.id}
             id={`application-${app.id}`}
             style={app.id === highlightedId ? { outline: '2px solid #2563eb', outlineOffset: 3, scrollMarginTop: 80 } : undefined}
-            className="group bg-white border border-slate-200 rounded-[2rem] p-8 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500"
+            className="group min-w-0 max-w-full overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-4 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/10 sm:p-8"
           >
-            <div className="flex flex-col gap-8">
+            <div className="flex min-w-0 flex-col gap-6 sm:gap-8">
               {/* Top Row: Info & Status */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  <div className="flex items-center gap-5">
-                    <div className="h-16 w-16 rounded-2xl bg-linear-to-br from-slate-50 to-slate-100 flex items-center justify-center text-slate-400 group-hover:from-blue-50 group-hover:to-blue-100 group-hover:text-blue-600 transition-all duration-500">
+                  <div className="flex min-w-0 items-start gap-3 sm:items-center sm:gap-5">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-slate-50 to-slate-100 text-slate-400 transition-all duration-500 group-hover:from-blue-50 group-hover:to-blue-100 group-hover:text-blue-600 sm:h-16 sm:w-16">
                       <User size={32} />
                     </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                      <h2 className="text-xl font-black text-slate-900 leading-none">
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="flex min-w-0 items-center gap-2">
+                      <h2 className="min-w-0 break-words text-lg font-black leading-tight text-slate-900 [overflow-wrap:anywhere] sm:text-xl sm:leading-none">
                         {app.user_email?.split("@")[0] ?? `Applicant #${app.user_id}`}
                       </h2>
-                      {app.status === 'hired' && <CheckCircle2 size={18} className="text-emerald-500" />}
+                      {app.status === 'hired' && <CheckCircle2 size={18} className="shrink-0 text-emerald-500" />}
                     </div>
-                    <div className="flex items-center gap-4 text-xs font-bold text-slate-400">
-                      <span className="flex items-center gap-1.5"><Mail size={12} /> {app.user_email}</span>
-                      <span className="flex items-center gap-1.5"><Calendar size={12} /> {new Date(app.created_at).toLocaleDateString()}</span>
+                    <div className="flex min-w-0 flex-col gap-1 text-xs font-bold text-slate-400 sm:flex-row sm:flex-wrap sm:gap-x-4">
+                      <span className="flex min-w-0 items-start gap-1.5"><Mail size={12} className="mt-0.5 shrink-0" /> <span className="min-w-0 [overflow-wrap:anywhere]">{app.user_email}</span></span>
+                      <span className="flex items-center gap-1.5"><Calendar size={12} className="shrink-0" /> {new Date(app.created_at).toLocaleDateString()}</span>
                     </div>
                   </div>
                 </div>
@@ -230,32 +230,32 @@ const JobApplicants = () => {
 
               {/* Middle Row: Cover Letter */}
               {app.cover_letter && (
-                <div className="relative bg-slate-50/50 rounded-2xl p-6 border border-slate-100">
+                <div className="relative min-w-0 max-w-full overflow-hidden rounded-2xl border border-slate-100 bg-slate-50/50 p-4 sm:p-6">
                   <Quote className="absolute top-4 right-4 text-slate-200" size={40} />
                   <h3 className="text-xs font-black uppercase tracking-widest text-blue-600 mb-3 flex items-center gap-2">
                     <FileText size={14} /> Cover Letter
                   </h3>
-                  <p className="text-slate-600 text-sm leading-relaxed font-medium whitespace-pre-wrap break-words relative z-10">
+                  <p className="relative z-10 min-w-0 max-w-full whitespace-pre-wrap break-words text-sm font-medium leading-relaxed text-slate-600 [overflow-wrap:anywhere]">
                     {app.cover_letter}
                   </p>
                 </div>
               )}
 
               {/* Bottom Row: Resume Download */}
-              <div className="flex items-center justify-between pt-6 border-t border-slate-50">
-                <div className="flex items-center gap-2 text-slate-400">
-                   <FileText size={18} />
-                   <span className="text-xs font-bold uppercase tracking-widest">
+              <div className="flex min-w-0 flex-col gap-4 border-t border-slate-50 pt-6 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 items-center gap-2 text-slate-400">
+                   <FileText size={18} className="shrink-0" />
+                   <span className="min-w-0 break-words text-xs font-bold uppercase tracking-widest [overflow-wrap:anywhere]">
                     {app.resume_filename ?? "No resume uploaded"}
                    </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => handleOpenResume(app.resume_path)}
                     disabled={!app.resume_path}
-                    className="rounded-xl h-11 px-5 font-bold"
+                    className="h-11 min-w-0 rounded-xl px-3 font-bold sm:px-5"
                   >
                     <ExternalLink size={18} />
                     Open
@@ -269,7 +269,7 @@ const JobApplicants = () => {
                       )
                     }
                     disabled={!app.resume_path}
-                    className="bg-slate-900 hover:bg-blue-600 text-white font-bold rounded-xl px-6 py-2 h-11 transition-all flex items-center gap-2 shadow-lg shadow-slate-200"
+                    className="flex h-11 min-w-0 items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 font-bold text-white shadow-lg shadow-slate-200 transition-all hover:bg-blue-600 sm:px-6"
                   >
                     <Download size={18} />
                     Download
