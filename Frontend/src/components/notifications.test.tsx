@@ -73,7 +73,10 @@ function show(component: React.ReactNode) {
 describe('notification experience', () => {
   it('loads count, opens dropdown without marking read, and links to inbox', async () => {
     show(<NotificationBell />)
-    fireEvent.click(await screen.findByRole('button', { name: 'Notifications, 1 unread' }))
+    const button = await screen.findByRole('button', { name: 'Notifications, 1 unread' })
+    expect(button.querySelector('svg')?.classList.contains('fill-current')).toBe(false)
+    fireEvent.click(button)
+    expect(button.querySelector('svg')?.classList.contains('fill-current')).toBe(true)
     expect(await screen.findByText(item.message)).toBeTruthy()
     expect(api.markNotificationRead).not.toHaveBeenCalled()
     expect(screen.getByRole('link', { name: 'View all notifications' }).getAttribute('href')).toBe('/notifications')

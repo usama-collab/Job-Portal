@@ -77,17 +77,22 @@ const JobApplicants = () => {
       return;
     }
 
-    const newTab = window.open("about:blank", "_blank", "noopener,noreferrer");
+    // Keep a handle to the synchronously opened tab so the async, authenticated
+    // download can navigate it without being blocked as a new popup.
+    const newTab = window.open("", "_blank");
+    if (newTab) newTab.opener = null;
+
     try {
       const response = await api.get(resumePath, { responseType: "blob" });
       const objectUrl = URL.createObjectURL(response.data);
-      if (newTab) {
+      if (newTab && !newTab.closed) {
         newTab.location.href = objectUrl;
       } else {
+        // If popups are disabled, open the CV in the current tab rather than
+        // leaving the user with a blank tab and an unopened document.
         const link = document.createElement("a");
         link.href = objectUrl;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
+        link.target = "_self";
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
