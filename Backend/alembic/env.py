@@ -18,6 +18,7 @@ from app.models.job import Job
 from app.models.application import Application
 from app.models.saved_job import SavedJob
 from app.models.company import Company, CompanyMembership
+from app.models.notification import Notification
 # Add more models here as needed
 
 # Alembic config object

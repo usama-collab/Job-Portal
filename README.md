@@ -99,3 +99,61 @@ alembic upgrade head
 ```
 
 The migration adds the non-null `users.auth_version` column with a server default of `0`. Confirm before deployment that no case-colliding duplicate email records exist, since recovery lookup is case-insensitive.
+# In-app notifications
+
+Authenticated users have a navbar bell and a `/notifications` inbox. New job
+applications notify the company's active, verified **owner only** (excluding an
+owner applying to their own job). Managers retain application-management access
+but do not receive new-application alerts in this release. Recipient selection is
+centralized in `Backend/app/crud/notification.py` for future manager delivery.
+Actual status changes notify the applicant; unchanged updates do not generate
+notifications or repeat status emails. Application and notification writes commit
+together. Existing email delivery remains independent after commit.
+
+The bell refreshes every 30 seconds while the browser tab is visible, and on
+focus/reconnection. Opening notifications refreshes the list without marking it
+read. Individual read actions and mark-all persist across devices. The inbox
+supports All/Unread filters and paginated history. Notification links open and
+highlight the relevant application. Former company members lose access to that
+company's recruiting notifications; seekers retain their own status history.
+
+## Deployment
+
+Before deploying the notification backend, run from `Backend` against the target
+database:
+
+```sh
+alembic upgrade head
+```
+
+Migration `6b20d9a43f81` adds only the notifications table and indexes. The current
+Render blueprint does not run migrations automatically: run this as an explicit
+release step before deploying backend code, then deploy the frontend. Existing
+users begin with empty inboxes; there is no backfill or automatic expiry. If the
+feature must be rolled back, deploy the previous application code first and leave
+the additive table in place to preserve notification data.
+
+**No new Render credentials, environment variables, services, or dependencies are
+required.** Reuse `DATABASE_URL` and `VITE_API_BASE_URL`; existing email variables
+remain unchanged. Watch notification endpoint failures/latency and database load
+after release. Polling delivery depends on the backend being available.
+
+## API and tests
+
+- `GET /notifications`: `limit` (default 20, maximum 50), opaque `cursor`, and
+  `unread_only`; returns `items` and `next_cursor`.
+- `GET /notifications/unread-count`: returns `unread_count`.
+- `PATCH /notifications/{id}/read`: returns the notification; repeated reads
+  preserve the original read timestamp.
+- `PATCH /notifications/read-all`: returns `updated_count`; applies to all visible
+  unread rows, including unloaded pages, at the time the update executes.
+
+All endpoints use the existing Bearer authentication and restrict access to the
+current recipient, including administrators. Responses must not be HTTP-cached.
+
+Run `python -m pytest tests/test_notifications.py` from `Backend` for isolated
+SQLite tests. To include PostgreSQL concurrency checks, provide
+`NOTIFICATION_TEST_DATABASE_URL` pointing to a **disposable test database** whose
+user can create schemas. Tests create and remove their own generated schemas;
+this variable is for local/CI testing and should not be added to Render.
+Run `npm test` and `npm run build` from `Frontend` for UI verification.

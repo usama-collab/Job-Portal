@@ -172,10 +172,13 @@ def update_application_status(
     if not can_manage_company(current_user, job.company_id, db):
         raise HTTPException(status_code=403, detail="You are unauthorized to update this application")
     
-    updated_status = crud_app.update_application_status(application_id, new_status.status, db)
+    updated_status, changed = crud_app.update_application_status(application_id, new_status.status, db)
+    if updated_status is None:
+        raise HTTPException(status_code=404, detail="Application Not Found")
 
     app_user = db.query(User).filter(User.id == app.user_id).first()
 
-    background_tasks.add_task(send_app_status_email, app_user.email, new_status.status)
+    if changed:
+        background_tasks.add_task(send_app_status_email, app_user.email, new_status.status)
 
     return _application_response(updated_status)
