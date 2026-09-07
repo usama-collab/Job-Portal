@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useCallback } from 'react';
 import { useParams, useNavigate } from "react-router-dom";
 import { 
   getApplicationsForJob, 
@@ -23,6 +24,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import api from "../api/axios";
+import { useApplicationHighlight } from '../hooks/useApplicationHighlight';
 
 const STATUS_OPTIONS = [
   "applied",
@@ -60,11 +62,14 @@ const JobApplicants = () => {
     },
   });
 
-  const { data, isLoading, isError } = useQuery<JobApplication[]>({
+  const { data, isLoading, isError, isFetching } = useQuery<JobApplication[]>({
     queryKey: ["job-applicants", jobId],
     queryFn: () => getApplicationsForJob(Number(jobId)),
     enabled: !!jobId,
+    refetchOnMount: 'always',
   });
+  const refreshApplicants = useCallback(() => { void queryClient.invalidateQueries({ queryKey: ['job-applicants', jobId] }); }, [queryClient, jobId]);
+  const highlightedId = useApplicationHighlight(!isLoading && !isFetching, refreshApplicants);
 
   const handleOpenResume = async (resumePath: string | null | undefined) => {
     if (!resumePath) {
@@ -167,6 +172,7 @@ const JobApplicants = () => {
       </div>
 
       <div className="grid gap-6">
+        {highlightedId && data && !data.some((app) => app.id === highlightedId) && <p role="status" className="rounded-xl bg-slate-100 p-4 text-sm text-slate-600">Application no longer available.</p>}
         {data?.length === 0 && (
           <div className="max-w-md mx-auto mt-10 p-10 bg-white border border-slate-200 rounded-[2rem] text-center shadow-lg">
             <div className="bg-slate-100 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 text-slate-400">
@@ -179,6 +185,8 @@ const JobApplicants = () => {
         {data?.map((app) => (
           <div
             key={app.id}
+            id={`application-${app.id}`}
+            style={app.id === highlightedId ? { outline: '2px solid #2563eb', outlineOffset: 3, scrollMarginTop: 80 } : undefined}
             className="group bg-white border border-slate-200 rounded-[2rem] p-8 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500"
           >
             <div className="flex flex-col gap-8">

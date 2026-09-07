@@ -18,6 +18,7 @@ import {
 } from "../components/ui/popover"
 import { useProfile } from "../hooks/useProfile";
 import { BrandLogo } from "../components/brand-logo";
+import { NotificationBell } from "../components/notification-bell";
 
 const MainLayout = () => {
     const { data: profile } = useProfile(); // Fetch profile data
@@ -111,6 +112,7 @@ const MainLayout = () => {
                                     </Button>
 
                                     {/* User Popover */}
+                                    <NotificationBell />
                                     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                                         <PopoverTrigger asChild>
                                             <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 border border-slate-200 overflow-hidden hover:opacity-80 transition-all">

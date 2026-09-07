@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import Optional
 from app.models.job import Job
 from app.models.application import Application
+from app.crud.notification import notify_application_received, notify_status_changed
 
 
 
@@ -32,8 +33,14 @@ def create_application(
         status='applied'
     )
 
-    db.add(app)
-    db.commit()
+    try:
+        db.add(app)
+        db.flush()
+        notify_application_received(app, db)
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
     db.refresh(app)
     return app
 
@@ -50,12 +57,22 @@ def get_application_by_id(application_id: int, db: Session) -> Optional[Applicat
     return db.query(Application).filter(Application.id == application_id).first()
 
 
-def update_application_status(application_id: int, new_status: str, db: Session) -> Optional[Application]:
-    app = get_application_by_id(application_id,db)
+def update_application_status(application_id: int, new_status: str, db: Session) -> tuple[Optional[Application], bool]:
+    # Refresh an already-loaded row after acquiring the lock. Concurrent requests
+    # must compare against the committed status, not their identity-map snapshot.
+    app = db.query(Application).filter(Application.id == application_id).populate_existing().with_for_update().first()
     if not app:
-        return None
-    app.status = new_status
-    db.add(app)
-    db.commit()
+        return None, False
+    if app.status == new_status:
+        db.commit()
+        return app, False
+    previous_status = app.status
+    try:
+        app.status = new_status
+        notify_status_changed(app, previous_status, db)
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
     db.refresh(app)
-    return app
+    return app, True

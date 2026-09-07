@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { getMyApplications, type Application } from "../api/application";
@@ -6,6 +6,7 @@ import { getMySavedJobs, toggleSaveJob } from "../api/savedJobs";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { toast } from "sonner";
+import { useApplicationHighlight } from '../hooks/useApplicationHighlight';
 import { 
   Briefcase, 
   ChevronRight, 
@@ -43,9 +44,10 @@ const MyApplications = () => {
   const [activeTab, setActiveTab] = useState<TabId>('applied');
 
   // 1. Fetch Applied Jobs
-  const { data: appliedJobs, isLoading: isAppliedLoading } = useQuery<Application[]>({
+  const { data: appliedJobs, isLoading: isAppliedLoading, isFetching: isAppliedFetching } = useQuery<Application[]>({
     queryKey: ["my-applications"],
     queryFn: getMyApplications,
+    refetchOnMount: 'always',
   });
 
   // 2. Fetch Saved Jobs
@@ -68,6 +70,9 @@ const MyApplications = () => {
   });
 
   const isLoading = activeTab === 'applied' ? isAppliedLoading : isSavedLoading;
+  const activateApplied = useCallback(() => setActiveTab('applied'), []);
+  const refreshApplied = useCallback(() => { void queryClient.invalidateQueries({ queryKey: ['my-applications'] }); }, [queryClient]);
+  const highlightedId = useApplicationHighlight(!isAppliedFetching && !isAppliedLoading, refreshApplied, activateApplied);
 
   if (isLoading) return (
     <div className="flex flex-col justify-center items-center min-h-[60vh] gap-4">
@@ -122,6 +127,7 @@ const MyApplications = () => {
 
       {/* Tab Content Logic */}
       <div className="space-y-4">
+        {highlightedId && appliedJobs && !appliedJobs.some((app) => app.id === highlightedId) && <p role="status" className="rounded-xl bg-slate-100 p-4 text-sm text-slate-600">Application no longer available.</p>}
         
         {/* APPLIED JOBS */}
         {activeTab === 'applied' && (
@@ -129,6 +135,8 @@ const MyApplications = () => {
             appliedJobs.map((app) => (
               <div
                 key={app.id}
+                id={`application-${app.id}`}
+                style={app.id === highlightedId ? { outline: '2px solid #2563eb', outlineOffset: 3, scrollMarginTop: 80 } : undefined}
                 onClick={() => navigate(`/jobs/${app.job_id}`)}
                 className="group bg-white border border-slate-200 rounded-3xl p-6 cursor-pointer hover:shadow-xl hover:shadow-blue-500/5 hover:border-blue-200 transition-all duration-300"
               >

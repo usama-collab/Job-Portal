@@ -19,6 +19,7 @@ import CompanyRoute from './CompanyRoute'
 import EmployerOnboarding from '../pages/EmployerOnboarding'
 import ForgotPassword from '../pages/ForgotPassword'
 import ResetPassword from '../pages/ResetPassword'
+import Notifications from '../pages/Notifications'
 
 
 const AppRoutes = () => {
@@ -36,6 +37,7 @@ const AppRoutes = () => {
             <Route element={<ProtectedRoute/>}>
                 <Route path='/jobs/:id/apply' element={<ApplyJob/>}/>
                 <Route path="/applications" element={<MyApplications />} />
+                <Route path="/notifications" element={<Notifications />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/employer/onboarding" element={<EmployerOnboarding />} />
                 <Route element={<CompanyRoute />}>
