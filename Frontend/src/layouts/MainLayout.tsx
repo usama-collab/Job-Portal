@@ -7,7 +7,7 @@ import {
   LayoutDashboard, 
   UserCircle, 
   Bookmark, // Added Bookmark icon
-  Menu,
+  X,
 } from 'lucide-react'
 import { useAuthStore } from '../store/authStore';
 import { logoutUser } from '../api/auth';
@@ -200,7 +200,13 @@ const MainLayout = () => {
                                         className="h-10 w-10 rounded-full p-0 text-slate-600 hover:bg-slate-100 md:hidden"
                                         aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
                                     >
-                                        <Menu className="h-6 w-6" />
+                                        {isMobileMenuOpen ? (
+                                            <X data-slot="mobile-menu-icon" data-state="open" className="h-6 w-6" />
+                                        ) : (
+                                            <svg data-slot="mobile-menu-icon" data-state="closed" viewBox="0 0 24 24" aria-hidden="true" className="h-6 w-6" fill="none">
+                                                <path d="M5 8h14M5 16h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                            </svg>
+                                        )}
                                     </Button>
                                 </PopoverTrigger>
                                 <PopoverContent

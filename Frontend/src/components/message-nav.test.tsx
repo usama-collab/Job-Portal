@@ -33,12 +33,14 @@ function show(path: string) {
 }
 
 describe('message navigation icon', () => {
-  it('uses an outlined message icon with a compact circular badge', async () => {
+  it('uses the compact solid message icon with a circular badge', async () => {
     const link = show('/jobs')
     expect(link.getAttribute('aria-current')).toBeNull()
     const icon = link.querySelector('[data-slot="message-icon"]')
     expect(icon?.classList.contains('h-6')).toBe(true)
     expect(icon?.getAttribute('fill')).toBe('none')
+    expect(icon?.querySelector('path')?.classList.contains('fill-current')).toBe(true)
+    expect(icon?.querySelector('g')?.getAttribute('transform')).toContain('scale(.833333)')
     await screen.findByText('3')
     const badge = link.querySelector('[data-slot="unread-badge"]')
     expect(badge?.classList.contains('h-4')).toBe(true)

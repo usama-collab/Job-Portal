@@ -52,13 +52,17 @@ function renderLayout(route = '/') {
 function expectMobileMenuTrigger() {
   const trigger = screen.getByRole('button', { name: 'Open navigation menu' })
   expect(trigger.className).toContain('md:hidden')
+  return trigger
 }
 
 describe('mobile navigation', () => {
   it('provides a mobile menu trigger and preserves signed-out actions', () => {
     renderLayout()
-    expectMobileMenuTrigger()
-    fireEvent.click(screen.getByRole('button', { name: 'Open navigation menu' }))
+    const trigger = expectMobileMenuTrigger()
+    expect(trigger.querySelector('[data-slot="mobile-menu-icon"]')?.getAttribute('data-state')).toBe('closed')
+    fireEvent.click(trigger)
+    const closeTrigger = screen.getByRole('button', { name: 'Close navigation menu' })
+    expect(closeTrigger.querySelector('[data-slot="mobile-menu-icon"]')?.getAttribute('data-state')).toBe('open')
     const mobileNavigation = document.querySelector('nav[aria-label="Mobile navigation"]') as HTMLElement
     expect(mobileNavigation).toBeTruthy()
     expect(within(mobileNavigation).getByRole('link', { name: 'Find Jobs' }).getAttribute('href')).toBe('/jobs')
