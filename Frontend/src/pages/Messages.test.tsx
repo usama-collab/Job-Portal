@@ -44,6 +44,26 @@ describe('application messaging', () => {
     expect(api.getMessages).toHaveBeenCalledWith(8, {}, expect.any(AbortSignal))
   })
 
+  it('uses company names in the inbox and visually separates incoming and outgoing messages', async () => {
+    vi.mocked(api.getMessages).mockResolvedValue({
+      items: [message, { ...message, id: 2, sender_id: 1, sender_name: 'Applicant', body: 'My reply' }],
+      next_before_id: null,
+      next_after_id: null,
+    })
+    show()
+
+    expect(await screen.findByRole('link', { name: /Acme/ })).toBeTruthy()
+    const history = screen.getByLabelText('Message history')
+    const incoming = Array.from(history.querySelectorAll('article')).find((item) => item.textContent?.includes('Interview invitation'))
+    const outgoing = Array.from(history.querySelectorAll('article')).find((item) => item.textContent?.includes('My reply'))
+    expect(incoming?.dataset.messageDirection).toBe('incoming')
+    expect(outgoing?.dataset.messageDirection).toBe('outgoing')
+    expect(incoming?.textContent).toContain('Employer')
+    expect(outgoing?.textContent).not.toContain('Applicant')
+    expect(incoming?.querySelector('time')).toBeTruthy()
+    expect(outgoing?.querySelector('time')).toBeTruthy()
+  })
+
   it('keeps drafts on failure and reuses the UUID for an uncertain send retry', async () => {
     vi.mocked(api.sendMessage).mockRejectedValueOnce(new Error('network'))
     show()

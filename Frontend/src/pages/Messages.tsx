@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router-dom'
 import { isAxiosError } from 'axios'
+import { Send } from 'lucide-react'
 import { getConversation, getMessages, readConversation, sendMessage, type Message, type MessagePage } from '../api/messages'
 import { accessError, messagePolling, useConversations } from '../hooks/useMessages'
 import { useNotificationScope } from '../hooks/useNotifications'
@@ -18,25 +19,40 @@ export default function Messages() {
     .sort((a, b) => (b.latest_message?.id ?? 0) - (a.latest_message?.id ?? 0))
   const id = Number(applicationId)
   return <div className="mx-auto max-w-6xl px-4 py-6">
-    <h1 className="mb-5 text-3xl font-bold text-slate-900">Messages</h1>
-    <div className="grid gap-4 md:grid-cols-[300px_minmax(0,1fr)]">
-      <aside className={`${applicationId ? 'hidden md:block' : ''} rounded-2xl border bg-white p-3`} aria-label="Conversations">
-        {inbox.isPending && <p role="status">Loading conversations…</p>}
-        {inbox.isError && <p role="status">Could not update conversations. <Button variant="ghost" onClick={() => void inbox.refetch()}>Retry</Button></p>}
+    <div className="grid overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm md:grid-cols-[320px_minmax(0,1fr)]">
+      <aside className={`${applicationId ? 'hidden md:block' : ''} min-h-[70vh] border-r border-slate-200`} aria-label="Conversations">
+        <div className="border-b border-slate-200 px-5 py-5">
+          <h1 className="text-2xl font-bold text-slate-900">Messages</h1>
+          <p className="mt-1 text-sm text-slate-500">Your conversations with employers</p>
+        </div>
+        <div className="p-2">
+        {inbox.isPending && <p className="p-3 text-sm text-slate-500" role="status">Loading conversations…</p>}
+        {inbox.isError && <p className="p-3 text-sm" role="status">Could not update conversations. <Button variant="ghost" onClick={() => void inbox.refetch()}>Retry</Button></p>}
         {!accessError(inbox.error) && items.map((item) => <Link key={item.application_id} to={`/messages/${item.application_id}`}
-          className={`mb-2 block rounded-xl p-3 ${item.application_id === id ? 'bg-blue-50' : 'hover:bg-slate-50'}`}>
-          <span className="block font-semibold">{item.job_title}</span>
-          <span className="block text-sm text-slate-500">{item.company_name} · {item.applicant_name}</span>
-          <span className="mt-1 block truncate text-sm text-slate-600">{item.latest_message?.body}</span>
-          {item.unread_count > 0 && <span className="text-xs font-bold text-blue-700">{item.unread_count} unread</span>}
+          className={`mb-1 block rounded-xl px-4 py-3 transition-colors ${item.application_id === id ? 'bg-blue-50 ring-1 ring-blue-100' : 'hover:bg-slate-50'}`}>
+          <span className="flex items-start justify-between gap-3">
+            <span className="min-w-0">
+              <span className="block truncate font-semibold text-slate-900">{item.company_name}</span>
+              <span className="mt-0.5 block truncate text-sm text-slate-600">{item.job_title}</span>
+            </span>
+            {item.unread_count > 0 && <span className="mt-1 min-w-5 rounded-full bg-blue-600 px-1.5 py-0.5 text-center text-xs font-bold text-white" aria-label={`${item.unread_count} unread`}>{item.unread_count}</span>}
+          </span>
+          <span className="mt-2 block truncate text-sm text-slate-500">{item.latest_message?.body ?? 'No messages yet'}</span>
         </Link>)}
         {!inbox.isPending && !inbox.isError && !items.length && <p className="p-3 text-sm text-slate-500">No conversations yet. Start a message from an application.</p>}
         {inbox.hasNextPage && <Button variant="ghost" disabled={inbox.isFetchingNextPage} onClick={() => void inbox.fetchNextPage()}>Load more</Button>}
+        </div>
       </aside>
       {applicationId ? (Number.isSafeInteger(id) && id > 0 ? <Thread key={`${scope}:${id}`} id={id} scope={scope} /> : <p>Conversation not found.</p>) :
-        <div className="hidden rounded-2xl border bg-white p-10 text-slate-500 md:block">Choose a conversation, or start one from an application.</div>}
+        <div className="hidden min-h-[70vh] place-items-center p-10 text-center text-slate-500 md:grid">Choose a conversation, or start one from an application.</div>}
     </div>
   </div>
+}
+
+function messageTime(value: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+  }).format(new Date(value))
 }
 
 function Thread({ id, scope }: { id: number, scope: string | null }) {
@@ -133,39 +149,48 @@ function Thread({ id, scope }: { id: number, scope: string | null }) {
   }, [newest, focused, atBottom, blocked, denied, scope, read.isPending, read.isError, mark])
 
   if (blocked || denied) return <section className="rounded-2xl border bg-white p-6"><Link to="/messages">← Inbox</Link><p role="alert" className="mt-4">This conversation is no longer available.</p></section>
-  return <section className="flex min-w-0 flex-col overflow-hidden rounded-2xl border bg-white">
-    <header className="border-b p-4">
+  const currentUserId = scope?.split(':')[0]
+  return <section className="flex min-h-[70vh] min-w-0 flex-col overflow-hidden bg-white">
+    <header className="border-b border-slate-200 px-5 py-4">
       <Link to="/messages" className="mb-2 block text-sm text-blue-600 md:hidden">← Inbox</Link>
-      <h2 className="font-bold">{context.data?.job_title ?? 'Application conversation'}</h2>
-      {context.data && <p className="text-sm text-slate-500">{context.data.company_name} · {context.data.applicant_name} · {context.data.status.replaceAll('_', ' ')}</p>}
+      <h2 className="text-lg font-bold text-slate-900">{context.data?.company_name ?? 'Application conversation'}</h2>
+      {context.data && <p className="mt-0.5 text-sm text-slate-500">{context.data.job_title} · <span className="capitalize">{context.data.status.replaceAll('_', ' ')}</span></p>}
     </header>
     {(history.isPending || context.isPending) && <p role="status" className="p-4">Loading conversation…</p>}
     {(history.isError || context.isError) && <p role="status" className="p-4 text-amber-800">Updates are unavailable. <Button variant="ghost" onClick={refresh}>Retry</Button></p>}
     <div ref={viewport} onScroll={() => {
       const el = viewport.current
       if (el) setAtBottom(el.scrollHeight - el.scrollTop - el.clientHeight < 40)
-    }} className="h-[50vh] min-h-64 space-y-3 overflow-y-auto p-4" aria-label="Message history">
+    }} className="h-[52vh] min-h-80 flex-1 space-y-5 overflow-y-auto bg-slate-50/40 px-5 py-6" aria-label="Message history">
       {history.data?.next_before_id && <Button variant="ghost" disabled={older.isPending} onClick={() => older.mutate(history.data!.next_before_id!)}>Load older messages</Button>}
       {older.isError && <p role="alert">Could not load older messages. Please retry.</p>}
       {!history.isPending && !history.isError && !history.data?.items.length && <p className="text-sm text-slate-500">Start the conversation about this application.</p>}
-      {history.data?.items.map((message) => <article key={message.id}
-        className={`max-w-[90%] rounded-2xl p-3 ${String(message.sender_id) === scope?.split(':')[0] ? 'ml-auto bg-blue-50' : 'bg-slate-100'}`}>
-        <div className="flex flex-wrap items-center gap-x-3 text-xs text-slate-500"><span className="font-semibold">{message.sender_name}</span><time dateTime={message.created_at}>{new Date(message.created_at).toLocaleString()}</time></div>
-        <p className="mt-1 whitespace-pre-wrap text-sm [overflow-wrap:anywhere]">{message.body}</p>
-      </article>)}
+      {history.data?.items.map((message) => {
+        const outgoing = String(message.sender_id) === currentUserId
+        return <article key={message.id} data-message-direction={outgoing ? 'outgoing' : 'incoming'}
+          className={`flex max-w-[82%] flex-col ${outgoing ? 'ml-auto items-end' : 'mr-auto items-start'}`}>
+          <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm [overflow-wrap:anywhere] ${outgoing ? 'rounded-br-md bg-blue-600 text-white' : 'rounded-bl-md border border-slate-200 bg-white text-slate-800'}`}>
+            <p className="whitespace-pre-wrap">{message.body}</p>
+          </div>
+          <div className={`mt-1.5 flex items-center gap-1.5 px-1 text-xs text-slate-500 ${outgoing ? 'justify-end' : ''}`}>
+            {!outgoing && <><span className="font-semibold text-slate-600">{message.sender_name}</span><span aria-hidden="true">·</span></>}
+            <time dateTime={message.created_at}>{messageTime(message.created_at)}</time>
+          </div>
+        </article>
+      })}
     </div>
     {!atBottom && <Button variant="ghost" onClick={() => setAtBottom(true)}>New messages / jump to latest</Button>}
     {read.isError && <p role="status" className="px-4 text-sm text-amber-800">Could not save read position. <Button variant="ghost" onClick={() => { read.reset(); if (focused && atBottom && newest) read.mutate(newest) }}>Retry</Button></p>}
-    <form className="space-y-2 border-t p-4" onSubmit={(event) => {
+    <form className="border-t border-slate-200 bg-white p-4" onSubmit={(event) => {
       event.preventDefault()
       const body = draft.trim()
       if (!body || send.isPending || body.length > 5000) return
       if (retryMessage.current?.body !== body) retryMessage.current = { body, uuid: crypto.randomUUID() }
       send.mutate(retryMessage.current)
     }}>
-      <label htmlFor="message-body" className="text-sm font-semibold">Message</label>
-      <Textarea id="message-body" value={draft} onChange={(event) => setDraft(event.target.value)} maxLength={5000} rows={3} placeholder="Write about this application…" />
-      <div className="flex items-center justify-between"><span className="text-xs text-slate-500">{draft.length}/5000</span><Button type="submit" disabled={!draft.trim() || send.isPending || !context.data || history.isPending}>{send.isPending ? 'Sending…' : 'Send message'}</Button></div>
+      <label htmlFor="message-body" className="sr-only">Message</label>
+      <Textarea id="message-body" className="min-h-24 resize-none rounded-xl border-slate-300 bg-slate-50/50 px-4 py-3 shadow-none focus-visible:bg-white" value={draft} onChange={(event) => setDraft(event.target.value)} maxLength={5000} rows={3} placeholder="Write a message…" />
+      <div className="mt-3 flex items-center justify-between"><span className="text-xs text-slate-400">{draft.length}/5000</span><Button className="rounded-full bg-blue-600 px-5 hover:bg-blue-700" type="submit" aria-label="Send message" disabled={!draft.trim() || send.isPending || !context.data || history.isPending}>{send.isPending ? 'Sending…' : <><Send />Send</>}</Button></div>
       {send.isError && <p role="alert" className="text-sm text-red-700">{isAxiosError(send.error) && send.error.response?.status === 429 ? 'Too many messages. Wait a minute, then retry.' : 'Could not confirm delivery. Your draft is saved here; retry to send it safely.'}</p>}
     </form>
   </section>
