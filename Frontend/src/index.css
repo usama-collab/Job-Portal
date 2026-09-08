@@ -237,6 +237,25 @@ html { scroll-behavior: smooth; }
   * {
     @apply border-border outline-ring/50;
   }
+
+  :where(
+    a[href],
+    button:not(:disabled),
+    [role="button"]:not([aria-disabled="true"]),
+    [role="link"]:not([aria-disabled="true"]),
+    summary,
+    select:not(:disabled),
+    input[type="button"]:not(:disabled),
+    input[type="submit"]:not(:disabled),
+    input[type="reset"]:not(:disabled),
+    input[type="checkbox"]:not(:disabled),
+    input[type="radio"]:not(:disabled),
+    input[type="file"]:not(:disabled),
+    label[for]
+  ) {
+    cursor: pointer;
+  }
+
   body {
     @apply bg-background text-foreground;
   }
