@@ -33,18 +33,19 @@ function show(path: string) {
 }
 
 describe('message navigation icon', () => {
-  it('uses an outlined chat bubble away from messaging', () => {
+  it('uses the solid message icon away from messaging', () => {
     const link = show('/jobs')
     expect(link.getAttribute('aria-current')).toBeNull()
-    expect(link.querySelector('path')?.classList.contains('fill-transparent')).toBe(true)
-    expect(link.querySelectorAll('circle')).toHaveLength(3)
+    const icon = link.querySelector('[data-slot="message-icon"]')
+    expect(icon?.classList.contains('h-6')).toBe(true)
+    expect(icon?.querySelector('path')?.classList.contains('fill-current')).toBe(true)
+    expect(icon?.querySelectorAll('circle')).toHaveLength(0)
   })
 
-  it('fills the chat bubble on messaging routes and supports a filled focus state', () => {
+  it('highlights the message icon on messaging routes', () => {
     const link = show('/messages/8')
     expect(link.getAttribute('aria-current')).toBe('page')
     expect(link.querySelector('path')?.classList.contains('fill-current')).toBe(true)
-    expect(link.querySelector('path')?.classList.contains('group-focus-visible:fill-current')).toBe(true)
-    expect(link.querySelector('circle')?.classList.contains('fill-white')).toBe(true)
+    expect(link.classList.contains('text-blue-600')).toBe(true)
   })
 })

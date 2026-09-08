@@ -109,7 +109,7 @@ const MainLayout = () => {
                                         onClick={() => navigate('/applications')}
                                         title="My Applications"
                                     >
-                                        <Bookmark className={`h-5 w-5 transition-[fill] group-focus-visible:fill-current ${location.pathname === '/applications' ? 'fill-current' : ''}`} />
+                                        <Bookmark className={`h-6 w-6 transition-[fill] group-focus-visible:fill-current ${location.pathname === '/applications' ? 'fill-current' : ''}`} />
                                     </Button>
 
                                     {/* User Popover */}
@@ -129,7 +129,7 @@ const MainLayout = () => {
                                                         }}
                                                     />
                                                 ) : (
-                                                    <User className="h-5 w-5 text-slate-600" />
+                                                    <User className="h-6 w-6 text-slate-600" />
                                                 )}
                                             </Button>
                                         </PopoverTrigger>
@@ -200,7 +200,7 @@ const MainLayout = () => {
                                         className="h-10 w-10 rounded-full p-0 text-slate-600 hover:bg-slate-100 md:hidden"
                                         aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
                                     >
-                                        <Menu className="h-5 w-5" />
+                                        <Menu className="h-6 w-6" />
                                     </Button>
                                 </PopoverTrigger>
                                 <PopoverContent
