@@ -12,6 +12,21 @@ const profileMock = vi.hoisted(() => ({
 
 vi.mock('../hooks/useProfile', () => ({ useProfile: () => ({ data: profileMock.data }) }))
 vi.mock('../api/auth', () => ({ logoutUser: vi.fn() }))
+vi.mock('../components/message-nav', () => ({ MessageNav: () => <a href="/messages">Messages</a> }))
+// Test navigation behavior without JSDOM's expensive Radix focus/portal simulation.
+// Real popovers are exercised by the browser smoke check.
+vi.mock('../components/ui/popover', async () => {
+  const { createContext, useContext, cloneElement } = await import('react')
+  const Context = createContext<{ open: boolean, onOpenChange: (open: boolean) => void }>({ open: false, onOpenChange: () => {} })
+  return {
+    Popover: ({ children, open, onOpenChange }: { children: React.ReactNode, open: boolean, onOpenChange: (open: boolean) => void }) => <Context.Provider value={{ open, onOpenChange }}>{children}</Context.Provider>,
+    PopoverTrigger: ({ children }: { children: React.ReactElement<{ onClick: () => void }> }) => {
+      const state = useContext(Context)
+      return cloneElement(children, { onClick: () => state.onOpenChange(!state.open) })
+    },
+    PopoverContent: ({ children }: { children: React.ReactNode }) => useContext(Context).open ? <div>{children}</div> : null,
+  }
+})
 
 beforeEach(() => {
   profileMock.data = undefined

@@ -19,6 +19,7 @@ import {
 import { useProfile } from "../hooks/useProfile";
 import { BrandLogo } from "../components/brand-logo";
 import { NotificationBell } from "../components/notification-bell";
+import { MessageNav } from "../components/message-nav";
 
 const MainLayout = () => {
     const { data: profile } = useProfile(); // Fetch profile data
@@ -85,7 +86,7 @@ const MainLayout = () => {
                             )}
                         </div>
 
-                        <div className='flex items-center gap-3'>
+                        <div className='flex items-center gap-1 sm:gap-3'>
                             {!token ? (
                                 <>
                                     <Link to="/login" className="hidden md:block">
@@ -100,7 +101,7 @@ const MainLayout = () => {
                                     {/* 1. New Save/Applications Icon Button */}
                                     <Button 
                                         variant="ghost" 
-                                        className={`group h-10 w-10 rounded-full p-0 transition-all focus-visible:text-blue-600 ${
+                                        className={`group hidden h-10 w-10 rounded-full p-0 transition-all focus-visible:text-blue-600 sm:inline-flex ${
                                             location.pathname === '/applications' 
                                             ? "bg-blue-50 text-blue-600 border border-blue-100" 
                                             : "text-slate-600 hover:bg-slate-100"
@@ -113,6 +114,7 @@ const MainLayout = () => {
 
                                     {/* User Popover */}
                                     <NotificationBell />
+                                    <MessageNav />
                                     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                                         <PopoverTrigger asChild>
                                             <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 border border-slate-200 overflow-hidden hover:opacity-80 transition-all">

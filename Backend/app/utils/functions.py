@@ -29,7 +29,9 @@ def get_current_user(token: str = Depends(oauth2_schemes), db: Session = Depends
             headers={'WWW-Authenticate': 'Bearer'},
         )
 
-    user = db.query(User).filter(User.id == int(subject)).first()
+    # Authentication must reflect persisted account state even if this Session
+    # already loaded the user before a password reset or account change.
+    user = db.query(User).filter(User.id == int(subject)).populate_existing().first()
     if not user:
         raise HTTPException(
             status_code=401,

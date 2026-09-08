@@ -34,5 +34,7 @@ export function installNotificationSession(client: QueryClient) {
     pendingWrites.clear()
     void client.cancelQueries({ queryKey: ['notifications'] })
     client.removeQueries({ queryKey: ['notifications'] })
+    void client.cancelQueries({ queryKey: ['messaging'] })
+    client.removeQueries({ queryKey: ['messaging'] })
   })
 }

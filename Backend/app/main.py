@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from app.routes import user,auth,job,application,google_auth, saved_job, company
 from app.routes import notification
+from app.routes import conversation
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -78,3 +79,4 @@ app.include_router(google_auth.router)
 app.include_router(saved_job.router)
 app.include_router(company.router)
 app.include_router(notification.router)
+app.include_router(conversation.router)

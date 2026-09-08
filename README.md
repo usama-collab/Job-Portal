@@ -157,3 +157,54 @@ SQLite tests. To include PostgreSQL concurrency checks, provide
 user can create schemas. Tests create and remove their own generated schemas;
 this variable is for local/CI testing and should not be added to Render.
 Run `npm test` and `npm run build` from `Frontend` for UI verification.
+
+## Application messaging
+
+Applicants and the job company's current owners/managers can start and share one
+conversation per application from the application cards or `/messages`. Global
+administrator status and job authorship do not grant access. New company members
+can see prior history; removed members lose access. Hiring, rejection, and job
+closure do not close conversations. Deleting the application/job deletes its
+conversation. Deleted employer senders display as “Deleted user”.
+
+Messages are plain text (1–5,000 characters), without attachments or edits.
+The open thread polls every 5 seconds; the inbox and unread badge poll every 30
+seconds while visible. Each participant has their own read position. Viewing the
+latest messages while the thread is focused acknowledges earlier messages through
+that position and their matching notifications. Marking notifications read does
+not acknowledge conversation messages. New messages notify all other active,
+verified participants in-app; no message emails are sent.
+
+Messaging API (Bearer authentication, private non-cacheable responses):
+
+- `GET /conversations?limit=20&cursor=...`: started threads, latest activity first.
+- `GET /conversations/unread-count`: unread incoming message count.
+- `GET /applications/{id}/conversation`: application context and optional thread.
+- `GET /applications/{id}/messages?limit=50`: latest messages, chronological.
+  `before_id` loads older history; `after_id` catches up in ascending order.
+  Use only one cursor, from the same conversation. Continuation fields are
+  `next_before_id` and `next_after_id`; fetch until the relevant field is null.
+- `POST /applications/{id}/messages`: `{body, client_message_id}` where the latter
+  is a UUID. Reuse the UUID and unchanged text after uncertain delivery: a replay
+  returns `200`, a new message `201`, and conflicting reuse `409`.
+- `PATCH /applications/{id}/conversation/read`: `{last_read_message_id}` advances
+  only the current participant's read position and never moves it backwards.
+
+Release: run `alembic upgrade head` from `Backend` before deploying the new backend
+and frontend. Revision `9f2c6d8e104a` adds the messaging tables and extends
+notifications; existing applications need no backfill. The Render start command
+does not apply migrations. For rollback, prefer retaining the new schema/data;
+the migration downgrade intentionally deletes messages and message notifications.
+Older backend versions cannot read the new notification type, so rolling back
+code also requires draining message writes and handling these notifications.
+
+The existing Redis service enforces `MESSAGE_SEND_LIMIT` (default 30 attempts per
+user) per `MESSAGE_RATE_WINDOW_SECONDS` (default 60). Exhaustion returns `429`
+with `Retry-After`; Redis failure returns `503` for sends only. No new credentials
+or services are required. Monitor endpoint failures, latency, and polling load;
+keep `SQLALCHEMY_ECHO` disabled in production to avoid logging private content.
+
+Run `python -m pytest tests/test_messages.py tests/test_notifications.py
+tests/test_company_authorization.py` from `Backend`. PostgreSQL concurrency tests
+use the same disposable `NOTIFICATION_TEST_DATABASE_URL` fixture described above.
+Run `npm test`, `npm run lint`, and `npm run build` from `Frontend`.

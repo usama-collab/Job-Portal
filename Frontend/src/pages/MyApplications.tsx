@@ -159,6 +159,7 @@ const MyApplications = () => {
                       {statusConfig[app.status]?.label || app.status}
                     </span>
                     <ChevronRight size={20} className="text-slate-300 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+                    <Button variant="outline" onClick={(event) => { event.stopPropagation(); navigate(`/messages/${app.id}`); }}>Message</Button>
                   </div>
                 </div>
               </div>

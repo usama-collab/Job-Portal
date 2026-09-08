@@ -2,6 +2,7 @@
 from sqlalchemy import Column, Integer, ForeignKey, String, Text, DateTime, func
 from sqlalchemy.orm import relationship
 from app.core.db import Base  # adjust import if Base lives elsewhere
+from app.models.conversation import Conversation, Message, ConversationRead  # register dependent metadata
 
 class Application(Base):
     __tablename__ = "applications"

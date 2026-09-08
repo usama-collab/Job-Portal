@@ -61,9 +61,16 @@ def visible_notifications(user: User, db: Session):
         CompanyMembership.role.in_(("owner", "manager")),
     ).exists()
     company_access = Notification.company_id.is_not(None) if user.is_admin else membership
+    applicant_access = db.query(Application.id).filter(
+        Application.id == Notification.application_id, Application.user_id == user.id,
+    ).exists()
+    message_access = and_(Notification.application_id.is_not(None), Notification.message_id.is_not(None),
+                          or_(applicant_access, membership))
     return db.query(Notification).filter(
         Notification.recipient_id == user.id,
-        or_(Notification.type == "application_status_changed", company_access),
+        or_(Notification.type == "application_status_changed",
+            and_(Notification.type == "application_received", company_access),
+            and_(Notification.type == "application_message_received", message_access)),
     )
 
 

@@ -3,7 +3,7 @@ import { notificationWrite } from '../lib/notification-session'
 
 export interface Notification {
   id: number
-  type: 'application_received' | 'application_status_changed'
+  type: 'application_received' | 'application_status_changed' | 'application_message_received'
   application_id: number | null
   job_id: number | null
   company_id: number | null

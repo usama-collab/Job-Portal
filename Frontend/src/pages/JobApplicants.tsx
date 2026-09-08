@@ -255,6 +255,7 @@ const JobApplicants = () => {
                    </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
+                  <Button variant="outline" onClick={() => navigate(`/messages/${app.id}`)}>Message</Button>
                   <Button
                     type="button"
                     variant="outline"

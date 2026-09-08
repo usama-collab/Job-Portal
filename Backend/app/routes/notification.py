@@ -19,7 +19,9 @@ router = APIRouter(prefix="/notifications", tags=["Notifications"], dependencies
 def notification_response(row: Notification):
     result = NotificationOut.model_validate(row)
     if row.application_id is not None and row.job_id is not None:
-        if row.type == "application_received":
+        if row.type == "application_message_received":
+            result.target_path = f"/messages/{row.application_id}" if row.message_id else None
+        elif row.type == "application_received":
             result.target_path = f"/employer/jobs/{row.job_id}/applicants?applicationId={row.application_id}"
         else:
             result.target_path = f"/applications?applicationId={row.application_id}"

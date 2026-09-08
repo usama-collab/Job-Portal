@@ -1,4 +1,5 @@
 import axios from "axios"
+import { notificationScope } from '../lib/notification-session';
 import {
     ACCESS_TOKEN_STORAGE_KEY,
     AUTH_LOGOUT_EVENT,
@@ -10,6 +11,7 @@ declare module "axios" {
     interface AxiosRequestConfig {
         _retry?: boolean;
         skipAuthRefresh?: boolean;
+        _sessionScope?: string | null;
     }
 }
 
@@ -23,6 +25,7 @@ const api = axios.create({
 })
 
 let refreshPromise: Promise<string | null> | null = null;
+let refreshingToken: string | null = null;
 
 const clearAuthentication = () => {
     localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
@@ -35,10 +38,10 @@ const clearAuthentication = () => {
 };
 
 export const refreshAccessToken = (): Promise<string | null> => {
-    if (refreshPromise) return refreshPromise;
-
     const refreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
     if (!refreshToken) return Promise.resolve(null);
+    if (refreshPromise && refreshingToken === refreshToken) return refreshPromise;
+    refreshingToken = refreshToken;
 
     refreshPromise = axios.post(
         `${String(API_BASE_URL).replace(/\/$/, "")}/auth/refresh`,
@@ -46,6 +49,7 @@ export const refreshAccessToken = (): Promise<string | null> => {
         { headers: { "Content-Type": "application/json" } },
     )
         .then((response) => {
+            if (localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY) !== refreshToken) return null;
             const accessToken = response.data?.access_token;
             const rotatedRefreshToken = response.data?.refresh_token;
             if (!accessToken || !rotatedRefreshToken) return null;
@@ -57,7 +61,10 @@ export const refreshAccessToken = (): Promise<string | null> => {
         })
         .catch(() => null)
         .finally(() => {
-            refreshPromise = null;
+            if (refreshingToken === refreshToken) {
+                refreshPromise = null;
+                refreshingToken = null;
+            }
         });
 
     return refreshPromise;
@@ -65,6 +72,10 @@ export const refreshAccessToken = (): Promise<string | null> => {
 
 api.interceptors.request.use(
     (config) => {
+        if (config._sessionScope !== undefined && config._sessionScope !== notificationScope()) {
+            throw new axios.CanceledError('Account changed');
+        }
+        config._sessionScope = notificationScope();
         const token = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
@@ -78,6 +89,9 @@ api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const config = error.config;
+        if (config && config._sessionScope !== notificationScope()) {
+            return Promise.reject(new axios.CanceledError('Account changed'));
+        }
         if (error.response?.status !== 401 || !config) {
             return Promise.reject(error);
         }
@@ -96,6 +110,9 @@ api.interceptors.response.use(
 
         config._retry = true;
         const accessToken = await refreshAccessToken();
+        if (config._sessionScope !== notificationScope()) {
+            return Promise.reject(new axios.CanceledError('Account changed'));
+        }
         if (!accessToken) {
             clearAuthentication();
             return Promise.reject(error);

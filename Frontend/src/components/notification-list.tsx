@@ -41,7 +41,7 @@ export function NotificationList({ items, onNavigate }: { items: Notification[],
   if (!items.length) return <div className="px-6 py-12 text-center text-slate-500">
     <Bell className="mx-auto mb-3 h-8 w-8 text-slate-300" />
     <p className="font-semibold">You’re all caught up</p>
-    <p className="mt-1 text-sm">New application updates will appear here.</p>
+    <p className="mt-1 text-sm">Application updates and new messages will appear here.</p>
   </div>
 
   return <ul className="divide-y divide-slate-100" aria-label="Notifications">
