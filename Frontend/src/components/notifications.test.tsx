@@ -74,6 +74,11 @@ describe('notification experience', () => {
   it('loads count, opens dropdown without marking read, and links to inbox', async () => {
     show(<NotificationBell />)
     const button = await screen.findByRole('button', { name: 'Notifications, 1 unread' })
+    const badge = button.querySelector('[data-slot="unread-badge"]')
+    expect(badge?.classList.contains('h-4')).toBe(true)
+    expect(badge?.classList.contains('min-w-4')).toBe(true)
+    expect(badge?.classList.contains('right-0')).toBe(true)
+    expect(badge?.classList.contains('top-0')).toBe(true)
     expect(button.querySelector('svg')?.classList.contains('fill-current')).toBe(false)
     fireEvent.click(button)
     expect(button.querySelector('svg')?.classList.contains('fill-current')).toBe(true)

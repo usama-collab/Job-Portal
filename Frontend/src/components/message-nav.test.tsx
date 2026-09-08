@@ -33,19 +33,23 @@ function show(path: string) {
 }
 
 describe('message navigation icon', () => {
-  it('uses the solid message icon away from messaging', () => {
+  it('uses an outlined message icon with a compact circular badge', async () => {
     const link = show('/jobs')
     expect(link.getAttribute('aria-current')).toBeNull()
     const icon = link.querySelector('[data-slot="message-icon"]')
     expect(icon?.classList.contains('h-6')).toBe(true)
-    expect(icon?.querySelector('path')?.classList.contains('fill-current')).toBe(true)
-    expect(icon?.querySelectorAll('circle')).toHaveLength(0)
+    expect(icon?.getAttribute('fill')).toBe('none')
+    await screen.findByText('3')
+    const badge = link.querySelector('[data-slot="unread-badge"]')
+    expect(badge?.classList.contains('h-4')).toBe(true)
+    expect(badge?.classList.contains('min-w-4')).toBe(true)
+    expect(badge?.classList.contains('right-0')).toBe(true)
+    expect(badge?.classList.contains('top-0')).toBe(true)
   })
 
   it('highlights the message icon on messaging routes', () => {
     const link = show('/messages/8')
     expect(link.getAttribute('aria-current')).toBe('page')
-    expect(link.querySelector('path')?.classList.contains('fill-current')).toBe(true)
     expect(link.classList.contains('text-blue-600')).toBe(true)
   })
 })
