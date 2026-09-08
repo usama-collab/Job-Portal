@@ -81,6 +81,11 @@ describe('notification experience', () => {
     expect(api.markNotificationRead).not.toHaveBeenCalled()
     expect(screen.getByRole('link', { name: 'View all notifications' }).getAttribute('href')).toBe('/notifications')
     expect(api.getNotifications).toHaveBeenCalledWith(10, false, null, expect.any(AbortSignal))
+
+    fireEvent.click(button)
+    expect(screen.queryByText(item.message)).toBeNull()
+    expect(button.querySelector('svg')?.classList.contains('fill-current')).toBe(false)
+    expect(button.querySelector('svg')?.classList.contains('group-focus:fill-current')).toBe(false)
   })
 
   it('caps the visual badge while keeping an exact accessible count', async () => {

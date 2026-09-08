@@ -19,10 +19,10 @@ function SessionBell() {
     <PopoverTrigger asChild>
       <Button
         variant="ghost"
-        className={`group relative h-10 w-10 rounded-full p-0 transition-colors focus:bg-blue-50 focus:text-blue-600 ${open ? 'bg-blue-50 text-blue-600' : 'text-slate-600'}`}
+        className={`group relative h-10 w-10 rounded-full p-0 transition-colors ${open ? 'bg-blue-50 text-blue-600' : 'text-slate-600'}`}
         aria-label={`Notifications${unread === undefined ? '' : `, ${unread} unread`}${count.isError ? ', updates unavailable' : ''}`}
       >
-        <Bell className={`h-5 w-5 transition-[fill] group-focus:fill-current ${open ? 'fill-current' : ''}`} />
+        <Bell className={`h-5 w-5 transition-[fill] ${open ? 'fill-current' : ''}`} />
         {!!unread && <span aria-hidden="true" className="absolute -right-1 -top-1 rounded-full bg-blue-600 px-1.5 text-[10px] font-bold leading-5 text-white">{unread > 99 ? '99+' : unread}</span>}
       </Button>
     </PopoverTrigger>
