@@ -56,7 +56,7 @@ afterEach(() => {
 });
 
 describe("application eligibility UI", () => {
-  it("disables Apply on a company manager's own job", async () => {
+  it("keeps Quick Apply available on a company manager's own job", async () => {
     localStorage.setItem("token", "test-token");
     profileMock.data = {
       name: "manager",
@@ -69,8 +69,8 @@ describe("application eligibility UI", () => {
 
     renderRoute(<JobDetail />, "/jobs/:id", "/jobs/12");
 
-    const applyButton = await screen.findByRole("button", { name: "You manage this company" });
-    expect(applyButton.hasAttribute("disabled")).toBe(true);
+    const applyButton = await screen.findByRole("button", { name: "Quick Apply" });
+    expect(applyButton.hasAttribute("disabled")).toBe(false);
   });
 
   it("keeps Apply available for jobs at other companies", async () => {

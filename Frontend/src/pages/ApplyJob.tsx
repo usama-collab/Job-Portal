@@ -126,11 +126,6 @@ const ApplyJob = () => {
           <CardDescription className="text-base text-slate-500">Fields marked with * are required.</CardDescription>
         </CardHeader>
         <CardContent className="px-6 pb-10 sm:px-10">
-          {managesJobCompany && (
-            <div role="alert" className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
-              {MANAGED_COMPANY_MESSAGE}
-            </div>
-          )}
           <form onSubmit={handleSubmit} className="mt-4 space-y-10">
             <section className="space-y-3" aria-labelledby="resume-heading">
               <div><h2 id="resume-heading" className="flex items-center gap-2 text-base font-black text-slate-900"><UploadCloud size={18} className="text-blue-600" /> Resume / CV <span className="text-red-500">*</span></h2><p className="mt-1 text-sm text-slate-500">Upload this first, then complete your application details.</p></div>
@@ -178,9 +173,16 @@ const ApplyJob = () => {
               <div className="flex justify-between gap-4 text-xs text-slate-400"><span>Include relevant skills, experience, and motivation.</span><span>{details.cover_letter.length.toLocaleString()} / 10,000</span></div>
             </section>
 
-            <div className="flex flex-col gap-4 border-t border-slate-100 pt-6 sm:flex-row">
-              <Button type="button" variant="ghost" onClick={() => navigate(-1)} disabled={isPending} className="h-12 flex-1 rounded-xl font-bold text-slate-600 hover:bg-slate-100">Discard application</Button>
-              <Button type="submit" disabled={isPending || managesJobCompany} className="h-12 flex-2 rounded-xl bg-blue-600 text-base font-bold shadow-lg shadow-blue-200 hover:bg-blue-700">{isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending application...</> : "Submit application"}</Button>
+            <div className="space-y-4 border-t border-slate-100 pt-6">
+              {managesJobCompany && (
+                <p role="alert" className="text-sm font-semibold text-amber-700">
+                  {MANAGED_COMPANY_MESSAGE}
+                </p>
+              )}
+              <div className="flex flex-col gap-4 sm:flex-row">
+                <Button type="button" variant="ghost" onClick={() => navigate(-1)} disabled={isPending} className="h-12 flex-1 rounded-xl font-bold text-slate-600 hover:bg-slate-100">Discard application</Button>
+                <Button type="submit" disabled={isPending || managesJobCompany} className="h-12 flex-2 rounded-xl bg-blue-600 text-base font-bold shadow-lg shadow-blue-200 hover:bg-blue-700">{isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending application...</> : "Submit application"}</Button>
+              </div>
             </div>
           </form>
         </CardContent>
