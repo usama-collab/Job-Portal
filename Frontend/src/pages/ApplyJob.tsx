@@ -16,6 +16,7 @@ import { useProfile } from "../hooks/useProfile";
 const MAX_RESUME_SIZE = 8 * 1024 * 1024;
 const RESUME_EXTENSIONS = ["pdf", "doc", "docx"];
 const CURRENT_YEAR = new Date().getFullYear();
+const MANAGED_COMPANY_MESSAGE = "You manage this company, so you can’t apply to this job.";
 
 const initialDetails: ApplicationDetails = {
   full_name: "", email: "", phone: "", city: "", current_job_title: "",
@@ -98,6 +99,10 @@ const ApplyJob = () => {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (managesJobCompany) {
+      toast.error(MANAGED_COMPANY_MESSAGE);
+      return;
+    }
     if (!resume) { toast.error("Please upload your resume or CV."); return; }
     const digits = resolvedDetails.phone.replace(/\D/g, "");
     if (digits.length < 7 || digits.length > 15) { toast.error("Enter a valid phone number with 7 to 15 digits."); return; }
@@ -106,19 +111,6 @@ const ApplyJob = () => {
 
   if (isProfileLoading || isJobLoading) {
     return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-10 w-10 animate-spin text-blue-600" aria-label="Checking application eligibility" /></div>;
-  }
-
-  if (managesJobCompany) {
-    return <div className="mx-auto flex min-h-[60vh] max-w-lg items-center px-4">
-      <Card className="w-full rounded-2xl border-slate-200 text-center shadow-xl shadow-blue-500/5">
-        <CardHeader className="space-y-3 p-8">
-          <BriefcaseBusiness className="mx-auto h-10 w-10 text-slate-400" />
-          <CardTitle>You manage this company</CardTitle>
-          <CardDescription>Company owners and managers cannot apply to their own company&apos;s jobs.</CardDescription>
-          <Button type="button" onClick={() => navigate(`/jobs/${id}`)} className="mt-3">Back to job</Button>
-        </CardHeader>
-      </Card>
-    </div>;
   }
 
   return <div className="min-h-screen bg-slate-50/50 px-4 py-8 sm:py-12">
@@ -134,6 +126,11 @@ const ApplyJob = () => {
           <CardDescription className="text-base text-slate-500">Fields marked with * are required.</CardDescription>
         </CardHeader>
         <CardContent className="px-6 pb-10 sm:px-10">
+          {managesJobCompany && (
+            <div role="alert" className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
+              {MANAGED_COMPANY_MESSAGE}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="mt-4 space-y-10">
             <section className="space-y-3" aria-labelledby="resume-heading">
               <div><h2 id="resume-heading" className="flex items-center gap-2 text-base font-black text-slate-900"><UploadCloud size={18} className="text-blue-600" /> Resume / CV <span className="text-red-500">*</span></h2><p className="mt-1 text-sm text-slate-500">Upload this first, then complete your application details.</p></div>
@@ -183,7 +180,7 @@ const ApplyJob = () => {
 
             <div className="flex flex-col gap-4 border-t border-slate-100 pt-6 sm:flex-row">
               <Button type="button" variant="ghost" onClick={() => navigate(-1)} disabled={isPending} className="h-12 flex-1 rounded-xl font-bold text-slate-600 hover:bg-slate-100">Discard application</Button>
-              <Button type="submit" disabled={isPending} className="h-12 flex-2 rounded-xl bg-blue-600 text-base font-bold shadow-lg shadow-blue-200 hover:bg-blue-700">{isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending application...</> : "Submit application"}</Button>
+              <Button type="submit" disabled={isPending || managesJobCompany} className="h-12 flex-2 rounded-xl bg-blue-600 text-base font-bold shadow-lg shadow-blue-200 hover:bg-blue-700">{isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending application...</> : "Submit application"}</Button>
             </div>
           </form>
         </CardContent>

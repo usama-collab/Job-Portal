@@ -89,7 +89,7 @@ describe("application eligibility UI", () => {
     expect((await screen.findByRole("button", { name: "Quick Apply" })).hasAttribute("disabled")).toBe(false);
   });
 
-  it("blocks the direct application form for the managed company", async () => {
+  it("shows the application form but disables submission for the managed company", async () => {
     profileMock.data = {
       name: "owner",
       email: "owner@example.com",
@@ -99,8 +99,9 @@ describe("application eligibility UI", () => {
 
     renderRoute(<ApplyJob />, "/jobs/:id/apply", "/jobs/12/apply");
 
-    expect(await screen.findByText("You manage this company")).toBeTruthy();
-    expect(document.querySelector("input#resume")).toBeNull();
+    expect(await screen.findByText("You manage this company, so you can’t apply to this job.")).toBeTruthy();
+    expect(document.querySelector("input#resume")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Submit application" }).hasAttribute("disabled")).toBe(true);
   });
 
   it("shows the direct application form for another company's job", async () => {
@@ -115,5 +116,6 @@ describe("application eligibility UI", () => {
 
     expect(await screen.findByText("Platform Engineer")).toBeTruthy();
     expect(document.querySelector("input#resume")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Submit application" }).hasAttribute("disabled")).toBe(false);
   });
 });
