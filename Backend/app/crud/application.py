@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import Optional
 from app.models.job import Job
 from app.models.application import Application
+from app.models.company import CompanyMembership
 from app.crud.notification import notify_application_received, notify_status_changed
 
 
@@ -20,6 +21,17 @@ def create_application(
     job = db.query(Job).filter(Job.id == job_id, Job.is_active == True).first()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
+
+    manages_job_company = db.query(CompanyMembership).filter(
+        CompanyMembership.user_id == user_id,
+        CompanyMembership.company_id == job.company_id,
+        CompanyMembership.role.in_(("owner", "manager")),
+    ).first()
+    if manages_job_company:
+        raise HTTPException(
+            status_code=403,
+            detail="You cannot apply to a job at a company you manage",
+        )
     
     existing = db.query(Application).filter(Application.job_id == job_id, Application.user_id == user_id).first()
     if existing:

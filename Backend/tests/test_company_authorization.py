@@ -1,5 +1,6 @@
 import unittest
 
+from fastapi import HTTPException
 from pydantic import ValidationError
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -108,7 +109,7 @@ class CompanyAuthorizationTests(unittest.TestCase):
         self.assertFalse(can_manage_company(outsider, company.id, self.db))
         self.assertTrue(can_manage_company(admin, company.id, self.db))
 
-    def test_company_owner_can_still_apply(self):
+    def test_company_owner_cannot_apply_to_own_job(self):
         owner = self.add_user("owner@example.com")
         company = create_company(CompanyCreate(name="Acme"), owner.id, self.db)
         job = Job(
@@ -121,12 +122,44 @@ class CompanyAuthorizationTests(unittest.TestCase):
         self.db.add(job)
         self.db.commit()
 
-        application = create_application(job.id, owner.id, None, None, None, self.db)
-        self.assertEqual(owner.id, application.user_id)
+        with self.assertRaises(HTTPException) as error:
+            create_application(job.id, owner.id, None, None, None, self.db)
 
         listing = get_jobs_for_company(company.id, self.db)[0]
         response = EmployerJobOut.model_validate(listing)
-        self.assertEqual(1, response.applications_count)
+        self.assertEqual(403, error.exception.status_code)
+        self.assertEqual("You cannot apply to a job at a company you manage", error.exception.detail)
+        self.assertEqual(0, response.applications_count)
+
+    def test_company_manager_cannot_apply_to_own_job(self):
+        owner = self.add_user("owner@example.com")
+        manager = self.add_user("manager@example.com")
+        company = create_company(CompanyCreate(name="Acme"), owner.id, self.db)
+        self.db.add(CompanyMembership(company_id=company.id, user_id=manager.id, role="manager"))
+        job = Job(title="Engineer", description="Build things", company_id=company.id, is_active=True)
+        self.db.add(job)
+        self.db.commit()
+
+        with self.assertRaises(HTTPException) as error:
+            create_application(job.id, manager.id, None, None, None, self.db)
+
+        self.assertEqual(403, error.exception.status_code)
+        self.assertEqual(0, self.db.query(Application).count())
+
+    def test_company_member_can_apply_to_another_company_job(self):
+        owner = self.add_user("owner@example.com")
+        own_company = create_company(CompanyCreate(name="Acme"), owner.id, self.db)
+        other_company = Company(name="Other")
+        self.db.add(other_company)
+        self.db.flush()
+        job = Job(title="Engineer", description="Build things", company_id=other_company.id, is_active=True)
+        self.db.add(job)
+        self.db.commit()
+
+        application = create_application(job.id, owner.id, None, None, None, self.db)
+
+        self.assertEqual(owner.id, application.user_id)
+        self.assertNotEqual(own_company.id, application.job.company_id)
 
 
 if __name__ == "__main__":

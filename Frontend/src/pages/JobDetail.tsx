@@ -5,6 +5,7 @@ import { getJobById } from "../api/jobs";
 import { Button } from "../components/ui/button";
 import { getMyApplications } from "../api/application";
 import { toggleSaveJob, getMySavedJobs } from "../api/savedJobs";
+import { useProfile } from "../hooks/useProfile";
 import { 
   Bookmark, 
   BookmarkCheck, 
@@ -26,6 +27,7 @@ const JobDetail = () => {
 
   // 1. Authentication state
   const token = localStorage.getItem('token');
+  const { data: profile, isLoading: isProfileLoading } = useProfile();
 
   // 2. Fetch Job Details
   const { data: job, isLoading, isError } = useQuery({
@@ -56,6 +58,9 @@ const JobDetail = () => {
   const isSaved = savedJobs?.some(
     (item) => item.job_id === job?.id || item.job_id === Number(id)
   );
+
+  const managedCompanyId = profile?.company_membership?.company_id;
+  const managesJobCompany = managedCompanyId != null && managedCompanyId === job?.company_id;
 
   // 6. Mutations
   const { mutate: handleToggleSave, isPending: isToggling } = useMutation({
@@ -177,16 +182,18 @@ const JobDetail = () => {
                   ) : (
                     <Button
                       className={`w-full h-14 rounded-2xl text-base sm:text-lg font-black transition-all shadow-xl ${
-                        hasApplied 
+                        hasApplied
                         ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-none cursor-default' 
+                        : managesJobCompany
+                        ? 'bg-slate-100 text-slate-500 border border-slate-200 shadow-none cursor-default'
                         : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200'
                       }`}
                       onClick={handleApplyNavigation}
-                      disabled={hasApplied}
+                      disabled={hasApplied || managesJobCompany || isProfileLoading}
                     >
                       {hasApplied ? (
                         <span className="flex items-center gap-2"><CheckCircle2 size={20} /> Applied</span>
-                      ) : "Quick Apply"}
+                      ) : managesJobCompany ? "You manage this company" : isProfileLoading ? "Checking eligibility..." : "Quick Apply"}
                     </Button>
                   )}
 

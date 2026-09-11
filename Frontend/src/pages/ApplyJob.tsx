@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { applyToJob, type ApplicationDetails } from "../api/application";
+import { getJobById } from "../api/jobs";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
@@ -41,8 +42,15 @@ const ApplyJob = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
-  const jobTitle = location.state?.jobTitle || "the position";
-  const { data: profile } = useProfile();
+  const { data: profile, isLoading: isProfileLoading } = useProfile();
+  const { data: job, isLoading: isJobLoading } = useQuery({
+    queryKey: ["job", id],
+    queryFn: () => getJobById(id!),
+    enabled: !!id,
+  });
+  const jobTitle = job?.title || location.state?.jobTitle || "the position";
+  const managedCompanyId = profile?.company_membership?.company_id;
+  const managesJobCompany = managedCompanyId != null && managedCompanyId === job?.company_id;
   const [details, setDetails] = useState(initialDetails);
   const [editedProfileFields, setEditedProfileFields] = useState({ full_name: false, email: false, city: false });
   const [resume, setResume] = useState<File | null>(null);
@@ -95,6 +103,23 @@ const ApplyJob = () => {
     if (digits.length < 7 || digits.length > 15) { toast.error("Enter a valid phone number with 7 to 15 digits."); return; }
     mutate();
   };
+
+  if (isProfileLoading || isJobLoading) {
+    return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-10 w-10 animate-spin text-blue-600" aria-label="Checking application eligibility" /></div>;
+  }
+
+  if (managesJobCompany) {
+    return <div className="mx-auto flex min-h-[60vh] max-w-lg items-center px-4">
+      <Card className="w-full rounded-2xl border-slate-200 text-center shadow-xl shadow-blue-500/5">
+        <CardHeader className="space-y-3 p-8">
+          <BriefcaseBusiness className="mx-auto h-10 w-10 text-slate-400" />
+          <CardTitle>You manage this company</CardTitle>
+          <CardDescription>Company owners and managers cannot apply to their own company&apos;s jobs.</CardDescription>
+          <Button type="button" onClick={() => navigate(`/jobs/${id}`)} className="mt-3">Back to job</Button>
+        </CardHeader>
+      </Card>
+    </div>;
+  }
 
   return <div className="min-h-screen bg-slate-50/50 px-4 py-8 sm:py-12">
     <div className="mx-auto max-w-4xl">

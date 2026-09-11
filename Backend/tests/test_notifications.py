@@ -111,11 +111,6 @@ def test_owner_only_and_creator_is_not_recipient(scenario):
     assert "seeker applied for Engineer at Acme" in row.message
     for user in (manager, seeker, outsider, admin):
         assert visible_notifications(user, db).count() == 0
-    # Owners can still apply; they do not receive alerts for their own submission.
-    applications.create_application(job.id, owner.id, None, None, None, db)
-    assert db.query(Notification).count() == 1
-
-
 @pytest.mark.parametrize("field", ["is_active", "email_verified"])
 def test_unavailable_owner_is_not_notified(scenario, field):
     db, _, _, owner, *_ = scenario
