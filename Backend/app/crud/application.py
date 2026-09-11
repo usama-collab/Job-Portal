@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import Optional
 from app.models.job import Job
 from app.models.application import Application
@@ -60,11 +60,23 @@ def create_application(
 
 
 def get_applications_for_job(job_id: int, db: Session) -> list[Application]:
-    return db.query(Application).filter(Application.job_id == job_id).order_by(Application.created_at.desc()).all()
+    return (
+        db.query(Application)
+        .options(joinedload(Application.job), joinedload(Application.user))
+        .filter(Application.job_id == job_id)
+        .order_by(Application.created_at.desc())
+        .all()
+    )
 
 
 def get_applications_for_user(user_id: int, db: Session) -> list[Application]:
-    return db.query(Application).filter(Application.user_id == user_id).order_by(Application.created_at.desc()).all()
+    return (
+        db.query(Application)
+        .options(joinedload(Application.job), joinedload(Application.user))
+        .filter(Application.user_id == user_id)
+        .order_by(Application.created_at.desc())
+        .all()
+    )
 
 
 def get_application_by_id(application_id: int, db: Session) -> Optional[Application]:

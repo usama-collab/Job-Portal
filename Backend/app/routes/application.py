@@ -82,6 +82,7 @@ def _application_response(application) -> dict:
     """Expose an authorized endpoint, never the private R2 object key."""
 
     response = ApplicationOut.model_validate(application).model_dump()
+    response["job_title"] = application.job.title if application.job else None
     response["resume_path"] = (
         f"/applications/{application.id}/resume"
         if is_storage_key(application.resume_path, "resumes")

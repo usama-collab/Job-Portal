@@ -147,7 +147,7 @@ const MyApplications = () => {
                     </div>
                     <div>
                       <h2 className="text-lg font-black text-slate-900 group-hover:text-blue-600 transition-colors">
-                        Position ID: #{app.job_id}
+                        {app.job_title || `Position #${app.job_id}`}
                       </h2>
                       <div className="flex items-center gap-3 text-xs text-slate-400 font-bold mt-1">
                         <span className="flex items-center gap-1"><Clock size={14} /> Applied on {new Date(app.created_at).toLocaleDateString()}</span>

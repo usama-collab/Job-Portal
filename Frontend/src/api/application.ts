@@ -9,6 +9,7 @@ import api from "./axios"
 export interface Application {
   id: number
   job_id: number
+  job_title?: string | null
   status: "applied" | "under_review" | "shortlisted" | "hired" | "rejected"
   created_at: string
   user_id: number

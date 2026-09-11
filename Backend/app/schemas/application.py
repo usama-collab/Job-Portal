@@ -72,6 +72,7 @@ class ApplicationOut(BaseModel):
 
     id: int
     job_id: int
+    job_title: Optional[str] = None
     user_id: int
     resume_path: Optional[str] = None
     resume_filename: Optional[str] = None
