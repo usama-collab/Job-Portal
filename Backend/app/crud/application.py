@@ -14,7 +14,8 @@ def create_application(
         cover_letter: Optional[str],
         resume_path: Optional[str],
         resume_filename: Optional[str],
-        db: Session
+        db: Session,
+        **candidate_details,
         ) -> Application:
     job = db.query(Job).filter(Job.id == job_id, Job.is_active == True).first()
     if not job:
@@ -30,6 +31,7 @@ def create_application(
         cover_letter=cover_letter,
         resume_path=resume_path,
         resume_filename=resume_filename,
+        **candidate_details,
         status='applied'
     )
 

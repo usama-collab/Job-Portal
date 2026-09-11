@@ -20,7 +20,11 @@ import {
   FileText,
   Download,
   ExternalLink,
-  Quote
+  Quote,
+  Phone,
+  MapPin,
+  GraduationCap,
+  BriefcaseBusiness,
 } from "lucide-react";
 import { toast } from "sonner";
 import api from "../api/axios";
@@ -204,12 +208,12 @@ const JobApplicants = () => {
                     <div className="min-w-0 flex-1 space-y-1">
                       <div className="flex min-w-0 items-center gap-2">
                       <h2 className="min-w-0 break-words text-lg font-black leading-tight text-slate-900 [overflow-wrap:anywhere] sm:text-xl sm:leading-none">
-                        {app.user_email?.split("@")[0] ?? `Applicant #${app.user_id}`}
+                        {app.full_name ?? app.user_email?.split("@")[0] ?? `Applicant #${app.user_id}`}
                       </h2>
                       {app.status === 'hired' && <CheckCircle2 size={18} className="shrink-0 text-emerald-500" />}
                     </div>
                     <div className="flex min-w-0 flex-col gap-1 text-xs font-bold text-slate-400 sm:flex-row sm:flex-wrap sm:gap-x-4">
-                      <span className="flex min-w-0 items-start gap-1.5"><Mail size={12} className="mt-0.5 shrink-0" /> <span className="min-w-0 [overflow-wrap:anywhere]">{app.user_email}</span></span>
+                      <span className="flex min-w-0 items-start gap-1.5"><Mail size={12} className="mt-0.5 shrink-0" /> <span className="min-w-0 [overflow-wrap:anywhere]">{app.email ?? app.user_email}</span></span>
                       <span className="flex items-center gap-1.5"><Calendar size={12} className="shrink-0" /> {new Date(app.created_at).toLocaleDateString()}</span>
                     </div>
                   </div>
@@ -232,6 +236,17 @@ const JobApplicants = () => {
                   </select>
                 </div>
               </div>
+
+              {(app.phone || app.city || app.degree || app.current_job_title || app.notice_period) && (
+                <div className="grid gap-3 rounded-2xl border border-slate-100 bg-white p-4 text-sm sm:grid-cols-2 lg:grid-cols-3 sm:p-5">
+                  {app.phone && <div className="flex items-start gap-2 text-slate-600"><Phone size={15} className="mt-0.5 shrink-0 text-blue-600" /><span className="break-words">{app.phone}</span></div>}
+                  {app.city && <div className="flex items-start gap-2 text-slate-600"><MapPin size={15} className="mt-0.5 shrink-0 text-blue-600" /><span className="break-words">{app.city}</span></div>}
+                  {app.current_job_title && <div className="flex items-start gap-2 text-slate-600"><BriefcaseBusiness size={15} className="mt-0.5 shrink-0 text-blue-600" /><span className="break-words">{app.current_job_title}{app.total_experience_years ? ` · ${app.total_experience_years} years` : ""}</span></div>}
+                  {app.degree && <div className="flex items-start gap-2 text-slate-600"><GraduationCap size={15} className="mt-0.5 shrink-0 text-blue-600" /><span className="break-words">{app.degree}{app.field_of_study ? `, ${app.field_of_study}` : ""}<span className="block text-xs text-slate-400">{app.university_name}{app.graduation_year ? ` · ${app.graduation_year}` : ""}</span></span></div>}
+                  {app.notice_period && <div className="text-slate-600"><span className="font-bold text-slate-800">Notice:</span> {app.notice_period.replaceAll("_", " ")}</div>}
+                  {(app.current_salary || app.expected_salary) && <div className="text-slate-600"><span className="font-bold text-slate-800">Salary:</span> {app.current_salary ? `${app.salary_currency} ${Number(app.current_salary).toLocaleString()}` : "Not shared"} → {app.expected_salary ? `${app.salary_currency} ${Number(app.expected_salary).toLocaleString()}` : "Negotiable"}</div>}
+                </div>
+              )}
 
               {/* Middle Row: Cover Letter */}
               {app.cover_letter && (

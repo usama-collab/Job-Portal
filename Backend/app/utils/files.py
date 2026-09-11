@@ -15,7 +15,7 @@ from fastapi import HTTPException, UploadFile
 from app.core.config import settings
 
 
-ALLOWED_DOC_EXT = {".pdf", ".doc", ".docx", ".txt"}
+ALLOWED_DOC_EXT = {".pdf", ".doc", ".docx"}
 ALLOWED_IMAGE_EXT = {".png", ".jpg", ".jpeg", ".webp"}
 MAX_FILE_SIZE = 8 * 1024 * 1024  # 8MB
 
@@ -194,7 +194,11 @@ async def delete_object(object_key: str) -> None:
 
 def _original_filename(file: UploadFile) -> str:
     raw_filename = (file.filename or "").replace("\\", "/")
-    return Path(raw_filename).name
+    filename = Path(raw_filename).name
+    if len(filename) <= 255:
+        return filename
+    extension = Path(filename).suffix
+    return f"{Path(filename).stem[:255 - len(extension)]}{extension}"
 
 
 async def _save_upload_file(
@@ -213,6 +217,8 @@ async def _save_upload_file(
         raise HTTPException(status_code=400, detail=f"Unsupported file extension {extension}")
 
     content = await file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail="The uploaded file is empty")
     if len(content) > MAX_FILE_SIZE:
         raise HTTPException(
             status_code=413,

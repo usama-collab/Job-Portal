@@ -1,6 +1,8 @@
-from typing import Optional
+from typing import Annotated, Optional
+from decimal import Decimal
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile, File, Form, Depends
+from pydantic import EmailStr, ValidationError
 from fastapi.responses import Response
 from pathlib import Path
 import mimetypes
@@ -18,7 +20,7 @@ from app.utils.files import (
 from app.utils.send_app_email import send_app_email
 from app.core.db import get_db
 from app.models.user import User
-from app.schemas.application import ApplicationOut, ApplicationUpdateStatus
+from app.schemas.application import ApplicationCreate, ApplicationOut, ApplicationUpdateStatus, NOTICE_PERIODS
 from app.utils.functions import can_manage_company, get_current_user
 from app.crud import application as crud_app
 from app.crud import job as crud_job
@@ -26,6 +28,50 @@ from app.crud import job as crud_job
 
 
 router = APIRouter(prefix="/applications", tags=["Applications"])
+
+
+def _application_form(
+    full_name: Annotated[str, Form()],
+    email: Annotated[EmailStr, Form()],
+    phone: Annotated[str, Form()],
+    city: Annotated[str, Form()],
+    salary_currency: Annotated[str, Form()],
+    notice_period: Annotated[NOTICE_PERIODS, Form()],
+    university_name: Annotated[str, Form()],
+    degree: Annotated[str, Form()],
+    graduation_year: Annotated[int, Form()],
+    cover_letter: Annotated[str, Form()],
+    current_job_title: Annotated[Optional[str], Form()] = None,
+    total_experience_years: Annotated[Optional[Decimal], Form()] = None,
+    current_salary: Annotated[Optional[Decimal], Form()] = None,
+    expected_salary: Annotated[Optional[Decimal], Form()] = None,
+    field_of_study: Annotated[Optional[str], Form()] = None,
+) -> ApplicationCreate:
+    """Flatten validated candidate details alongside the multipart resume field."""
+    try:
+        return ApplicationCreate(
+            full_name=full_name,
+            email=email,
+            phone=phone,
+            city=city,
+            current_job_title=current_job_title,
+            total_experience_years=total_experience_years,
+            current_salary=current_salary,
+            expected_salary=expected_salary,
+            salary_currency=salary_currency,
+            notice_period=notice_period,
+            university_name=university_name,
+            degree=degree,
+            field_of_study=field_of_study,
+            graduation_year=graduation_year,
+            cover_letter=cover_letter,
+        )
+    except ValidationError as exc:
+        detail = [
+            {"loc": ["body", *error["loc"]], "msg": error["msg"], "type": error["type"]}
+            for error in exc.errors(include_url=False)
+        ]
+        raise HTTPException(status_code=422, detail=detail) from exc
 
 
 def _application_response(application) -> dict:
@@ -51,9 +97,9 @@ def _download_filename(filename: Optional[str]) -> str:
 async def apply_to_job(
     job_id: int,
     background_tasks: BackgroundTasks,
+    resume: UploadFile = File(...),
+    details: ApplicationCreate = Depends(_application_form),
     current_user: User = Depends(get_current_user),
-    cover_letter: Optional[str] = Form(None),
-    resume: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db)
     ):
     resume_path = None
@@ -67,10 +113,11 @@ async def apply_to_job(
         app = crud_app.create_application(
             job_id,
             current_user.id,
-            cover_letter,
+            details.cover_letter,
             resume_path,
             resume_filename,
             db,
+            **details.model_dump(exclude={"cover_letter"}),
         )
     except Exception:
         if resume_path:
