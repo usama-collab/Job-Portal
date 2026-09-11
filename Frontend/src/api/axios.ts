@@ -19,9 +19,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const api = axios.create({
     baseURL: API_BASE_URL,
-    headers: {
-        "Content-Type": "application/json"
-    }
+    // Axios detects JSON payloads; leave FormData intact so the browser can
+    // supply the multipart Content-Type and boundary for file uploads.
 })
 
 let refreshPromise: Promise<string | null> | null = null;
