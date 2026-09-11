@@ -1,11 +1,12 @@
 # schemas/application.py
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl, TypeAdapter, field_validator
 from datetime import datetime
 from decimal import Decimal
 from typing import Literal, Optional
 import re
 
 NOTICE_PERIODS = Literal["immediate", "15_days", "30_days", "60_days", "90_days", "more_than_90_days"]
+HTTP_URL = TypeAdapter(HttpUrl)
 
 class ApplicationCreate(BaseModel):
     full_name: str = Field(min_length=2, max_length=100)
@@ -18,6 +19,8 @@ class ApplicationCreate(BaseModel):
     expected_salary: Optional[Decimal] = Field(default=None, ge=0, le=999_999_999_999)
     salary_currency: str = Field(min_length=3, max_length=3)
     notice_period: NOTICE_PERIODS
+    github_url: Optional[str] = Field(default=None, max_length=2048)
+    website_url: Optional[str] = Field(default=None, max_length=2048)
     university_name: str = Field(min_length=2, max_length=160)
     degree: str = Field(min_length=2, max_length=120)
     field_of_study: Optional[str] = Field(default=None, max_length=120)
@@ -54,6 +57,16 @@ class ApplicationCreate(BaseModel):
             raise ValueError("Currency must be a 3-letter ISO code")
         return value
 
+    @field_validator("github_url", "website_url", mode="before")
+    @classmethod
+    def validate_optional_url(cls, value):
+        if value is None or not isinstance(value, str):
+            return value
+        value = value.strip()
+        if not value:
+            return None
+        return str(HTTP_URL.validate_python(value))
+
 class ApplicationOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -73,6 +86,8 @@ class ApplicationOut(BaseModel):
     expected_salary: Optional[Decimal] = None
     salary_currency: Optional[str] = None
     notice_period: Optional[str] = None
+    github_url: Optional[str] = None
+    website_url: Optional[str] = None
     university_name: Optional[str] = None
     degree: Optional[str] = None
     field_of_study: Optional[str] = None

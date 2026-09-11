@@ -26,6 +26,8 @@ class Application(Base):
     expected_salary = Column(Numeric(14, 2), nullable=True)
     salary_currency = Column(String(3), nullable=True)
     notice_period = Column(String(30), nullable=True)
+    github_url = Column(String(2048), nullable=True)
+    website_url = Column(String(2048), nullable=True)
     university_name = Column(String(160), nullable=True)
     degree = Column(String(120), nullable=True)
     field_of_study = Column(String(120), nullable=True)

@@ -21,8 +21,9 @@ const MANAGED_COMPANY_MESSAGE = "You manage this company, so you can’t apply t
 const initialDetails: ApplicationDetails = {
   full_name: "", email: "", phone: "", city: "", current_job_title: "",
   total_experience_years: "", current_salary: "", expected_salary: "",
-  salary_currency: "USD", notice_period: "", university_name: "", degree: "",
-  field_of_study: "", graduation_year: "", cover_letter: "",
+  salary_currency: "USD", notice_period: "", github_url: "", website_url: "",
+  university_name: "", degree: "", field_of_study: "", graduation_year: "",
+  cover_letter: "",
 };
 
 type FieldProps = { id: keyof ApplicationDetails; label: string; required?: boolean; children: React.ReactNode; hint?: string };
@@ -36,7 +37,7 @@ function FormField({ id, label, required, children, hint }: FieldProps) {
 }
 
 const fieldClass = "h-11 rounded-xl border-slate-200 bg-white px-3 focus-visible:border-blue-500 focus-visible:ring-blue-500/20";
-const selectClass = `${fieldClass} w-full text-sm text-slate-700 outline-none focus:ring-3`;
+const selectClass = `${fieldClass} w-full border text-sm text-slate-700 outline-none focus:ring-3`;
 
 const ApplyJob = () => {
   const { id } = useParams();
@@ -126,7 +127,7 @@ const ApplyJob = () => {
           <CardDescription className="text-base text-slate-500">Fields marked with * are required.</CardDescription>
         </CardHeader>
         <CardContent className="px-6 pb-10 sm:px-10">
-          <form onSubmit={handleSubmit} className="mt-4 space-y-10">
+          <form onSubmit={handleSubmit} className="application-form mt-4 space-y-10">
             <section className="space-y-3" aria-labelledby="resume-heading">
               <div><h2 id="resume-heading" className="flex items-center gap-2 text-base font-black text-slate-900"><UploadCloud size={18} className="text-blue-600" /> Resume / CV <span className="text-red-500">*</span></h2><p className="mt-1 text-sm text-slate-500">Upload this first, then complete your application details.</p></div>
               <div className={`relative flex min-h-40 flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-6 text-center transition-all ${resume ? "border-green-300 bg-green-50/40" : "border-slate-200 bg-slate-50/60 hover:border-blue-300 hover:bg-blue-50/30"}`}>
@@ -154,6 +155,8 @@ const ApplyJob = () => {
                 <FormField id="expected_salary" label="Expected annual salary" hint="Optional — leave blank if negotiable."><Input id="expected_salary" type="number" inputMode="decimal" min="0" max="999999999999" step="0.01" value={details.expected_salary} onChange={(e) => setField("expected_salary", e.target.value)} className={fieldClass} placeholder="e.g. 90000" /></FormField>
                 <FormField id="salary_currency" label="Salary currency" required><Input id="salary_currency" required minLength={3} maxLength={3} pattern="[A-Za-z]{3}" value={details.salary_currency} onChange={(e) => setField("salary_currency", e.target.value.toUpperCase())} className={fieldClass} placeholder="USD" /></FormField>
                 <FormField id="notice_period" label="Notice period" required><select id="notice_period" required value={details.notice_period} onChange={(e) => setField("notice_period", e.target.value)} className={selectClass}><option value="">Select availability</option><option value="immediate">Immediate</option><option value="15_days">15 days</option><option value="30_days">30 days</option><option value="60_days">60 days</option><option value="90_days">90 days</option><option value="more_than_90_days">More than 90 days</option></select></FormField>
+                <FormField id="github_url" label="GitHub URL" hint="Optional — link to your GitHub profile."><Input id="github_url" name="github_url" type="url" autoComplete="url" maxLength={2048} value={details.github_url} onChange={(e) => setField("github_url", e.target.value)} className={fieldClass} placeholder="https://github.com/username" /></FormField>
+                <FormField id="website_url" label="Website URL" hint="Optional — portfolio or personal website."><Input id="website_url" name="website_url" type="url" maxLength={2048} value={details.website_url} onChange={(e) => setField("website_url", e.target.value)} className={fieldClass} placeholder="https://yourwebsite.com" /></FormField>
               </div>
             </section>
 

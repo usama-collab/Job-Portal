@@ -46,6 +46,8 @@ def _application_form(
     current_salary: Annotated[Optional[Decimal], Form()] = None,
     expected_salary: Annotated[Optional[Decimal], Form()] = None,
     field_of_study: Annotated[Optional[str], Form()] = None,
+    github_url: Annotated[Optional[str], Form()] = None,
+    website_url: Annotated[Optional[str], Form()] = None,
 ) -> ApplicationCreate:
     """Flatten validated candidate details alongside the multipart resume field."""
     try:
@@ -63,6 +65,8 @@ def _application_form(
             university_name=university_name,
             degree=degree,
             field_of_study=field_of_study,
+            github_url=github_url,
+            website_url=website_url,
             graduation_year=graduation_year,
             cover_letter=cover_letter,
         )

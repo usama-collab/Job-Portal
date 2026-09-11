@@ -65,6 +65,17 @@
 
 html { scroll-behavior: smooth; }
 
+/* Keep Chrome's autofilled fields visually consistent with regular form fields. */
+.application-form input:-webkit-autofill,
+.application-form input:-webkit-autofill:hover,
+.application-form input:-webkit-autofill:focus,
+.application-form input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--color-slate-900);
+  caret-color: var(--color-slate-900);
+  box-shadow: 0 0 0 1000px white inset;
+  transition: background-color 9999s ease-out 0s;
+}
+
 @keyframes home-rise {
   from { opacity: 0; transform: translateY(18px); }
   to { opacity: 1; transform: translateY(0); }

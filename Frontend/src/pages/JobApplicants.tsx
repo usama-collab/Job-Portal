@@ -25,6 +25,8 @@ import {
   MapPin,
   GraduationCap,
   BriefcaseBusiness,
+  Github,
+  Globe2,
 } from "lucide-react";
 import { toast } from "sonner";
 import api from "../api/axios";
@@ -237,7 +239,7 @@ const JobApplicants = () => {
                 </div>
               </div>
 
-              {(app.phone || app.city || app.degree || app.current_job_title || app.notice_period) && (
+              {(app.phone || app.city || app.degree || app.current_job_title || app.notice_period || app.github_url || app.website_url) && (
                 <div className="grid gap-3 rounded-2xl border border-slate-100 bg-white p-4 text-sm sm:grid-cols-2 lg:grid-cols-3 sm:p-5">
                   {app.phone && <div className="flex items-start gap-2 text-slate-600"><Phone size={15} className="mt-0.5 shrink-0 text-blue-600" /><span className="break-words">{app.phone}</span></div>}
                   {app.city && <div className="flex items-start gap-2 text-slate-600"><MapPin size={15} className="mt-0.5 shrink-0 text-blue-600" /><span className="break-words">{app.city}</span></div>}
@@ -245,6 +247,8 @@ const JobApplicants = () => {
                   {app.degree && <div className="flex items-start gap-2 text-slate-600"><GraduationCap size={15} className="mt-0.5 shrink-0 text-blue-600" /><span className="break-words">{app.degree}{app.field_of_study ? `, ${app.field_of_study}` : ""}<span className="block text-xs text-slate-400">{app.university_name}{app.graduation_year ? ` · ${app.graduation_year}` : ""}</span></span></div>}
                   {app.notice_period && <div className="text-slate-600"><span className="font-bold text-slate-800">Notice:</span> {app.notice_period.replaceAll("_", " ")}</div>}
                   {(app.current_salary || app.expected_salary) && <div className="text-slate-600"><span className="font-bold text-slate-800">Salary:</span> {app.current_salary ? `${app.salary_currency} ${Number(app.current_salary).toLocaleString()}` : "Not shared"} → {app.expected_salary ? `${app.salary_currency} ${Number(app.expected_salary).toLocaleString()}` : "Negotiable"}</div>}
+                  {app.github_url && <a href={app.github_url} target="_blank" rel="noopener noreferrer" className="flex items-start gap-2 text-blue-600 hover:underline"><Github size={15} className="mt-0.5 shrink-0" /><span className="break-all">GitHub profile</span></a>}
+                  {app.website_url && <a href={app.website_url} target="_blank" rel="noopener noreferrer" className="flex items-start gap-2 text-blue-600 hover:underline"><Globe2 size={15} className="mt-0.5 shrink-0" /><span className="break-all">Portfolio / website</span></a>}
                 </div>
               )}
 

@@ -23,6 +23,8 @@ export interface Application {
   expected_salary?: string | null
   salary_currency?: string | null
   notice_period?: string | null
+  github_url?: string | null
+  website_url?: string | null
   university_name?: string | null
   degree?: string | null
   field_of_study?: string | null
@@ -45,6 +47,8 @@ export interface ApplicationDetails {
   expected_salary: string
   salary_currency: string
   notice_period: string
+  github_url: string
+  website_url: string
   university_name: string
   degree: string
   field_of_study: string

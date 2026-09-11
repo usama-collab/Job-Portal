@@ -116,6 +116,9 @@ describe("application eligibility UI", () => {
 
     expect(await screen.findByText("Platform Engineer")).toBeTruthy();
     expect(document.querySelector("input#resume")).toBeTruthy();
+    expect(screen.getByLabelText("GitHub URL").hasAttribute("required")).toBe(false);
+    expect(screen.getByLabelText("Website URL").hasAttribute("required")).toBe(false);
+    expect(screen.getByLabelText(/Notice period/).classList.contains("border")).toBe(true);
     expect(screen.getByRole("button", { name: "Submit application" }).hasAttribute("disabled")).toBe(false);
   });
 });
