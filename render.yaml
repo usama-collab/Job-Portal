@@ -12,7 +12,7 @@ services:
         sync: false
       - key: MAIL_FROM
         sync: false
-      - key: OPENAI_API_KEY
+      - key: GEMINI_API_KEY
         sync: false
       - key: RESUME_AI_ENABLED
         sync: false

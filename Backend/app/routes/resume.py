@@ -204,7 +204,7 @@ async def analyze_resume(
         raise HTTPException(status_code=422, detail="Consent is required before analysis")
     if not settings.RESUME_AI_ENABLED:
         raise HTTPException(status_code=503, detail="AI resume analysis is not enabled")
-    if not settings.OPENAI_API_KEY:
+    if not settings.GEMINI_API_KEY or not settings.GEMINI_API_KEY.strip():
         raise HTTPException(status_code=503, detail="AI resume analysis is not configured")
     if payload.resume_id != current_user.resume_id or not is_storage_key(current_user.resume_path, "profile-resumes"):
         raise HTTPException(status_code=409, detail="The profile resume has changed")

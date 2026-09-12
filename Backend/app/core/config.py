@@ -16,9 +16,9 @@ class Settings(BaseSettings):
     R2_ACCESS_KEY_ID: str | None = Field(None, env="R2_ACCESS_KEY_ID")
     R2_SECRET_ACCESS_KEY: str | None = Field(None, env="R2_SECRET_ACCESS_KEY")
     R2_BUCKET_NAME: str | None = Field(None, env="R2_BUCKET_NAME")
-    OPENAI_API_KEY: str | None = Field(None, env="OPENAI_API_KEY")
+    GEMINI_API_KEY: str | None = Field(None, env="GEMINI_API_KEY")
     RESUME_AI_ENABLED: bool = Field(False, env="RESUME_AI_ENABLED")
-    RESUME_AI_MODEL: str = Field("gpt-4.1-mini-2025-04-14", env="RESUME_AI_MODEL")
+    RESUME_AI_MODEL: str = Field("gemini-3.1-flash-lite", env="RESUME_AI_MODEL")
     BREVO_API_KEY: str | None = Field(None, env="BREVO_API_KEY")
     MAIL_FROM: str = Field(..., env="MAIL_FROM")
     CONFIRMATION_TOKEN_EXPIRE_MINUTES: int = Field(15, env="CONFIRMATION_TOKEN_EXPIRE_MINUTES")
@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     SESSION_SECRET: str = Field(..., env='SESSION_SECRET')
 
     class Config:
+        # Ignore obsolete provider entries in local dotenv files during migration.
+        extra = "ignore"
         env_file = Path(__file__).resolve().parent.parent / ".env"
         # This points to Backend/app/.env for local development.
 

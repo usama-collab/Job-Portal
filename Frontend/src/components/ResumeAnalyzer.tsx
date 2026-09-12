@@ -184,7 +184,7 @@ export default function ResumeAnalyzer() {
         </div>
       )}
 
-      <label className="mt-4 flex items-start gap-2 text-xs text-slate-600"><input className="mt-0.5" type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} /> I agree to send extracted resume text to OpenAI for this analysis. Nothing is added to my profile until I save selected items. OpenAI may retain API content for abuse monitoring under its data policy.</label>
+      <label className="mt-4 flex items-start gap-2 text-xs text-slate-600"><input className="mt-0.5" type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} /> I agree to send extracted resume text to Google Gemini for this analysis. Nothing is added to my profile until I save selected items. On the free tier, Google may use submitted content to improve its products under its data policy.</label>
 
       <Dialog open={Boolean(analysis)} onOpenChange={(open) => { if (!open) setAnalysis(null); }}>
         <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-4xl">

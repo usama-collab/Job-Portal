@@ -6,16 +6,22 @@ Jobify is a high-performance, real-time job portal designed to bridge the gap be
 
 ## AI resume parsing setup
 
-The profile resume workflow stores private PDF/DOCX files in the existing Cloudflare R2 bucket and uses OpenAI only after the user chooses **Analyze resume**. Add these backend-only values to `Backend/app/.env` locally and to the Render backend environment:
+The profile resume workflow stores private PDF/DOCX files in the existing Cloudflare R2 bucket and uses Google Gemini through the official `google-genai` Python SDK only after the user consents and chooses **Analyze resume**. Add these backend-only values to `Backend/app/.env` locally and to the Render backend environment:
 
 ```dotenv
-OPENAI_API_KEY=your_openai_project_api_key
+GEMINI_API_KEY=your_google_ai_studio_api_key
 RESUME_AI_ENABLED=true
-# Optional; this is the default pinned model.
-RESUME_AI_MODEL=gpt-4.1-mini-2025-04-14
+# Optional; this is the default model.
+RESUME_AI_MODEL=gemini-3.1-flash-lite
 ```
 
-The existing `REDIS_URL`, `R2_ENDPOINT_URL`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, and `R2_BUCKET_NAME` values must also be configured. No frontend API key is used. Before enabling the feature, create an OpenAI API project with billing and spending alerts, confirm the R2 credentials can read/write/delete objects in the private bucket, and run `alembic upgrade head` from `Backend/`.
+The existing `REDIS_URL`, `R2_ENDPOINT_URL`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, and `R2_BUCKET_NAME` values must also be configured. No frontend API key is used. Create a Gemini Developer API key in [Google AI Studio](https://aistudio.google.com/apikey), confirm the R2 credentials can read/write/delete objects in the private bucket, and run `alembic upgrade head` from `Backend/`.
+
+When migrating, remove `OPENAI_API_KEY` and remove or replace any old `RESUME_AI_MODEL` override in both local and Render environments. Set `GEMINI_API_KEY` manually in Render's Environment settings and redeploy; adding a `sync: false` entry to an existing Blueprint does not populate its secret. Install the updated `Backend/requirements.txt` before running locally.
+
+The default model supports structured output and a [free tier](https://ai.google.dev/gemini-api/docs/pricing#gemini-3.1-flash-lite), subject to Google's project quotas and availability. Free-tier submissions may be used to improve Google's products; the consent text discloses this. The application still limits analysis to five attempts per user per day through Redis. Provider quota errors return 429 without automatic retries. Requests have a 40-second timeout, and results pass the existing Pydantic and source-evidence validation before review. Scanned-PDF OCR remains unsupported.
+
+Run provider and parsing tests from `Backend/` with `python -m pytest tests/test_resume_ai.py tests/test_resume_parsing.py -q`. Tests use synthetic responses and require no live API key.
 
 🚀 Features
 For Job Seekers
