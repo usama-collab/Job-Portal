@@ -4,6 +4,19 @@ This is a high-quality project to have on your GitHub. Since it features a moder
 Jobify: Modern Full-Stack Job Board Platform
 Jobify is a high-performance, real-time job portal designed to bridge the gap between employers and job seekers. Built with a focus on sleek UI/UX and a robust asynchronous backend, it provides a seamless experience for managing career opportunities.
 
+## AI resume parsing setup
+
+The profile resume workflow stores private PDF/DOCX files in the existing Cloudflare R2 bucket and uses OpenAI only after the user chooses **Analyze resume**. Add these backend-only values to `Backend/app/.env` locally and to the Render backend environment:
+
+```dotenv
+OPENAI_API_KEY=your_openai_project_api_key
+RESUME_AI_ENABLED=true
+# Optional; this is the default pinned model.
+RESUME_AI_MODEL=gpt-4.1-mini-2025-04-14
+```
+
+The existing `REDIS_URL`, `R2_ENDPOINT_URL`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, and `R2_BUCKET_NAME` values must also be configured. No frontend API key is used. Before enabling the feature, create an OpenAI API project with billing and spending alerts, confirm the R2 credentials can read/write/delete objects in the private bucket, and run `alembic upgrade head` from `Backend/`.
+
 🚀 Features
 For Job Seekers
 Intelligent Job Discovery: Browse and filter jobs with real-time search functionality.

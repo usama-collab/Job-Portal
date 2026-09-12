@@ -14,6 +14,7 @@ export interface Application {
   created_at: string
   user_id: number
   user_email?: string
+  resume_filename?: string | null
   full_name?: string | null
   email?: string | null
   phone?: string | null

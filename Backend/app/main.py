@@ -3,7 +3,7 @@ from app.core.config import settings
 from app.core.db import get_db
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
-from app.routes import user,auth,job,application,google_auth, saved_job, company
+from app.routes import user,auth,job,application,google_auth, saved_job, company, resume
 from app.routes import notification
 from app.routes import conversation
 from sqlalchemy import text
@@ -71,6 +71,7 @@ def health_check(db: Session = Depends(get_db)):
 
     return {"status": "ok", "database": "ok"}
 
+app.include_router(resume.router)
 app.include_router(user.router)
 app.include_router(auth.router)
 app.include_router(job.router)

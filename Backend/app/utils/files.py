@@ -16,6 +16,7 @@ from app.core.config import settings
 
 
 ALLOWED_DOC_EXT = {".pdf", ".doc", ".docx"}
+ALLOWED_PROFILE_RESUME_EXT = {".pdf", ".docx"}
 ALLOWED_IMAGE_EXT = {".png", ".jpg", ".jpeg", ".webp"}
 MAX_FILE_SIZE = 8 * 1024 * 1024  # 8MB
 
@@ -216,14 +217,23 @@ async def _save_upload_file(
     if extension not in allowed_exts:
         raise HTTPException(status_code=400, detail=f"Unsupported file extension {extension}")
 
-    content = await file.read()
+    chunks: list[bytes] = []
+    total = 0
+    while chunk := await file.read(1024 * 1024):
+        total += len(chunk)
+        if total > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=413,
+                detail=f"File too large - Limit is {MAX_FILE_SIZE}",
+            )
+        chunks.append(chunk)
+    content = b"".join(chunks)
     if not content:
         raise HTTPException(status_code=400, detail="The uploaded file is empty")
-    if len(content) > MAX_FILE_SIZE:
-        raise HTTPException(
-            status_code=413,
-            detail=f"File too large {len(content)} - Limit is {MAX_FILE_SIZE}",
-        )
+    if extension == ".pdf" and not content.startswith(b"%PDF-"):
+        raise HTTPException(status_code=400, detail="The file is not a valid PDF")
+    if extension == ".docx" and not content.startswith(b"PK"):
+        raise HTTPException(status_code=400, detail="The file is not a valid DOCX document")
 
     object_key = build_object_key(prefix, extension)
     content_type = file.content_type or mimetypes.guess_type(filename)[0]
@@ -233,6 +243,10 @@ async def _save_upload_file(
 
 async def save_resume_file(file: UploadFile) -> tuple[Optional[str], Optional[str]]:
     return await _save_upload_file(file, "resumes", ALLOWED_DOC_EXT)
+
+
+async def save_profile_resume_file(file: UploadFile) -> tuple[Optional[str], Optional[str]]:
+    return await _save_upload_file(file, "profile-resumes", ALLOWED_PROFILE_RESUME_EXT)
 
 
 async def save_avatar_file(file: UploadFile) -> tuple[Optional[str], Optional[str]]:

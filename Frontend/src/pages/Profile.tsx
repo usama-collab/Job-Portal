@@ -11,6 +11,7 @@ import {
   Loader2
 } from "lucide-react";
 import EditProfileModal from "../components/EditProfileModal";
+import ResumeAnalyzer from "../components/ResumeAnalyzer";
 import { toast } from "sonner";
 
 const Profile = () => {
@@ -136,13 +137,14 @@ const Profile = () => {
 
       {/* ... Rest of your component (Skills, Experience, etc.) ... */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <ResumeAnalyzer />
           {/* Main Content Area */}
           <div className="lg:col-span-2 space-y-8">
             <section className="bg-white border rounded-2xl p-8 shadow-sm">
                 <h2 className="text-xl font-black mb-6">Skills & Expertise</h2>
                 <div className="flex flex-wrap gap-2">
-                    {profile.skills?.length > 0 ? (
-                    profile.skills.map((skill: string, index: number) => (
+                    {(profile.skills?.length ?? 0) > 0 ? (
+                    profile.skills!.map((skill: string, index: number) => (
                         <span key={index} className="px-4 py-2 bg-slate-50 text-slate-700 rounded-xl text-xs font-black border border-slate-100 uppercase tracking-wider">
                         {skill}
                         </span>
@@ -152,7 +154,36 @@ const Profile = () => {
                     )}
                 </div>
             </section>
-            {/* Add your other sections here */}
+            <section className="bg-white border rounded-2xl p-8 shadow-sm">
+              <h2 className="text-xl font-black mb-6">Work experience</h2>
+              <div className="space-y-5">
+                {profile.work_experience?.length ? profile.work_experience.map((item, index) => (
+                  <article key={index} className="border-l-2 border-blue-200 pl-4">
+                    <h3 className="font-black text-slate-900">{item.title}</h3>
+                    <p className="font-medium text-slate-600">{item.company}{item.location ? ` · ${item.location}` : ""}</p>
+                    <p className="text-xs text-slate-400">{item.start_date ?? "Date not listed"} – {item.is_current ? "Present" : item.end_date ?? "Date not listed"}</p>
+                    {item.description && <p className="mt-2 whitespace-pre-wrap text-sm text-slate-600">{item.description}</p>}
+                  </article>
+                )) : <p className="text-gray-400 italic">No structured experience added yet.</p>}
+              </div>
+            </section>
+            <section className="bg-white border rounded-2xl p-8 shadow-sm">
+              <h2 className="text-xl font-black mb-6">Education</h2>
+              <div className="space-y-4">
+                {profile.education?.length ? profile.education.map((item, index) => (
+                  <article key={index}><h3 className="font-black">{item.institution}</h3><p className="text-sm text-slate-600">{[item.degree, item.field_of_study].filter(Boolean).join(" · ")}</p><p className="text-xs text-slate-400">{item.start_date ?? ""}{item.start_date || item.end_date ? " – " : ""}{item.end_date ?? ""}</p></article>
+                )) : <p className="text-gray-400 italic">No education added yet.</p>}
+              </div>
+            </section>
+            <section className="bg-white border rounded-2xl p-8 shadow-sm">
+              <h2 className="text-xl font-black mb-6">Projects</h2>
+              <div className="space-y-4">
+                {profile.projects?.length ? profile.projects.map((item, index) => (
+                  <article key={index}><h3 className="font-black">{item.name}</h3>{item.role && <p className="text-sm font-medium text-slate-600">{item.role}</p>}{item.description && <p className="mt-1 whitespace-pre-wrap text-sm text-slate-600">{item.description}</p>}<div className="mt-2 flex flex-wrap gap-1">{item.technologies.map((technology) => <span key={technology} className="rounded bg-slate-100 px-2 py-1 text-xs">{technology}</span>)}</div>{item.url && <a className="mt-2 inline-block text-sm text-blue-600 hover:underline" href={item.url} target="_blank" rel="noreferrer">View project</a>}</article>
+                )) : <p className="text-gray-400 italic">No projects added yet.</p>}
+              </div>
+            </section>
+            {profile.experience?.length ? <section className="rounded-2xl border bg-white p-8 shadow-sm"><h2 className="mb-4 text-xl font-black">Earlier profile experience</h2>{profile.experience.map((item, index) => <p key={index} className="mb-2 whitespace-pre-wrap text-sm text-slate-600">{typeof item === "string" ? item : JSON.stringify(item, null, 2)}</p>)}</section> : null}
           </div>
       </div>
 

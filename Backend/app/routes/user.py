@@ -145,7 +145,7 @@ def update(
 
 # Delete User
 @router.delete('/{user_id}')
-def delete(
+async def delete(
     user_id: int,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -159,17 +159,24 @@ def delete(
     ).first():
         raise HTTPException(status_code=409, detail="Company owners must retain their account")
 
+    target_user = db.query(User).filter(User.id == user_id).first()
+    profile_resume_path = target_user.resume_path if target_user else None
     user = crud_user.delete_user(user_id, db)
     if not user:
         raise HTTPException(status_code=404, detail="User with this id not exists")
+    if is_storage_key(profile_resume_path, "profile-resumes"):
+        try:
+            await delete_object(profile_resume_path)
+        except StorageError:
+            pass
     return JSONResponse(status_code=200, content="User deleted successfully!")
 
 
 # Update Seeker Profile
 @router.put('/me/update', response_model=UserOut)
 def update_my_profile(payload: ProfileUpdate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    allowed = {'name', 'bio', 'skills', 'experience'}
-    data = payload.model_dump(exclude_none=True)
+    allowed = {'name', 'bio', 'skills', 'experience', 'work_experience', 'education', 'projects'}
+    data = payload.model_dump(exclude_none=True, mode="json")
 
     data = {k: v for k, v in data.items() if k in allowed}
 

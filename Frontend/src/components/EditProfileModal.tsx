@@ -10,16 +10,14 @@ import {
 } from "../components/ui/dialog";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { Textarea } from "../components/ui/textarea";
 
 interface EditProfileProps {
   isOpen: boolean;
   onClose: () => void;
   initialData: {
-    name?: string;
-    bio?: string;
-    skills?: string[];
-    experience?: unknown[];
+    name?: string | null;
+    bio?: string | null;
+    skills?: string[] | null;
   };
 }
 
@@ -27,7 +25,6 @@ interface EditProfileForm {
   name: string;
   bio: string;
   skills: string;
-  experience: string;
 }
 
 const EditProfileModal = ({ isOpen, onClose, initialData }: EditProfileProps) => {
@@ -38,8 +35,6 @@ const EditProfileModal = ({ isOpen, onClose, initialData }: EditProfileProps) =>
     bio: initialData?.bio || "",
     // Array -> "Skill 1, Skill 2"
     skills: Array.isArray(initialData?.skills) ? initialData.skills.join(", ") : "",
-    // Array -> "Full Experience Text"
-    experience: Array.isArray(initialData?.experience) ? initialData.experience.map(String).join("\n") : "",
   },
 });
 
@@ -49,10 +44,7 @@ const EditProfileModal = ({ isOpen, onClose, initialData }: EditProfileProps) =>
     const payload = {
       name: data.name,
       bio: data.bio,
-      // Convert "React, FastAPI" -> ["React", "FastAPI"]
       skills: data.skills.split(',').map((s) => s.trim()).filter(Boolean),
-      // Convert the experience text block into a single-item array to satisfy List[Any]
-      experience: data.experience ? [data.experience] : [],
     };
     
     return updateMyProfile(payload);
@@ -84,15 +76,6 @@ const EditProfileModal = ({ isOpen, onClose, initialData }: EditProfileProps) =>
           <div className="space-y-2">
             <label className="text-sm font-medium">Skills (comma separated)</label>
             <Input {...register("skills")} placeholder="React, FastAPI, Docker" />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Experience</label>
-            <Textarea 
-              {...register("experience")} 
-              placeholder="Describe your work history..." 
-              className="h-32"
-            />
           </div>
 
           <DialogFooter className="pt-4">

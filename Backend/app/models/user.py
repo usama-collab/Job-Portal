@@ -26,6 +26,15 @@ class User(Base):
 
     # experience: optional list of objects e.g. [{"company":"X","title":"Y","years":2}, ...]
     experience = Column(JSON, nullable=True)
+    work_experience = Column(JSON, nullable=True)
+    education = Column(JSON, nullable=True)
+    projects = Column(JSON, nullable=True)
+
+    # A seeker's reusable resume. Application resumes remain independent snapshots.
+    resume_path = Column(String(512), nullable=True)
+    resume_filename = Column(String(255), nullable=True)
+    resume_id = Column(String(36), nullable=True, unique=True)
+    resume_uploaded_at = Column(DateTime(timezone=True), nullable=True)
 
     # profile picture
     avatar_path = Column(String(512), nullable=True)

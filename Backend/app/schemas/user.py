@@ -2,6 +2,7 @@ from pydantic import BaseModel, ConfigDict
 from pydantic import EmailStr
 from datetime import datetime
 from typing import Any, List, Optional
+from app.schemas.resume import Education, Project, WorkExperience
 
 
 class UserBase(BaseModel):
@@ -36,6 +37,9 @@ class ProfileUpdate(BaseModel):
     bio: Optional[str] = None
     skills: Optional[List[str]] = None
     experience: Optional[List[Any]] = None  # small dicts list
+    work_experience: Optional[List[WorkExperience]] = None
+    education: Optional[List[Education]] = None
+    projects: Optional[List[Project]] = None
 
 class UserOut(UserBase):
     model_config = ConfigDict(from_attributes=True)
@@ -47,5 +51,8 @@ class UserOut(UserBase):
     bio: Optional[str] = None
     skills: Optional[List[str]] = None
     experience: Optional[List[Any]] = None
+    work_experience: Optional[List[WorkExperience]] = None
+    education: Optional[List[Education]] = None
+    projects: Optional[List[Project]] = None
     avatar_url: Optional[str] = None  # full URL/path served by static route
     company_membership: Optional[dict[str, Any]] = None
