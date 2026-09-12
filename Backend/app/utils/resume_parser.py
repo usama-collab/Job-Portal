@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import io
+import logging
 import multiprocessing
-import resource
 import queue as queue_module
+import resource
 import zipfile
 from pathlib import Path
 
@@ -12,6 +13,8 @@ MAX_PDF_PAGES = 10
 MAX_TEXT_CHARS = 32_000
 MAX_DOCX_ENTRIES = 1_000
 MAX_DOCX_EXPANDED_BYTES = 32 * 1024 * 1024
+
+logger = logging.getLogger(__name__)
 
 
 class ResumeParseError(ValueError):
@@ -35,7 +38,13 @@ def _validate_docx_archive(content: bytes) -> None:
         raise ResumeParseError("The file is not a valid DOCX document") from exc
 
 
-def _extract_pdf(content: bytes) -> str:
+def _character_count(text: str) -> int:
+    """Count meaningful characters without letting layout whitespace skew the result."""
+
+    return sum(not character.isspace() for character in text)
+
+
+def _extract_pdf(content: bytes) -> tuple[str, list[dict[str, int | str | bool]]]:
     from pypdf import PdfReader
 
     try:
@@ -45,10 +54,46 @@ def _extract_pdf(content: bytes) -> str:
         if len(reader.pages) > MAX_PDF_PAGES:
             raise ResumeParseError(f"PDF resumes are limited to {MAX_PDF_PAGES} pages")
         pages = []
+        page_stats: list[dict[str, int | str | bool]] = []
         for number, page in enumerate(reader.pages, 1):
-            text = page.extract_text(extraction_mode="layout") or ""
+            try:
+                layout_text = page.extract_text(extraction_mode="layout") or ""
+                layout_failed = False
+            except Exception:
+                layout_text = ""
+                layout_failed = True
+            try:
+                plain_text = page.extract_text(extraction_mode="plain") or ""
+                plain_failed = False
+            except Exception:
+                plain_text = ""
+                plain_failed = True
+            if layout_failed and plain_failed:
+                raise ResumeParseError(f"Page {number} of the PDF could not be read")
+
+            layout_characters = _character_count(layout_text)
+            plain_characters = _character_count(plain_text)
+
+            # Layout mode is experimental and omits rotated text by default. Some
+            # PDF generators rotate the page's entire text layer, so prefer the
+            # mode that recovered more actual characters for each page.
+            if plain_characters > layout_characters:
+                text = plain_text
+                extraction_mode = "plain"
+            else:
+                text = layout_text
+                extraction_mode = "layout"
             pages.append(f"[Page {number}]\n{text.strip()}")
-        return "\n\n".join(pages)
+            page_stats.append({
+                "page": number,
+                "layout_characters": layout_characters,
+                "plain_characters": plain_characters,
+                "layout_failed": layout_failed,
+                "plain_failed": plain_failed,
+                "selected_characters": _character_count(text),
+                "selected_mode": extraction_mode,
+            })
+        return "\n\n".join(pages), page_stats
     except ResumeParseError:
         raise
     except Exception as exc:
@@ -85,10 +130,13 @@ def _worker(content: bytes, extension: str, queue) -> None:
         # still containing decompression bombs inside the worker process.
         resource.setrlimit(resource.RLIMIT_AS, (512 * 1024 * 1024, 512 * 1024 * 1024))
         resource.setrlimit(resource.RLIMIT_CPU, (9, 10))
-        text = _extract_pdf(content) if extension == ".pdf" else _extract_docx(content)
-        queue.put((True, text))
+        if extension == ".pdf":
+            text, metadata = _extract_pdf(content)
+        else:
+            text, metadata = _extract_docx(content), None
+        queue.put((True, text, metadata))
     except Exception as exc:
-        queue.put((False, str(exc)))
+        queue.put((False, str(exc), None))
 
 
 def extract_resume_text(content: bytes, filename: str) -> str:
@@ -109,15 +157,31 @@ def extract_resume_text(content: bytes, filename: str) -> str:
         process.join()
         raise ResumeParseError("Resume text extraction timed out")
     try:
-        succeeded, result = queue.get(timeout=0.5)
+        succeeded, result, metadata = queue.get(timeout=0.5)
     except queue_module.Empty as exc:
         raise ResumeParseError("Resume text extraction failed") from exc
     if not succeeded:
         raise ResumeParseError(result)
 
     normalized = "\n".join(line.rstrip() for line in result.splitlines()).strip()
-    if len(normalized) < 80:
-        raise ResumeParseError("No usable text was found. Scanned PDFs are not supported yet")
+    if extension == ".pdf" and metadata is not None:
+        extracted_characters = sum(int(page["selected_characters"]) for page in metadata)
+        logger.info(
+            "PDF resume text extraction completed: pages=%d extracted_characters=%d page_stats=%s",
+            len(metadata),
+            extracted_characters,
+            metadata,
+        )
+    else:
+        extracted_characters = _character_count(normalized)
+        logger.info(
+            "DOCX resume text extraction completed: extracted_characters=%d",
+            extracted_characters,
+        )
+    if extracted_characters < 80:
+        if extension == ".pdf":
+            raise ResumeParseError("No usable text was found. Scanned PDFs are not supported yet")
+        raise ResumeParseError("No usable text was found in the DOCX")
     if len(normalized) > MAX_TEXT_CHARS:
         raise ResumeParseError("The resume contains too much text to analyze")
     return normalized

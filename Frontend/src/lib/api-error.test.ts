@@ -12,6 +12,10 @@ it('shows FastAPI validation messages with field names without exposing submitte
 
 it('preserves plain API messages and falls back for unexpected error shapes', () => {
   expect(getApiErrorDetail(apiError('Already applied'), 'Fallback')).toBe('Already applied')
+  expect(getApiErrorDetail(
+    apiError('No usable text was found. Scanned PDFs are not supported yet'),
+    'Could not analyze the resume',
+  )).toBe('No usable text was found. Scanned PDFs are not supported yet')
   for (const error of [new Error('offline'), apiError(null), apiError([]), apiError([null, {}])]) {
     expect(getApiErrorDetail(error, 'Fallback')).toBe('Fallback')
   }
