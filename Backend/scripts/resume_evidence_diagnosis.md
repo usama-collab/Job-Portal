@@ -44,3 +44,30 @@ analysis path, Unicode and PDF layout artifacts, missing and unrelated evidence,
 technical-name distinctions, provider-required excerpts, retained strict Pydantic
 validation, and warning rendering. Cached analyses must be analyzed again to
 recover previously discarded items.
+
+## Follow-up: actual letter-spaced PDF
+
+The subsequent all-items-omitted report exposed a second issue in the local
+`Usama-Mahmood-CV.pdf`. Its rotated text layer emits one space between every
+character (`P y t h o n`, `F a s t A P I`) and wider spaces between words.
+The prior synthetic fixture covered rotation but did not reproduce this spacing.
+Gemini read normal words from it, while token-based evidence matching correctly
+did not treat isolated letters as those words.
+
+A live before/after check on that local CV confirmed:
+
+- Original text: 18 generated entries, all with evidence, zero retained.
+- Repaired text: 23 skills, one work entry, one education entry, two projects;
+  all 27 entries retained, zero warnings. Generation counts can vary by call.
+
+PDF parsing now repairs pages with at least 40 tokens, at least 90% isolated
+characters, and repeated wider word gaps. Only lines entirely composed of
+isolated characters are repaired. Single glyph spaces are removed; wider word
+gaps and normal lines are preserved. No fuzzy matching or general removal of
+spaces was added to evidence validation. Repair occurs before contact redaction
+and before the same text is used for both generation and evidence checking.
+
+New regression coverage builds a rotated, letter-spaced PDF and checks skill
+retention, rejection of absent skills, restored contact redaction, preserved word
+boundaries, and unchanged ordinary/ambiguous text. No personal resume content
+is included in the repository fixtures.

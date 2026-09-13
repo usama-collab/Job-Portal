@@ -4,6 +4,7 @@ import io
 import logging
 import multiprocessing
 import queue as queue_module
+import re
 import resource
 import zipfile
 from pathlib import Path
@@ -42,6 +43,27 @@ def _character_count(text: str) -> int:
     """Count meaningful characters without letting layout whitespace skew the result."""
 
     return sum(not character.isspace() for character in text)
+
+
+def _repair_pdf_letter_spacing(text: str) -> str:
+    """Repair a PDF text layer with one space per glyph, not ordinary prose.
+
+    Require page-wide evidence of the encoding: many isolated characters and
+    repeated wider word gaps. Preserve those gaps and all mixed/normal lines.
+    This runs before contact redaction and before Gemini/evidence see the text.
+    """
+    tokens = text.split()
+    if (len(tokens) < 40
+            or sum(len(token) == 1 for token in tokens) / len(tokens) < 0.9
+            or len(re.findall(r"\S {2,}\S", text)) < 3):
+        return text
+    lines = []
+    for line in text.splitlines():
+        parts = line.split()
+        if len(parts) >= 3 and all(len(part) == 1 for part in parts):
+            line = re.sub(r"(?<=\S) (?=\S)", "", line)
+        lines.append(line)
+    return "\n".join(lines)
 
 
 def _extract_pdf(content: bytes) -> tuple[str, list[dict[str, int | str | bool]]]:
@@ -83,6 +105,7 @@ def _extract_pdf(content: bytes) -> tuple[str, list[dict[str, int | str | bool]]
             else:
                 text = layout_text
                 extraction_mode = "layout"
+            text = _repair_pdf_letter_spacing(text)
             pages.append(f"[Page {number}]\n{text.strip()}")
             page_stats.append({
                 "page": number,

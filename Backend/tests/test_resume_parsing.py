@@ -7,8 +7,8 @@ from pypdf import PdfWriter
 from pypdf.generic import DecodedStreamObject, DictionaryObject, NameObject
 
 from app.schemas.resume import ExtractedSkill, ResumeExtraction, WorkExperience
-from app.utils.resume_ai import _validated_evidence
-from app.utils.resume_parser import ResumeParseError, extract_resume_text
+from app.utils.resume_ai import _redact_contacts, _validated_evidence
+from app.utils.resume_parser import ResumeParseError, _repair_pdf_letter_spacing, extract_resume_text
 
 
 def _rotated_text_pdf(text: str) -> bytes:
@@ -109,3 +109,45 @@ def test_pdf_parser_output_keeps_supported_resume_skills():
         {"name": name, "source_excerpt": excerpt} for name in names
     ])
     assert [item.name for item in _validated_evidence(extraction, source).skills] == names
+
+
+def test_rotated_letter_spaced_cv_retains_skills_and_redacts_contacts():
+    # The reported PDF emits single spaces between every glyph and wider word
+    # gaps. Earlier fixtures covered rotation but missed this text-layer shape.
+    original = (
+        "Alex Example Full Stack Developer. Skills: Python, FastAPI, React, "
+        "PostgreSQL, Docker, Next.js. Email: candidate@example.com "
+        "Phone: 0307-1234567. Built web applications and database systems."
+    )
+    source = extract_resume_text(_rotated_text_pdf(" ".join(original)), "letter-spaced.pdf")
+    names = ["Python", "FastAPI", "React", "PostgreSQL", "Docker", "Next.js"]
+    result = _validated_evidence(ResumeExtraction(skills=[
+        {"name": name, "source_excerpt": name} for name in names
+    ] + [{"name": "Kubernetes", "source_excerpt": "Kubernetes"}]), source)
+    assert [item.name for item in result.skills] == names
+    assert len(result.warnings) == 1
+    redacted = _redact_contacts(source)
+    assert "candidate@example.com" not in redacted
+    assert "0307-1234567" not in redacted
+    assert "[email removed]" in redacted
+    assert "[phone removed]" in redacted
+
+
+@pytest.mark.parametrize("text", [
+    "Python FastAPI React PostgreSQL",
+    "Py thon Fast API Postgre SQL",
+    "P y t h o n",
+    "C C++ C# .NET Next.js " * 20,
+    "A B C D E F G H I J " * 10,  # No separate word boundaries to recover.
+])
+def test_letter_spacing_repair_does_not_join_ordinary_or_ambiguous_text(text):
+    assert _repair_pdf_letter_spacing(text) == text
+
+
+def test_letter_spacing_repair_preserves_word_boundaries_and_normal_lines():
+    spaced = " ".join("Software Engineer building Python and React applications. " * 5)
+    source = spaced + "\nNormal text: Py thon must stay separate."
+    repaired = _repair_pdf_letter_spacing(source)
+    assert "Software   Engineer" in repaired
+    assert "Normal text: Py thon must stay separate." in repaired
+    assert "SoftwareEngineer" not in repaired
