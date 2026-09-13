@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+.message-history-scroll { scrollbar-width: none; }
+.message-history-scroll::-webkit-scrollbar { display: none; }
+
 .job-rich-text { overflow-wrap: anywhere; line-height: 1.75; }
 .job-rich-text p { margin: 0 0 .75em; min-height: 1em; }
 .job-rich-text h2 { margin: 1.25em 0 .5em; font-size: 1.35em; font-weight: 700; color: var(--color-slate-900); }

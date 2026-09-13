@@ -215,7 +215,7 @@ function Thread({ id, scope }: { id: number, scope: string | null }) {
     <div ref={viewport} onScroll={() => {
       const el = viewport.current
       if (el) setAtBottom(el.scrollHeight - el.scrollTop - el.clientHeight < 40)
-    }} className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain bg-white px-4 py-5" aria-label="Message history">
+    }} className="message-history-scroll min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain bg-white px-4 py-5 focus-visible:outline-blue-600" aria-label="Message history" tabIndex={0}>
       {history.data?.next_before_id && <Button variant="ghost" disabled={older.isPending} onClick={() => older.mutate(history.data!.next_before_id!)}>Load older messages</Button>}
       {older.isError && <p role="alert">Could not load older messages. Please retry.</p>}
       {!history.isPending && !history.isError && !history.data?.items.length && <p className="text-sm text-slate-500">Start the conversation about this application.</p>}
