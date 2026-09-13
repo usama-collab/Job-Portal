@@ -38,7 +38,7 @@ function show(path = '/messages/8') {
 describe('application messaging', () => {
   it('opens an inbox thread and acknowledges only the displayed message position', async () => {
     show('/messages')
-    fireEvent.click(await screen.findByRole('link', { name: /Engineer/ }))
+    fireEvent.click(await screen.findByRole('link', { name: /Acme/ }))
     await screen.findByLabelText('Message')
     await waitFor(() => expect(api.readConversation).toHaveBeenCalledWith(8, 1))
     expect(api.getMessages).toHaveBeenCalledWith(8, {}, expect.any(AbortSignal))

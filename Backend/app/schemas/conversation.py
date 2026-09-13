@@ -42,6 +42,11 @@ class ConversationOut(BaseModel):
     job_id: int
     job_title: str
     company_name: str
+    company_logo_url: str | None = None
+    location: str | None = None
+    employment_type: str | None = None
+    salary_min: int | None = None
+    salary_max: int | None = None
     applicant_name: str
     status: str
     latest_message: MessageOut | None

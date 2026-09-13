@@ -9,6 +9,7 @@ from app.models.conversation import Conversation, ConversationRead, Message
 from app.models.job import Job
 from app.models.notification import Notification
 from app.models.user import User
+from app.utils.files import is_storage_key
 
 
 def participant_condition(user_id):
@@ -61,7 +62,12 @@ def unread_count(user, db, conversation_id=None):
 def summary(application, conversation, user, db, latest=None, count=None):
     if latest is None and conversation and conversation.last_message_id:
         latest = db.get(Message, conversation.last_message_id)
+    job = application.job
+    company = job.company_record
     return dict(application_id=application.id, conversation_id=conversation.id if conversation else None,
+                company_logo_url=f"/companies/{company.id}/logo" if is_storage_key(company.logo_path, "logos") else None,
+                location=job.location, employment_type=job.employment_type,
+                salary_min=job.salary_min, salary_max=job.salary_max,
                 job_id=application.job_id, job_title=application.job.title,
                 company_name=application.job.company, applicant_name=application.user.name,
                 status=application.status, latest_message=message_out(latest, db) if latest else None,

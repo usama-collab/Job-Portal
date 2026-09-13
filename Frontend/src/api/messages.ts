@@ -14,6 +14,11 @@ export interface Conversation {
   job_id: number
   job_title: string
   company_name: string
+  company_logo_url?: string | null
+  location?: string | null
+  employment_type?: string | null
+  salary_min?: number | null
+  salary_max?: number | null
   applicant_name: string
   status: string
   latest_message: Message | null
