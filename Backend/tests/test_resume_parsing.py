@@ -90,9 +90,22 @@ def test_items_without_matching_evidence_are_removed():
     validated = _validated_evidence(extraction, "Experienced with Python and FastAPI")
 
     assert [skill.name for skill in validated.skills] == ["Python"]
-    assert validated.warnings == ["Removed unsupported extraction: Kubernetes"]
+    assert validated.warnings == ["1 item was omitted because supporting resume text could not be verified."]
 
 
 def test_structured_dates_must_be_consistent():
     with pytest.raises(ValidationError):
         WorkExperience(company="Acme", title="Engineer", start_date="2024", end_date="2023")
+
+
+def test_pdf_parser_output_keeps_supported_resume_skills():
+    source = extract_resume_text(_rotated_text_pdf(
+        "Alex Example. Software Engineer building APIs and web applications. "
+        "Skills: Python | FastAPI | React | PostgreSQL | Next.js | Docker."
+    ), "synthetic.pdf")
+    names = ["Python", "FastAPI", "React", "PostgreSQL", "Next.js", "Docker"]
+    excerpt = "Skills: Python, FastAPI, React, PostgreSQL, Next.js, Docker."
+    extraction = ResumeExtraction(skills=[
+        {"name": name, "source_excerpt": excerpt} for name in names
+    ])
+    assert [item.name for item in _validated_evidence(extraction, source).skills] == names

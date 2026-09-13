@@ -83,7 +83,7 @@ def test_success_request_configuration_and_evidence(client):
     }))
     result = asyncio.run(resume_ai.extract_structured_resume("Python candidate@example.com"))
     assert [item.name for item in result.skills] == ["Python"]
-    assert result.warnings == ["Removed unsupported extraction: Go"]
+    assert result.warnings == ["1 item was omitted because supporting resume text could not be verified."]
     kwargs = client.models.generate_content.call_args.kwargs
     assert kwargs["model"] == "gemini-3.1-flash-lite"
     assert kwargs["config"].response_json_schema == resume_ai.AIResumeExtraction.model_json_schema()
@@ -160,7 +160,12 @@ def test_provider_schema_preserves_structure_and_application_constraints():
     assert wire["properties"]["projects"]["items"] == {"$ref": "#/$defs/Project"}
     project = wire["$defs"]["Project"]
     assert project["additionalProperties"] is False
-    assert project["required"] == ["name"]
+    assert project["required"] == ["name", "source_excerpt"]
+    for definition in wire["$defs"].values():
+        assert "source_excerpt" in definition["required"]
+        assert definition["properties"]["source_excerpt"]["type"] == "string"
+        assert "anyOf" not in definition["properties"]["source_excerpt"]
+    assert "source_excerpt" not in original["$defs"]["Project"]["required"]
     assert project["properties"]["url"]["anyOf"] == [{"maxLength": 2083, "minLength": 1, "type": "string"}, {"type": "null"}]
     assert project["properties"]["name"]["minLength"] == 1
     assert project["properties"]["name"]["maxLength"] == 200
@@ -191,3 +196,35 @@ def test_provider_output_still_enforces_strict_application_validation(client, pa
     with pytest.raises(HTTPException) as caught:
         asyncio.run(resume_ai.extract_structured_resume("Synthetic resume: Python"))
     assert caught.value.status_code == 422
+
+
+def test_resume_style_text_through_parser_and_analysis(client):
+    from io import BytesIO
+    from docx import Document
+    from app.utils.resume_parser import extract_resume_text
+
+    document = Document()
+    document.add_paragraph("Alex Example — Software Engineer building web applications.")
+    document.add_paragraph("Skills: Ｐｙｔｈｏｎ • Fast\u200bAPI • React | Postgre-\nSQL • Next.js • Docker • Tailwind\u00a0CSS")
+    document.add_paragraph("Example Labs — Software Engineer, building APIs and web applications.")
+    buffer = BytesIO()
+    document.save(buffer)
+    source = extract_resume_text(buffer.getvalue(), "synthetic.docx")
+    skills = ["Python", "FastAPI", "React", "PostgreSQL", "Next.js", "Docker", "Tailwind CSS"]
+    client.models.generate_content.return_value = response(json.dumps({
+        "skills": [{"name": name, "source_excerpt": name} for name in skills] + [{"name": "Kubernetes", "source_excerpt": "Kubernetes"}],
+        "work_experience": [{"company": "Example Labs", "title": "Software Engineer", "source_excerpt": "Example Labs: Software Engineer"}],
+    }))
+    result = asyncio.run(resume_ai.extract_structured_resume(source))
+    assert [item.name for item in result.skills] == skills
+    assert len(result.work_experience) == 1
+    assert len(result.warnings) == 1
+
+
+def test_reproduced_response_without_evidence_remains_rejected(client):
+    client.models.generate_content.return_value = response(json.dumps({
+        "skills": [{"name": name} for name in ["Python", "FastAPI", "React", "PostgreSQL"]],
+    }))
+    result = asyncio.run(resume_ai.extract_structured_resume("Python, FastAPI, React, PostgreSQL"))
+    assert result.skills == []
+    assert result.warnings == ["4 items were omitted because supporting resume text could not be verified."]

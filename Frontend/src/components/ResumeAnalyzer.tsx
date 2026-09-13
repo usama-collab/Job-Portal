@@ -23,6 +23,7 @@ import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
+import { ResumeWarnings } from "./ResumeWarnings";
 
 type Selected = Record<string, boolean>;
 
@@ -190,7 +191,7 @@ export default function ResumeAnalyzer() {
         <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-4xl">
           <DialogHeader><DialogTitle>Review extracted resume details</DialogTitle><DialogDescription>Edit the suggestions, uncheck anything you do not want, then save. AI results can be wrong.</DialogDescription></DialogHeader>
           {analysis && <div className="space-y-6">
-            {analysis.warnings.length > 0 && <div className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">{analysis.warnings.join(" ")}</div>}
+            <ResumeWarnings warnings={analysis.warnings} />
 
             <div className="space-y-2"><h3 className="font-black">Skills</h3>{analysis.skills.map((item, index) => <div key={index} className="rounded-xl border p-3">
               <label className="flex items-center gap-2"><input type="checkbox" checked={Boolean(selected[`skill-${index}`])} onChange={(e) => setSelected({ ...selected, [`skill-${index}`]: e.target.checked })} /><Input value={item.name} onChange={(e) => setAnalysis({ ...analysis, skills: analysis.skills.map((skill, i) => i === index ? { ...skill, name: e.target.value } : skill) })} /></label><Evidence value={item.source_excerpt} />

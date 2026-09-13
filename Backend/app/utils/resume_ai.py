@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
+import unicodedata
 
 import httpx
 from fastapi import HTTPException
@@ -44,6 +45,15 @@ class AIResumeExtraction(ResumeExtraction):
                     clean(child)
 
         clean(schema)
+        # The shared profile models allow evidence to be cleared after import.
+        # Generation must supply it: a prompt alone allowed every item to omit it.
+        for definition in schema["$defs"].values():
+            if "source_excerpt" in definition.get("properties", {}):
+                definition["properties"]["source_excerpt"] = {
+                    "type": "string", "minLength": 1, "maxLength": 300,
+                    "description": "Short verbatim resume passage supporting this item, including its name or institution/company and title. Never omit evidence.",
+                }
+                definition.setdefault("required", []).append("source_excerpt")
         return schema
 
 
@@ -85,7 +95,19 @@ Return an empty list when a section is absent and use warnings for ambiguous con
 
 
 def _normalize(value: str) -> str:
-    return " ".join(value.casefold().split())
+    value = unicodedata.normalize("NFKC", value).casefold()
+    # Remove invisible PDF artifacts and discretionary word-wrap hyphens only.
+    value = re.sub(r"\u00ad(?:\r?\n)?", "", value)
+    value = re.sub(r"[\u200b\ufeff\u2060]", "", value)
+    value = re.sub(r"(?<=\w)[-\u2010][ \t]*\r?\n[ \t]*(?=\w)", "", value)
+    # Compare contiguous tokens, ignoring layout punctuation but preserving
+    # meaningful skill punctuation (C++, C#, .NET, Next.js). Never fuzzy-match
+    # words, reorder them, or remove arbitrary spaces to manufacture a match.
+    return " ".join(re.findall(r"(?:\.[^\W_]+|[^\W_]+(?:\.[^\W_]+)*)(?:\+\+|#)?", value))
+
+
+def _contains_evidence(needle: str, haystack: str) -> bool:
+    return bool(needle) and f" {needle} " in f" {haystack} "
 
 
 def _redact_contacts(text: str) -> str:
@@ -95,18 +117,32 @@ def _redact_contacts(text: str) -> str:
 
 def _validated_evidence(result: ResumeExtraction, source: str) -> ResumeExtraction:
     normalized_source = _normalize(source)
-    warnings = list(result.warnings)
+    warnings = list(dict.fromkeys(result.warnings))
+    removed = 0
+    reasons = {"missing": 0, "unmatched": 0, "unrelated": 0}
     for field in ("skills", "work_experience", "education", "projects"):
         items = getattr(result, field)
         supported = []
         for item in items:
             excerpt = item.source_excerpt or ""
-            if excerpt and _normalize(excerpt) in normalized_source:
-                supported.append(item)
+            normalized_excerpt = _normalize(excerpt)
+            anchors = (item.company, item.title) if field == "work_experience" else (
+                (item.institution,) if field == "education" else (item.name,)
+            )
+            if not normalized_excerpt:
+                reasons["missing"] += 1
+            elif not _contains_evidence(normalized_excerpt, normalized_source):
+                reasons["unmatched"] += 1
+            elif not all(_contains_evidence(_normalize(anchor), normalized_excerpt) for anchor in anchors):
+                reasons["unrelated"] += 1
             else:
-                label = getattr(item, "name", None) or getattr(item, "title", None) or field
-                warnings.append(f"Removed unsupported extraction: {label}")
+                supported.append(item)
+                continue
+            removed += 1
         setattr(result, field, supported)
+    if removed:
+        warnings.insert(0, f"{removed} {'item was' if removed == 1 else 'items were'} omitted because supporting resume text could not be verified.")
+        logger.info("Resume evidence validation: removed=%d missing=%d unmatched=%d unrelated=%d", removed, reasons["missing"], reasons["unmatched"], reasons["unrelated"])
     result.warnings = warnings[:20]
     return result
 
