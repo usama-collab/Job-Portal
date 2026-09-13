@@ -15,7 +15,13 @@ logger = logging.getLogger(__name__)
 
 
 class AIResumeExtraction(ResumeExtraction):
-    """Keep application validation, but omit unsupported wire-schema annotations."""
+    """Provider schema only; validate responses with ResumeExtraction.
+
+    Gemini rejects this schema's large maxItems bounds with INVALID_ARGUMENT
+    (including skills=100 and work_experience=30 independently). Omit those
+    bounds on the wire to avoid its structured-output complexity limit; all
+    list limits and field validators still apply when parsing the response.
+    """
 
     @classmethod
     def model_json_schema(cls, **kwargs):
@@ -24,10 +30,15 @@ class AIResumeExtraction(ResumeExtraction):
         def clean(value):
             if isinstance(value, dict):
                 value.pop("default", None)
+                value.pop("maxItems", None)
                 if value.get("format") == "uri":
                     value.pop("format")
-                for child in value.values():
-                    clean(child)
+                for key, child in value.items():
+                    if key in ("properties", "$defs"):
+                        for subschema in child.values():
+                            clean(subschema)
+                    else:
+                        clean(child)
             elif isinstance(value, list):
                 for child in value:
                     clean(child)

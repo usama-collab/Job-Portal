@@ -130,6 +130,10 @@ def test_real_sdk_serializes_schema_and_parses_response(monkeypatch):
         assert request.url.path.endswith("models/gemini-3.1-flash-lite:generateContent")
         assert body["generationConfig"]["responseMimeType"] == "application/json"
         schema = body["generationConfig"]["responseJsonSchema"]
+        assert set(body["generationConfig"]) == {"responseMimeType", "responseJsonSchema", "maxOutputTokens"}
+        assert body["generationConfig"]["maxOutputTokens"] == 6000
+        assert schema == resume_ai.AIResumeExtraction.model_json_schema()
+        assert '"maxItems"' not in json.dumps(schema)
         assert schema["additionalProperties"] is False
         assert "projects" in schema["properties"]
         return httpx.Response(200, json={
@@ -143,3 +147,47 @@ def test_real_sdk_serializes_schema_and_parses_response(monkeypatch):
     monkeypatch.setattr(resume_ai.genai, "Client", factory)
     assert asyncio.run(resume_ai.extract_structured_resume("Synthetic resume")).skills == []
     assert len(requests) == 1
+
+
+def test_provider_schema_preserves_structure_and_application_constraints():
+    from app.schemas.resume import ResumeExtraction
+
+    original = ResumeExtraction.model_json_schema()
+    wire = resume_ai.AIResumeExtraction.model_json_schema()
+    assert original["properties"]["skills"]["maxItems"] == 100
+    assert original["$defs"]["Project"]["properties"]["technologies"]["maxItems"] == 30
+    assert '"maxItems"' not in json.dumps(wire)
+    assert wire["properties"]["projects"]["items"] == {"$ref": "#/$defs/Project"}
+    project = wire["$defs"]["Project"]
+    assert project["additionalProperties"] is False
+    assert project["required"] == ["name"]
+    assert project["properties"]["url"]["anyOf"] == [{"maxLength": 2083, "minLength": 1, "type": "string"}, {"type": "null"}]
+    assert project["properties"]["name"]["minLength"] == 1
+    assert project["properties"]["name"]["maxLength"] == 200
+    assert "pattern" in project["properties"]["start_date"]["anyOf"][0]
+    assert "title" in wire["$defs"]["WorkExperience"]["properties"]
+    assert ResumeExtraction.model_json_schema() == original
+
+
+@pytest.mark.parametrize("payload", [
+    {"skills": [{"name": "Python"}] * 101},
+    {"work_experience": [{"company": "Example", "title": "Engineer"}] * 31},
+    {"education": [{"institution": "Example"}] * 21},
+    {"projects": [{"name": "Demo"}] * 31},
+    {"warnings": ["Ambiguous"] * 21},
+    {"projects": [{"name": "Demo", "technologies": ["Python"] * 31}]},
+    {"skills": [{"name": ""}]},
+    {"skills": [{"name": "x" * 201}]},
+    {"skills": [{"name": "Python", "source_excerpt": "x" * 301}]},
+    {"projects": [{"name": "Demo", "description": "x" * 2001}]},
+    {"projects": [{"name": "Demo", "url": "ftp://example.com"}]},
+    {"projects": [{"name": "Demo", "url": "https://example.com/" + "x" * 2083}]},
+    {"projects": [{"name": "Demo", "start_date": "2024-13"}]},
+    {"work_experience": [{"company": "Example", "title": "Engineer", "is_current": True, "end_date": "2024"}]},
+    {"projects": [{"name": "Demo", "unexpected": "value"}]},
+])
+def test_provider_output_still_enforces_strict_application_validation(client, payload):
+    client.models.generate_content.return_value = response(json.dumps(payload))
+    with pytest.raises(HTTPException) as caught:
+        asyncio.run(resume_ai.extract_structured_resume("Synthetic resume: Python"))
+    assert caught.value.status_code == 422
