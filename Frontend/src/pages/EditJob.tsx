@@ -1,3 +1,5 @@
+import { useInitialPageLoading } from '../lib/page-loading'
+import { PageLoadingPlaceholder } from '../components/page-loading'
 import { Controller, useForm,useWatch } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -79,6 +81,9 @@ const EditJob = () => {
       });
     }
   });
+
+  const initialPageLoading = useInitialPageLoading(isLoading)
+  if (initialPageLoading) return <PageLoadingPlaceholder />
 
   if (isLoading) {
     return (

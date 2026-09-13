@@ -1,3 +1,5 @@
+import { useInitialPageLoading } from '../lib/page-loading'
+import { PageLoadingPlaceholder } from '../components/page-loading'
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Navigate, useNavigate } from "react-router-dom";
@@ -42,6 +44,9 @@ const EmployerOnboarding = () => {
       toast.error(detail || "Could not create the company profile");
     },
   });
+
+  const initialPageLoading = useInitialPageLoading(isLoading)
+  if (initialPageLoading) return <PageLoadingPlaceholder />
 
   if (isLoading) {
     return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div>;

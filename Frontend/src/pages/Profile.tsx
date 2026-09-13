@@ -1,3 +1,5 @@
+import { useInitialPageLoading } from '../lib/page-loading'
+import { PageLoadingPlaceholder } from '../components/page-loading'
 import { useState, useRef } from "react"; // Added useRef
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"; // Added mutation hooks
 import { getMyProfile, uploadAvatar } from "../api/user"; // Import uploadAvatar
@@ -42,6 +44,9 @@ const Profile = () => {
       handleUpload(file);
     }
   };
+
+  const initialPageLoading = useInitialPageLoading(isLoading)
+  if (initialPageLoading) return <PageLoadingPlaceholder />
 
   if (isLoading) {
     return (

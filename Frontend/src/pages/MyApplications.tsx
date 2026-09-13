@@ -1,3 +1,5 @@
+import { useInitialPageLoading } from '../lib/page-loading'
+import { PageLoadingPlaceholder } from '../components/page-loading'
 import { useCallback, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -73,6 +75,9 @@ const MyApplications = () => {
   const activateApplied = useCallback(() => setActiveTab('applied'), []);
   const refreshApplied = useCallback(() => { void queryClient.invalidateQueries({ queryKey: ['my-applications'] }); }, [queryClient]);
   const highlightedId = useApplicationHighlight(!isAppliedFetching && !isAppliedLoading, refreshApplied, activateApplied);
+
+  const initialPageLoading = useInitialPageLoading(isLoading)
+  if (initialPageLoading) return <PageLoadingPlaceholder />
 
   if (isLoading) return (
     <div className="flex flex-col justify-center items-center min-h-[60vh] gap-4">

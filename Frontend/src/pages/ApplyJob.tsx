@@ -1,3 +1,5 @@
+import { useInitialPageLoading } from '../lib/page-loading'
+import { PageLoadingPlaceholder } from '../components/page-loading'
 import { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -109,6 +111,9 @@ const ApplyJob = () => {
     if (digits.length < 7 || digits.length > 15) { toast.error("Enter a valid phone number with 7 to 15 digits."); return; }
     mutate();
   };
+
+  const initialPageLoading = useInitialPageLoading(isProfileLoading || isJobLoading)
+  if (initialPageLoading) return <PageLoadingPlaceholder />
 
   if (isProfileLoading || isJobLoading) {
     return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-10 w-10 animate-spin text-blue-600" aria-label="Checking application eligibility" /></div>;

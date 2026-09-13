@@ -1,3 +1,5 @@
+import { usePageLoading } from '../lib/page-loading'
+import { PageLoadingPlaceholder } from '../components/page-loading'
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { useProfile } from "../hooks/useProfile";
@@ -5,6 +7,9 @@ import { useProfile } from "../hooks/useProfile";
 const CompanyRoute = () => {
   const location = useLocation();
   const { data: profile, isLoading, isError } = useProfile();
+
+  const pageLoading = usePageLoading(isLoading)
+  if (pageLoading) return <PageLoadingPlaceholder />
 
   if (isLoading) {
     return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div>;

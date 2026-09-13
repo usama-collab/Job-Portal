@@ -4,10 +4,11 @@ import AppRoutes from './routes/AppRoutes'
 import { Toaster } from 'sonner'
 import { CircleCheck, CircleX, Info, LoaderCircle, TriangleAlert } from 'lucide-react'
 import ScrollToTop from './routes/ScrollToTop'
+import { PageLoadingProvider } from './components/page-loading'
 
 function App() {
   return (
-    <>
+    <PageLoadingProvider>
       <ScrollToTop />
       <AppRoutes />
       <Toaster
@@ -39,7 +40,7 @@ function App() {
           },
         }}
       />
-    </>
+    </PageLoadingProvider>
   )
 }
 
