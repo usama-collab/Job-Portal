@@ -26,6 +26,7 @@ const MainLayout = () => {
     const baseURL = import.meta.env.VITE_API_BASE_URL.replace('/api', ''); // Get base server URL
     const navigate = useNavigate()
     const location = useLocation()
+    const isHome = location.pathname === '/'
     const logoutStore = useAuthStore((state) => state.logout)
     const token = localStorage.getItem('token')
     
@@ -68,8 +69,8 @@ const MainLayout = () => {
         }`;
 
     return (
-        <div className='min-h-screen flex flex-col bg-slate-50/30'>
-            <nav className='sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md'>
+        <div className={`min-h-screen flex flex-col ${isHome ? 'bg-white' : 'bg-slate-50/30'}`}>
+            <nav className={`sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md ${isHome ? 'border-transparent' : ''}`}>
                 <div className='mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6'>
                     
                     {/* Logo Section */}

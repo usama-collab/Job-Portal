@@ -49,16 +49,18 @@ const Home = () => {
 
   return (
     <div className="overflow-hidden bg-white text-slate-950">
-      <section className="relative isolate border-b border-slate-100 bg-[linear-gradient(180deg,#f5f9ff_0%,#ffffff_88%)] px-5 pb-20 pt-16 sm:px-6 lg:pb-28 lg:pt-24">
-        <div className="pointer-events-none absolute -left-32 -top-20 -z-10 h-80 w-80 rounded-full bg-blue-200/30 blur-3xl" />
-        <div className="pointer-events-none absolute -right-32 top-20 -z-10 h-96 w-96 rounded-full bg-indigo-200/25 blur-3xl" />
+      <section className="relative isolate border-b border-slate-100 bg-white px-5 pb-20 pt-16 sm:px-6 lg:pb-28 lg:pt-24">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden bg-[linear-gradient(180deg,#f5f9ff_0%,#ffffff_88%)] [mask-image:linear-gradient(to_bottom,transparent,black_10rem)]">
+          <div className="absolute -left-32 -top-20 h-80 w-80 rounded-full bg-blue-200/30 blur-3xl" />
+          <div className="absolute -right-32 top-20 h-96 w-96 rounded-full bg-indigo-200/25 blur-3xl" />
+        </div>
         <div className="mx-auto grid max-w-6xl items-center gap-16 lg:grid-cols-[1.03fr_.97fr]">
-          <div className="home-rise">
+          <div className="min-w-0 home-rise">
             <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-3.5 py-2 text-xs font-bold text-blue-700 shadow-sm shadow-blue-100/60">
               <Sparkles className="h-3.5 w-3.5 fill-blue-100" /> Smarter job search, brighter next chapter
             </div>
             <h1 className="max-w-3xl text-5xl font-black leading-[1.06] tracking-[-0.055em] sm:text-6xl lg:text-[4rem]">
-              Find work that <span className="relative whitespace-nowrap text-blue-600">moves you forward<span className="absolute -bottom-1 left-0 -z-10 h-2 w-full -rotate-1 rounded-full bg-blue-200/70" /></span>
+              Find work that <span className="relative block text-blue-600">moves you forward<span className="absolute -bottom-1 left-0 -z-10 h-2 w-full -rotate-1 rounded-full bg-blue-200/70" /></span>
             </h1>
             <p className="mt-7 max-w-xl text-lg leading-8 text-slate-600 sm:text-xl">Discover meaningful opportunities from trusted teams, build your profile, and take the next step in your career—all in one place.</p>
             <form onSubmit={findJobs} className="mt-9 flex max-w-2xl flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_20px_60px_-18px_rgba(15,23,42,0.2)] sm:flex-row">
