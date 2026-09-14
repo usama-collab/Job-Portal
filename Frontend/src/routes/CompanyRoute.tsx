@@ -1,7 +1,8 @@
 import { usePageLoading } from '../lib/page-loading'
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { Loader2 } from "lucide-react";
 import { useProfile } from "../hooks/useProfile";
+import { PageSkeleton } from '../components/page-skeletons';
+import { skeletonKindForPath } from '../lib/page-skeleton-kind';
 
 const CompanyRoute = () => {
   const location = useLocation();
@@ -10,7 +11,7 @@ const CompanyRoute = () => {
   usePageLoading(isLoading)
 
   if (isLoading) {
-    return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div>;
+    return <PageSkeleton kind={skeletonKindForPath(location.pathname)} />;
   }
   if (isError || !profile?.company_membership) {
     return <Navigate to="/employer/onboarding" replace state={{ from: location.pathname }} />;

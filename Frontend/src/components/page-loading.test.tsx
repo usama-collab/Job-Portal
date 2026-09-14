@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-quer
 import { PageLoadingProvider } from './page-loading'
 import { useInitialPageLoading } from '../lib/page-loading'
 import { LazyPage } from '../routes/LazyPage'
+import { PageSkeleton } from './page-skeletons'
 
 const branded = () => screen.queryByRole('status', { name: 'Loading Jobify' })
 const skeleton = () => screen.queryByRole('status', { name: 'Loading page content' })
@@ -73,6 +74,36 @@ describe('startup loading', () => {
 })
 
 describe('internal navigation', () => {
+  it('keeps the destination shape through a lazy-chunk to data handoff', async () => {
+    const chunk = deferred<{ default: ComponentType }>()
+    const data = deferred<string>()
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    function Detail() {
+      const query = useQuery({ queryKey: ['job', 42], queryFn: () => data.promise })
+      useInitialPageLoading(query.isLoading)
+      return query.isLoading ? <PageSkeleton kind="job-detail" /> : <h1>{query.data}</h1>
+    }
+    const Destination = lazy(() => chunk.promise)
+    render(<QueryClientProvider client={client}><MemoryRouter><PageLoadingProvider>
+      <nav><Link to="/jobs/42">Open role</Link></nav><main><Routes>
+        <Route path="/" element={<h1>Home</h1>} />
+        <Route path="/jobs/:id" element={<LazyPage><Destination /></LazyPage>} />
+      </Routes></main>
+    </PageLoadingProvider></MemoryRouter></QueryClientProvider>)
+    await advance(430)
+    fireEvent.click(screen.getByRole('link', { name: 'Open role' }))
+    expect(skeleton()?.getAttribute('data-skeleton')).toBe('job-detail')
+    expect(skeleton()?.querySelector('.md\\:grid-cols-3')).toBeTruthy()
+    await act(async () => chunk.resolve({ default: Detail }))
+    expect(skeleton()?.getAttribute('data-skeleton')).toBe('job-detail')
+    expect(screen.queryByText(/Loading job specifications|Fetching job details/)).toBeNull()
+    await act(async () => data.resolve('Senior designer'))
+    await advance(0)
+    expect(skeleton()).toBeNull()
+    expect(screen.getByRole('heading', { name: 'Senior designer' })).toBeTruthy()
+    client.clear()
+  })
+
   it('keeps the layout mounted and shows a skeleton for a slow route chunk', async () => {
     const chunk = deferred<{ default: ComponentType }>()
     const Layout = () => <><nav><Link to="/slow">Slow page</Link></nav><main><Outlet /></main></>

@@ -1,4 +1,5 @@
 import { useInitialPageLoading } from '../lib/page-loading'
+import { PageSkeleton } from '../components/page-skeletons'
 import { Controller, useForm,useWatch } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -84,12 +85,7 @@ const EditJob = () => {
   useInitialPageLoading(isLoading)
 
   if (isLoading) {
-    return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
-        <Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
-        <p className="text-slate-500 font-medium">Fetching job details...</p>
-      </div>
-    );
+    return <PageSkeleton kind="job-form" />;
   }
 
   if (isError) {

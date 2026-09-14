@@ -1,4 +1,5 @@
 import { useInitialPageLoading } from '../lib/page-loading'
+import { PageSkeleton } from '../components/page-skeletons'
 import { useCallback, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +13,6 @@ import {
   Briefcase, 
   ChevronRight, 
   Clock, 
-  Loader2, 
   Bookmark, 
   Send, 
   CalendarCheck, 
@@ -77,12 +77,7 @@ const MyApplications = () => {
 
   useInitialPageLoading(isLoading)
 
-  if (isLoading) return (
-    <div className="flex flex-col justify-center items-center min-h-[60vh] gap-4">
-      <Loader2 className="animate-spin h-10 w-10 text-blue-600" />
-      <p className="text-slate-500 font-bold tracking-tight">Syncing your dashboard...</p>
-    </div>
-  );
+  if (isLoading) return <PageSkeleton kind="applications" />;
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-4 animate-in fade-in duration-700">

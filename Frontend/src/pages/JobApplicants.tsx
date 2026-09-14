@@ -1,4 +1,5 @@
 import { useInitialPageLoading } from '../lib/page-loading'
+import { PageSkeleton } from '../components/page-skeletons'
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from 'react';
 import { useParams, useNavigate } from "react-router-dom";
@@ -14,7 +15,6 @@ import {
   Calendar, 
   Mail, 
   ArrowLeft, 
-  Loader2, 
   CheckCircle2, 
   Users, 
   AlertCircle,
@@ -140,7 +140,7 @@ const JobApplicants = () => {
 
   useInitialPageLoading(isLoading)
 
-  if (isLoading) return <div className="min-h-[60vh] flex items-center justify-center"><Loader2 className="animate-spin text-blue-600" /></div>;
+  if (isLoading) return <PageSkeleton kind="applicants" />;
   if (!jobId) {
     return (
       <div className="max-w-md mx-auto mt-20 p-8 bg-white border border-slate-200 rounded-3xl text-center shadow-xl">

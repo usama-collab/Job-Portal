@@ -1,4 +1,5 @@
 import { useInitialPageLoading } from '../lib/page-loading'
+import { PageSkeleton } from '../components/page-skeletons'
 import { descriptionHtml } from "../lib/job-description";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
@@ -80,12 +81,7 @@ const JobDetail = () => {
 
   useInitialPageLoading(isLoading)
 
-  if (isLoading) return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-      <Loader2 className="animate-spin text-blue-600 h-10 w-10" />
-      <p className="text-sm sm:text-base text-slate-400 font-bold animate-pulse">Loading job specifications...</p>
-    </div>
-  );
+  if (isLoading) return <PageSkeleton kind="job-detail" />;
   
   if (isError || !job) {
     return (

@@ -1,4 +1,5 @@
 import { useInitialPageLoading } from '../lib/page-loading'
+import { PageSkeleton } from '../components/page-skeletons'
 import { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -114,7 +115,7 @@ const ApplyJob = () => {
   useInitialPageLoading(isProfileLoading || isJobLoading)
 
   if (isProfileLoading || isJobLoading) {
-    return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-10 w-10 animate-spin text-blue-600" aria-label="Checking application eligibility" /></div>;
+    return <PageSkeleton kind="apply" />;
   }
 
   return <div className="min-h-screen bg-slate-50/50 px-4 py-8 sm:py-12">

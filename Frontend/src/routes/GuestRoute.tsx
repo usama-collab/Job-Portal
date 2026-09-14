@@ -1,10 +1,11 @@
 import { usePageLoading } from '../lib/page-loading'
 import { useEffect, useState } from "react"
-import { Loader2 } from "lucide-react"
-import { Navigate, Outlet } from "react-router-dom"
+import { Navigate, Outlet, useLocation } from "react-router-dom"
 import { refreshAccessToken } from "../api/axios"
 import { getAuthenticatedLandingPath } from "../lib/auth-session"
 import { useAuthStore } from "../store/authStore"
+import { PageSkeleton } from '../components/page-skeletons'
+import { skeletonKindForPath } from '../lib/page-skeleton-kind'
 
 type SessionStatus =
   | { state: "checking" }
@@ -12,6 +13,7 @@ type SessionStatus =
   | { state: "authenticated"; destination: string }
 
 const GuestRoute = () => {
+  const { pathname } = useLocation()
   const token = useAuthStore((state) => state.token)
   const refreshToken = useAuthStore((state) => state.refreshToken)
   const logout = useAuthStore((state) => state.logout)
@@ -59,14 +61,7 @@ const GuestRoute = () => {
   usePageLoading(sessionStatus.state === "checking")
 
   if (sessionStatus.state === "checking") {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-white" aria-live="polite">
-        <div className="flex items-center gap-3 text-sm font-semibold text-slate-500">
-          <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
-          Checking your session…
-        </div>
-      </main>
-    )
+    return <PageSkeleton kind={skeletonKindForPath(pathname)} />
   }
 
   if (sessionStatus.state === "authenticated") {

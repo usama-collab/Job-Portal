@@ -6,6 +6,7 @@ import { ArrowUpRight, Briefcase, Building2, ChevronLeft, ChevronRight, Clock3, 
 import { getAllJobs, type Job } from '../api/jobs'
 import { Button } from '../components/ui/button'
 import { JobSearchFields } from '../components/job-search-fields'
+import { JobCardSkeleton } from '../components/page-skeletons'
 
 const LIMIT = 5
 
@@ -92,7 +93,7 @@ const JobResults = () => {
         <header className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-2xl font-black tracking-[-0.03em] text-slate-900 sm:text-3xl">
-              {isLoading ? 'Finding the right roles…' : `${data?.length || 0} ${data?.length === 1 ? 'job' : 'jobs'} on this page`}
+              {isLoading ? <span className="block h-8 w-52 rounded-lg bg-slate-200 motion-safe:animate-pulse" aria-label="Loading job results" /> : `${data?.length || 0} ${data?.length === 1 ? 'job' : 'jobs'} on this page`}
             </h1>
           </div>
           {(q || location) && (
@@ -105,7 +106,7 @@ const JobResults = () => {
         </header>
 
         <div className={`space-y-4 transition-opacity duration-200 ${isFetching && !isLoading ? 'opacity-60' : 'opacity-100'}`} aria-busy={isFetching}>
-          {isLoading ? [...Array(4)].map((_, index) => <JobSkeleton key={index} />)
+          {isLoading ? [...Array(4)].map((_, index) => <JobCardSkeleton key={index} />)
             : isError ? <StateCard icon={<SearchX />} title="We couldn't load the jobs" copy="Check your connection and try refreshing this page." />
             : data?.length === 0 ? <StateCard icon={<SearchX />} title="No matching roles yet" copy="Try a broader keyword or nearby location to see more opportunities." action={(q || location) ? <Button onClick={() => clearFilter()} variant="outline" className="mt-6 rounded-xl border-blue-200 font-bold text-blue-700 hover:bg-blue-50">View all jobs</Button> : undefined} />
             : data?.map((job, index) => <JobCard key={job.id} job={job} index={index} onOpen={() => navigate(`/jobs/${job.id}`)} />)}
@@ -156,8 +157,6 @@ const JobCard = ({ job, index, onOpen }: { job: Job; index: number; onOpen: () =
 const FilterChip = ({ label, icon, onClear }: { label: string; icon?: ReactNode; onClear: () => void }) => <span className="inline-flex max-w-52 items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700">{icon}<span className="truncate">{label}</span><button type="button" onClick={onClear} aria-label={`Remove ${label} filter`} className="rounded-full p-0.5 hover:bg-blue-200"><X className="h-3 w-3" /></button></span>
 
 const Meta = ({ icon, label }: { icon?: ReactNode; label: string }) => <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 px-3 py-2 ring-1 ring-slate-100">{icon && <span className="[&>svg]:h-4 [&>svg]:w-4 text-slate-400">{icon}</span>}{label}</span>
-
-const JobSkeleton = () => <div className="animate-pulse rounded-3xl border border-slate-200 bg-white p-6"><div className="flex gap-5"><div className="h-14 w-14 shrink-0 rounded-2xl bg-slate-100" /><div className="flex-1"><div className="h-6 w-2/5 rounded bg-slate-100" /><div className="mt-3 h-4 w-1/4 rounded bg-slate-100" /><div className="mt-6 h-16 rounded bg-slate-100" /></div></div></div>
 
 const StateCard = ({ icon, title, copy, action }: { icon: ReactNode; title: string; copy: string; action?: ReactNode }) => <div className="jobs-rise rounded-3xl border border-dashed border-slate-300 bg-white/80 px-6 py-20 text-center"><span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 [&>svg]:h-7 [&>svg]:w-7">{icon}</span><h3 className="mt-5 text-xl font-black text-slate-900">{title}</h3><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">{copy}</p>{action}</div>
 

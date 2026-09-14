@@ -1,4 +1,5 @@
 import { useInitialPageLoading } from '../lib/page-loading'
+import { PageSkeleton } from '../components/page-skeletons'
 import { useState, useRef } from "react"; // Added useRef
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"; // Added mutation hooks
 import { getMyProfile, uploadAvatar } from "../api/user"; // Import uploadAvatar
@@ -47,11 +48,7 @@ const Profile = () => {
   useInitialPageLoading(isLoading)
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <PageSkeleton kind="profile" />;
   }
 
   if (isError || !profile) {

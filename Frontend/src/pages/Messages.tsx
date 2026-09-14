@@ -10,6 +10,7 @@ import { notificationScope, notificationWrite } from '../lib/notification-sessio
 import { Button } from '../components/ui/button'
 import { Textarea } from '../components/ui/textarea'
 import { mergeMessages } from '../lib/messages'
+import { ConversationListSkeleton, MessageHistorySkeleton } from '../components/page-skeletons'
 
 export default function Messages() {
   const { applicationId } = useParams()
@@ -39,7 +40,7 @@ export default function Messages() {
           </div>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto p-2">
-        {inbox.isPending && <p className="p-3 text-sm text-slate-500" role="status">Loading conversations…</p>}
+        {inbox.isPending && <ConversationListSkeleton />}
         {inbox.isError && <p className="p-3 text-sm" role="status">Could not update conversations. <Button variant="ghost" onClick={() => void inbox.refetch()}>Retry</Button></p>}
         {!accessError(inbox.error) && visibleItems.map((item) => <Link key={item.application_id} to={`/messages/${item.application_id}`} aria-current={item.application_id === id ? 'page' : undefined}
           className={`mb-1 flex items-center gap-3 rounded-lg px-3 py-4 transition-colors focus-visible:outline-2 focus-visible:outline-blue-600 ${item.application_id === id ? 'bg-blue-50' : 'hover:bg-stone-50'}`}>
@@ -210,12 +211,12 @@ function Thread({ id, scope }: { id: number, scope: string | null }) {
         {context.data && <Link to={`/jobs/${context.data.job_id}`} className="shrink-0 text-xs font-medium text-blue-600 hover:underline xl:hidden">View job<ArrowUpRight className="ml-1 inline h-3.5 w-3.5" /></Link>}
       </div>
     </header>
-    {(history.isPending || context.isPending) && <p role="status" className="p-4">Loading conversation…</p>}
     {(history.isError || context.isError) && <p role="status" className="p-4 text-amber-800">Updates are unavailable. <Button variant="ghost" onClick={refresh}>Retry</Button></p>}
     <div ref={viewport} onScroll={() => {
       const el = viewport.current
       if (el) setAtBottom(el.scrollHeight - el.scrollTop - el.clientHeight < 40)
     }} className="message-history-scroll min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain bg-white px-4 py-5 focus-visible:outline-blue-600" aria-label="Message history" tabIndex={0}>
+      {(history.isPending || context.isPending) && <MessageHistorySkeleton />}
       {history.data?.next_before_id && <Button variant="ghost" disabled={older.isPending} onClick={() => older.mutate(history.data!.next_before_id!)}>Load older messages</Button>}
       {older.isError && <p role="alert">Could not load older messages. Please retry.</p>}
       {!history.isPending && !history.isError && !history.data?.items.length && <p className="text-sm text-slate-500">Start the conversation about this application.</p>}

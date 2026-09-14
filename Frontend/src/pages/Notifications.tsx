@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNotificationHistory, useNotificationScope, useUnreadCount } from '../hooks/useNotifications'
 import { MarkAllReadButton, NotificationFeedback, NotificationList } from '../components/notification-list'
 import { Button } from '../components/ui/button'
+import { NotificationRowsSkeleton } from '../components/page-skeletons'
 
 function NotificationInbox() {
   const [unreadOnly, setUnreadOnly] = useState(false)
@@ -21,7 +22,8 @@ function NotificationInbox() {
       <MarkAllReadButton disabled={count.data?.unread_count === 0} />
     </div>
     <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-      <NotificationFeedback pending={history.isPending} error={history.isError} hasData={!!history.data} retry={() => void history.refetch()} />
+      {history.isPending && !history.data ? <NotificationRowsSkeleton /> :
+        <NotificationFeedback pending={false} error={history.isError} hasData={!!history.data} retry={() => void history.refetch()} />}
       {history.data && <NotificationList items={items} />}
     </div>
     {history.hasNextPage && <div className="mt-6 text-center"><Button variant="outline" disabled={history.isFetching} onClick={() => void history.fetchNextPage()}>{history.isFetchingNextPage ? 'Loading…' : 'Load more'}</Button></div>}
