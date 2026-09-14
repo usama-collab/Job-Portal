@@ -1,5 +1,4 @@
 import { useInitialPageLoading } from '../lib/page-loading'
-import { PageLoadingPlaceholder } from '../components/page-loading'
 import { descriptionText } from "../lib/job-description";
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
@@ -55,8 +54,7 @@ const EmployerDashboard = () => {
     navigate('/employer/jobs/create')
   }
 
-  const initialPageLoading = useInitialPageLoading(isLoading)
-  if (initialPageLoading) return <PageLoadingPlaceholder />
+  useInitialPageLoading(isLoading)
 
   if (isLoading) return <DashboardState icon={<Loader2 className="animate-spin" />} title="Preparing your workspace…" copy="Loading jobs and applicant activity." />
   if (isError) return <DashboardState icon={<BriefcaseBusiness />} title="We couldn't load your dashboard" copy="Check your connection, then try again." action={<Button onClick={() => window.location.reload()} variant="outline" className="mt-5 rounded-xl">Try again</Button>} />

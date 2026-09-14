@@ -20,9 +20,11 @@ import { useProfile } from "../hooks/useProfile";
 import { BrandLogo } from "../components/brand-logo";
 import { NotificationBell } from "../components/notification-bell";
 import { MessageNav } from "../components/message-nav";
+import { useInitialPageLoading } from '../lib/page-loading';
 
 const MainLayout = () => {
-    const { data: profile } = useProfile(); // Fetch profile data
+    const { data: profile, isLoading: isProfileLoading } = useProfile(); // Fetch profile data
+    useInitialPageLoading(isProfileLoading)
     const baseURL = import.meta.env.VITE_API_BASE_URL.replace('/api', ''); // Get base server URL
     const navigate = useNavigate()
     const location = useLocation()

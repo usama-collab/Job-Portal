@@ -1,5 +1,4 @@
 import { usePageLoading } from '../lib/page-loading'
-import { PageLoadingPlaceholder } from '../components/page-loading'
 import { useEffect, useState } from "react"
 import { Loader2 } from "lucide-react"
 import { Navigate, Outlet } from "react-router-dom"
@@ -57,8 +56,7 @@ const GuestRoute = () => {
     }
   }, [logout, refreshToken, token])
 
-  const pageLoading = usePageLoading(sessionStatus.state === "checking")
-  if (pageLoading) return <PageLoadingPlaceholder />
+  usePageLoading(sessionStatus.state === "checking")
 
   if (sessionStatus.state === "checking") {
     return (

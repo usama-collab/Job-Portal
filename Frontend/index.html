@@ -5,9 +5,19 @@
     <link rel="icon" type="image/svg+xml" href="/jobify.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>jobify</title>
+    <style>
+      .jobify-startup { position: fixed; inset: 0; z-index: 100; display: grid; min-height: 100vh; min-height: 100dvh; place-items: center; background: #fff; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .jobify-startup-content { display: flex; flex-direction: column; align-items: center; gap: 22px; }
+      .jobify-startup-wordmark { color: #020617; font-size: 38px; font-weight: 900; letter-spacing: -.055em; line-height: 1; }
+      .jobify-startup-wordmark span { color: #2563eb; }
+      .jobify-startup-track { display: block; width: 112px; height: 3px; overflow: hidden; border-radius: 999px; background: #e2e8f0; }
+      .jobify-startup-progress { display: block; width: 36%; height: 100%; border-radius: inherit; background: #2563eb; animation: jobify-progress 1.1s ease-in-out infinite alternate; }
+      @keyframes jobify-progress { to { transform: translateX(178%); } }
+      @media (prefers-reduced-motion: reduce) { .jobify-startup-progress { width: 100%; animation: none; } }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div class="jobify-startup" role="status" aria-label="Loading Jobify"><div class="jobify-startup-content" aria-hidden="true"><span class="jobify-startup-wordmark">Jobify<span>.</span></span><span class="jobify-startup-track"><span class="jobify-startup-progress"></span></span></div></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

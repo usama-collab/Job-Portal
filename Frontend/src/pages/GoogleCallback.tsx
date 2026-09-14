@@ -6,6 +6,7 @@ import { exchangeGoogleCallback } from '../lib/google-auth'
 import { getAuthenticatedLandingPath } from '../lib/auth-session'
 import { useAuthStore } from '../store/authStore'
 import type { LoginResponse } from '../api/auth'
+import { usePageLoading } from '../lib/page-loading'
 
 export default function GoogleCallback() {
   const exchange = useRef<Promise<LoginResponse> | null>(null)
@@ -13,6 +14,7 @@ export default function GoogleCallback() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const login = useAuthStore(state => state.login)
+  usePageLoading(!error)
 
   useEffect(() => {
     let active = true

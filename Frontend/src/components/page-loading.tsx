@@ -1,16 +1,15 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { PageLoadingContext, usePageLoading } from '../lib/page-loading'
-import { BrandMark } from './brand-logo'
 
-const SHOW_DELAY_MS = 200
-const MIN_VISIBLE_MS = 250
+const MIN_VISIBLE_MS = 350
+const SETTLE_MS = 80
 
 export function PageLoadingProvider({ children }: { children: ReactNode }) {
   const [waits, setWaits] = useState<Set<symbol>>(() => new Set())
-  const [visible, setVisible] = useState(false)
-  const shownAt = useRef<number | null>(null)
-  const pending = waits.size > 0
+  const [initializing, setInitializing] = useState(true)
+  const startedAt = useRef<number | null>(null)
   const register = useCallback(() => {
+    if (!initializing) return () => {}
     const token = Symbol()
     setWaits((current) => new Set(current).add(token))
     return () => setWaits((current) => {
@@ -18,54 +17,47 @@ export function PageLoadingProvider({ children }: { children: ReactNode }) {
       next.delete(token)
       return next
     })
-  }, [])
+  }, [initializing])
 
   useEffect(() => {
-    // Effect updates from a fallback-to-page handoff are batched, so the same
-    // visible interval covers both the chunk and its initial data request.
-    if (pending) {
-      if (shownAt.current !== null) return
-      const timer = window.setTimeout(() => {
-        shownAt.current = Date.now()
-        setVisible(true)
-      }, SHOW_DELAY_MS)
-      return () => window.clearTimeout(timer)
-    }
-    if (shownAt.current === null) return
-    const remaining = Math.max(0, MIN_VISIBLE_MS - (Date.now() - shownAt.current))
-    const timer = window.setTimeout(() => {
-      shownAt.current = null
-      setVisible(false)
-    }, remaining)
+    if (startedAt.current === null) startedAt.current = Date.now()
+    if (!initializing || waits.size) return
+    const remaining = Math.max(0, MIN_VISIBLE_MS - (Date.now() - startedAt.current))
+    const timer = window.setTimeout(() => setInitializing(false), remaining + SETTLE_MS)
     return () => window.clearTimeout(timer)
-  }, [pending])
+  }, [initializing, waits])
 
   useEffect(() => {
-    if (!visible) return
+    if (!initializing) return
     const previous = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => { document.body.style.overflow = previous }
-  }, [visible])
+  }, [initializing])
 
   return <PageLoadingContext.Provider value={register}>
-    <div inert={visible} aria-busy={visible || undefined}>{children}</div>
-    {visible && <div className="fixed inset-0 z-[100] grid min-h-dvh place-items-center bg-white px-6" role="status" aria-live="polite" aria-label="Loading page">
-      <div className="flex flex-col items-center gap-5" aria-hidden="true">
-        <div className="flex items-center gap-3">
-          <div className="motion-safe:animate-pulse"><BrandMark className="h-14 w-14" /></div>
-          <span className="text-3xl font-black tracking-[-0.045em] text-slate-950">Jobify<span className="text-blue-600">.</span></span>
-        </div>
-        <span className="text-sm font-medium text-slate-500">Loading…</span>
+    <div inert={initializing} aria-busy={initializing || undefined}>{children}</div>
+    {initializing && <div className="jobify-startup" role="status" aria-label="Loading Jobify">
+      <div className="jobify-startup-content" aria-hidden="true">
+        <span className="jobify-startup-wordmark">Jobify<span>.</span></span>
+        <span className="jobify-startup-track"><span className="jobify-startup-progress" /></span>
       </div>
     </div>}
   </PageLoadingContext.Provider>
 }
 
-export function PageLoadingPlaceholder() {
-  return <div className="min-h-[60vh]" />
-}
-
 export function RouteLoadingFallback() {
   usePageLoading(true)
-  return <PageLoadingPlaceholder />
+  return <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6" role="status" aria-label="Loading page content">
+    <div className="animate-pulse space-y-6" aria-hidden="true">
+      <div className="h-8 w-48 rounded-lg bg-slate-200" />
+      <div className="h-4 w-72 max-w-full rounded bg-slate-100" />
+      <div className="grid gap-5 pt-4 md:grid-cols-2">
+        {[0, 1, 2, 3].map((item) => <div key={item} className="h-44 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
+          <div className="h-5 w-3/5 rounded bg-slate-200" />
+          <div className="mt-4 h-4 w-2/5 rounded bg-slate-100" />
+          <div className="mt-8 h-12 rounded bg-slate-100" />
+        </div>)}
+      </div>
+    </div>
+  </div>
 }

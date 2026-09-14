@@ -1,5 +1,4 @@
 import { useInitialPageLoading } from '../lib/page-loading'
-import { PageLoadingPlaceholder } from '../components/page-loading'
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from 'react';
 import { useParams, useNavigate } from "react-router-dom";
@@ -139,8 +138,7 @@ const JobApplicants = () => {
     }
   };
 
-  const initialPageLoading = useInitialPageLoading(isLoading)
-  if (initialPageLoading) return <PageLoadingPlaceholder />
+  useInitialPageLoading(isLoading)
 
   if (isLoading) return <div className="min-h-[60vh] flex items-center justify-center"><Loader2 className="animate-spin text-blue-600" /></div>;
   if (!jobId) {

@@ -1,5 +1,4 @@
 import { useInitialPageLoading } from '../lib/page-loading'
-import { PageLoadingPlaceholder } from '../components/page-loading'
 import { descriptionHtml } from "../lib/job-description";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
@@ -79,8 +78,7 @@ const JobDetail = () => {
     });
   };
 
-  const initialPageLoading = useInitialPageLoading(isLoading)
-  if (initialPageLoading) return <PageLoadingPlaceholder />
+  useInitialPageLoading(isLoading)
 
   if (isLoading) return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
