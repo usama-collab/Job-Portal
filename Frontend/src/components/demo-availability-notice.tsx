@@ -33,7 +33,7 @@ export function DemoAvailabilityNotice() {
           Demo availability
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl p-6 sm:max-w-lg sm:p-8">
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-2xl p-6 sm:max-w-lg sm:p-8">
         <div className="flex size-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-800">
           <Info className="size-6" aria-hidden="true" />
         </div>
