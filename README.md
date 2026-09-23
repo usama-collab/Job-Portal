@@ -4,6 +4,12 @@ This is a high-quality project to have on your GitHub. Since it features a moder
 Jobify: Modern Full-Stack Job Board Platform
 Jobify is a high-performance, real-time job portal designed to bridge the gap between employers and job seekers. Built with a focus on sleek UI/UX and a robust asynchronous backend, it provides a seamless experience for managing career opportunities.
 
+## Live demo availability notice
+
+The frontend currently displays a dismissible notice explaining the free-tier database outage. It appears on the first visit in a tab session, can be reopened with **Demo availability**, and does not depend on an API response. While enabled, it bypasses the full-screen startup loader so visitors can access the notice and navigation even when database requests stall.
+
+The notice is enabled by default for the current outage. After database service is restored, set `VITE_DEMO_LIMIT_NOTICE=false` in the frontend hosting environment and rebuild/redeploy the frontend. Set it to `true` to enable it again. This setting describes the known outage; it does not automatically detect database availability or restore database features.
+
 ## AI resume parsing setup
 
 The profile resume workflow stores private PDF/DOCX files in the existing Cloudflare R2 bucket and uses Google Gemini through the official `google-genai` Python SDK only after the user consents and chooses **Analyze resume**. Add these backend-only values to `Backend/app/.env` locally and to the Render backend environment:

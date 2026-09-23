@@ -22,6 +22,17 @@ beforeEach(() => vi.useFakeTimers())
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.useRealTimers() })
 
 describe('startup loading', () => {
+  it('keeps the site accessible during an outage even with pending data', () => {
+    function PendingPage() {
+      useInitialPageLoading(true)
+      return <main>Available page content</main>
+    }
+    render(<PageLoadingProvider skipStartup><PendingPage /></PageLoadingProvider>)
+    expect(branded()).toBeNull()
+    expect(screen.getByRole('main').parentElement?.hasAttribute('inert')).toBe(false)
+    expect(document.body.style.overflow).not.toBe('hidden')
+  })
+
   it('covers navbar and main together until the first app render is ready', async () => {
     const view = render(<PageLoadingProvider><nav>Navigation</nav><main>Home page</main></PageLoadingProvider>)
     expect(branded()).toBeTruthy()

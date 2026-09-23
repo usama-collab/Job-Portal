@@ -7,9 +7,9 @@ import { skeletonKindForPath } from '../lib/page-skeleton-kind'
 const MIN_VISIBLE_MS = 350
 const SETTLE_MS = 80
 
-export function PageLoadingProvider({ children }: { children: ReactNode }) {
+export function PageLoadingProvider({ children, skipStartup = false }: { children: ReactNode; skipStartup?: boolean }) {
   const [waits, setWaits] = useState<Set<symbol>>(() => new Set())
-  const [initializing, setInitializing] = useState(true)
+  const [initializing, setInitializing] = useState(!skipStartup)
   const startedAt = useRef<number | null>(null)
   const register = useCallback(() => {
     if (!initializing) return () => {}
