@@ -60,6 +60,11 @@ def get_home():
     return {"message": 'Job Board API with FastAPI + PostgresQL'}
 
 
+@app.get("/ping")
+def ping():
+    return {"status": "ok"}
+
+
 @app.get("/health", tags=["Health"])
 def health_check(db: Session = Depends(get_db)):
     """Report readiness only when the application can reach its database."""
