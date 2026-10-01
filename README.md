@@ -6,9 +6,9 @@ Jobify is a high-performance, real-time job portal designed to bridge the gap be
 
 ## Live demo availability notice
 
-The frontend currently displays a dismissible notice explaining the free-tier database outage. It appears on the first visit in a tab session, can be reopened with **Demo availability**, and does not depend on an API response. While enabled, it bypasses the full-screen startup loader so visitors can access the notice and navigation even when database requests stall.
+The frontend includes a dismissible notice for a free-tier database outage. When enabled, it appears on the first visit in a tab session, can be reopened with **Demo availability**, and does not depend on an API response. While enabled, it bypasses the full-screen startup loader so visitors can access the notice and navigation even when database requests stall.
 
-The notice is enabled by default for the current outage. After database service is restored, set `VITE_DEMO_LIMIT_NOTICE=false` in the frontend hosting environment and rebuild/redeploy the frontend. Set it to `true` to enable it again. This setting describes the known outage; it does not automatically detect database availability or restore database features.
+The notice is hidden by default now that database service is restored. Set `VITE_DEMO_LIMIT_NOTICE=true` in the frontend hosting environment and rebuild/redeploy the frontend to enable it during a future outage. Set it to `false` or remove it to hide the notice again. This setting describes a known outage; it does not automatically detect database availability or restore database features.
 
 ## AI resume parsing setup
 

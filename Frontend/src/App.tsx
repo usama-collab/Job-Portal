@@ -7,8 +7,8 @@ import ScrollToTop from './routes/ScrollToTop'
 import { PageLoadingProvider } from './components/page-loading'
 import { DemoAvailabilityNotice } from './components/demo-availability-notice'
 
-// Enabled for the current outage; set to false and rebuild when service returns.
-const showDemoNotice = import.meta.env.VITE_DEMO_LIMIT_NOTICE !== 'false'
+// Enable the outage notice explicitly if the database becomes unavailable again.
+const showDemoNotice = import.meta.env.VITE_DEMO_LIMIT_NOTICE === 'true'
 
 function App() {
   return (
